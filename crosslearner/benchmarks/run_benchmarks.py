@@ -8,6 +8,8 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from crosslearner.datasets.toy import get_toy_dataloader
 from crosslearner.datasets.complex import get_complex_dataloader
+from crosslearner.datasets.ihdp import get_ihdp_dataloader
+from crosslearner.datasets.jobs import get_jobs_dataloader
 from crosslearner.training.train_acx import train_acx
 from crosslearner.evaluation.evaluate import evaluate
 
@@ -54,6 +56,21 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[float]:
         elif dataset == "iris":
             loader, (mu0, mu1) = load_external_iris(seed=seed)
             p = 4
+        elif dataset == "ihdp":
+            loader, (mu0, mu1) = get_ihdp_dataloader(seed=seed)
+            p = loader.dataset.tensors[0].size(1)
+        elif dataset == "jobs":
+            loader, (mu0, mu1) = get_jobs_dataloader()
+            p = loader.dataset.tensors[0].size(1)
+        elif dataset == "all":
+            all_ds = ["toy", "complex", "iris", "ihdp", "jobs"]
+            summary = []
+            for ds in all_ds:
+                res = run(ds, replicates, epochs)
+                summary.append((ds, sum(res) / len(res)))
+            for ds, val in summary:
+                print(f"{ds}\t{val:.3f}")
+            return [v for _, v in summary]
         else:
             raise ValueError(f"Unknown dataset {dataset}")
         model = train_acx(loader, p=p, epochs=epochs)
@@ -70,7 +87,11 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[float]:
 
 def main():
     parser = argparse.ArgumentParser(description="Run CrossLearner benchmarks")
-    parser.add_argument("dataset", choices=["toy", "complex", "iris"], help="dataset to benchmark")
+    parser.add_argument(
+        "dataset",
+        choices=["toy", "complex", "iris", "ihdp", "jobs", "all"],
+        help="dataset to benchmark or 'all'",
+    )
     parser.add_argument("--replicates", type=int, default=3)
     parser.add_argument("--epochs", type=int, default=30)
     args = parser.parse_args()
