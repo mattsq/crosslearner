@@ -17,6 +17,8 @@ python train.py
 ```
 
 The script trains an AC‑X model on a synthetic dataset and prints the final \sqrt{PEHE}.
+The `train_acx` function also supports returning a full history of generator and
+discriminator losses to make experiment tracking easier.
 
 ## Benchmarking
 
