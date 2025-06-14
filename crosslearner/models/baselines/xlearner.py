@@ -2,6 +2,8 @@ import numpy as np
 import torch
 from sklearn.neural_network import MLPRegressor
 
+from .tlearner import TLearner
+
 
 class XLearner:
     def __init__(self, p: int):
@@ -29,7 +31,6 @@ class XLearner:
     def predict_tau(self, X: np.ndarray) -> torch.Tensor:
         tau_t = self.model_tau_t.predict(X)
         tau_c = self.model_tau_c.predict(X)
-        return torch.tensor((1 - self.prop) * tau_t + self.prop * tau_c, dtype=torch.float32)
-
-
-from .tlearner import TLearner
+        return torch.tensor(
+            (1 - self.prop) * tau_t + self.prop * tau_c, dtype=torch.float32
+        )

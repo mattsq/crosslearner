@@ -64,7 +64,7 @@ def train_acx(
 
     history: History = []
     writer = SummaryWriter(tensorboard_logdir) if tensorboard_logdir else None
-    best_val = float('inf')
+    best_val = float("inf")
     epochs_no_improve = 0
 
     for epoch in range(epochs):
@@ -77,7 +77,9 @@ def train_acx(
 
             if warm_start > 0 and epoch < warm_start:
                 loss_y = mse(torch.where(Tb.bool(), m1, m0), Yb)
-                opt_g.zero_grad(); loss_y.backward(); opt_g.step()
+                opt_g.zero_grad()
+                loss_y.backward()
+                opt_g.step()
                 continue
 
             # ------------- discriminator update -------------------------
@@ -114,7 +116,9 @@ def train_acx(
                     real_lbl = real_lbl * 0.9
                     fake_lbl = fake_lbl + 0.1
                 loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
-            opt_d.zero_grad(); loss_d.backward(); opt_d.step()
+            opt_d.zero_grad()
+            loss_d.backward()
+            opt_d.step()
             if weight_clip is not None:
                 for p_ in model.disc.parameters():
                     p_.data.clamp_(-weight_clip, weight_clip)
@@ -144,11 +148,14 @@ def train_acx(
                 loss_g += eta_fm * loss_fm
 
             if gradient_reversal:
-                t_logits = model.discriminator(torch.cat([grad_reverse(hb, grl_weight), Yb, Tb], 1))
+                t_logits = model.discriminator(
+                    torch.cat([grad_reverse(hb, grl_weight), Yb, Tb], 1)
+                )
                 loss_grl = bce(t_logits, Tb)
                 loss_g += loss_grl
 
-            opt_g.zero_grad(); loss_g.backward();
+            opt_g.zero_grad()
+            loss_g.backward()
             if grad_clip:
                 nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
             opt_g.step()
