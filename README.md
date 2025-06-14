@@ -18,6 +18,16 @@ python train.py
 
 The script trains an AC‑X model on a synthetic dataset and prints the final \sqrt{PEHE}.
 
+## Benchmarking
+
+To run a small benchmark across multiple datasets use:
+
+```bash
+python -m crosslearner.benchmarks.run_benchmarks toy --replicates 3
+```
+
+Replace `toy` with `complex` for a harder synthetic task or `iris` to automatically download a tiny external dataset and evaluate on it.
+
 ## Repository Layout
 
 - `crosslearner/models/` – model definitions including `ACX`.
