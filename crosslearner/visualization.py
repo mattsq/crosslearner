@@ -1,6 +1,5 @@
 import torch
 from matplotlib import pyplot as plt
-from typing import Iterable
 
 from .models.acx import ACX
 from .training.history import History
