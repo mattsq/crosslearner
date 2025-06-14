@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 @dataclass
 class EpochStats:
@@ -10,5 +10,6 @@ class EpochStats:
     loss_y: float
     loss_cons: float
     loss_adv: float
+    val_pehe: Optional[float] = None
 
 History = List[EpochStats]

@@ -1,9 +1,11 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from typing import Optional
+from typing import Optional, Tuple
+from torch.utils.tensorboard import SummaryWriter
 
 from crosslearner.training.history import EpochStats, History
+from crosslearner.evaluation.evaluate import evaluate
 
 from crosslearner.models.acx import ACX
 from crosslearner.training.grl import grad_reverse
@@ -32,6 +34,10 @@ def train_acx(
     lambda_gp: float = 10.0,
     eta_fm: float = 5.0,
     grl_weight: float = 1.0,
+    tensorboard_logdir: Optional[str] = None,
+    weight_clip: Optional[float] = None,
+    val_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None,
+    patience: int = 0,
     verbose: bool = True,
     return_history: bool = False,
 ):
@@ -57,6 +63,9 @@ def train_acx(
     mse = nn.MSELoss()
 
     history: History = []
+    writer = SummaryWriter(tensorboard_logdir) if tensorboard_logdir else None
+    best_val = float('inf')
+    epochs_no_improve = 0
 
     for epoch in range(epochs):
         loss_d_sum = loss_g_sum = 0.0
@@ -106,6 +115,9 @@ def train_acx(
                     fake_lbl = fake_lbl + 0.1
                 loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
             opt_d.zero_grad(); loss_d.backward(); opt_d.step()
+            if weight_clip is not None:
+                for p_ in model.disc.parameters():
+                    p_.data.clamp_(-weight_clip, weight_clip)
             loss_d_sum += loss_d.item()
 
             # ------------- generator update -----------------------------
@@ -154,15 +166,36 @@ def train_acx(
             loss_cons=loss_cons_sum / max(1, batch_count),
             loss_adv=loss_adv_sum / max(1, batch_count),
         )
+        if val_data is not None:
+            Xv, mu0v, mu1v = (v.to(device) for v in val_data)
+            val_pehe = evaluate(model, Xv, mu0v, mu1v)
+            stats.val_pehe = val_pehe
+            if writer:
+                writer.add_scalar("val_pehe", val_pehe, epoch)
+            if val_pehe < best_val:
+                best_val = val_pehe
+                epochs_no_improve = 0
+            else:
+                epochs_no_improve += 1
+
         history.append(stats)
+        if writer:
+            writer.add_scalar("loss/discriminator", stats.loss_d, epoch)
+            writer.add_scalar("loss/generator", stats.loss_g, epoch)
 
         if verbose and (epoch % 5 == 0 or epoch == epochs - 1):
-            print(
-                f"epoch {epoch:2d}",
-                f"Ly={stats.loss_y:.3f}",
-                f"Lcons={stats.loss_cons:.3f}",
-                f"Ladv={stats.loss_adv:.3f}",
+            msg = (
+                f"epoch {epoch:2d} Ly={stats.loss_y:.3f} "
+                f"Lcons={stats.loss_cons:.3f} Ladv={stats.loss_adv:.3f}"
             )
+            if val_data is not None:
+                msg += f" val_pehe={stats.val_pehe:.3f}"
+            print(msg)
 
+        if patience > 0 and epochs_no_improve >= patience:
+            break
+
+    if writer:
+        writer.close()
     model.eval()
     return (model, history) if return_history else model

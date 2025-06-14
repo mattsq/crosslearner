@@ -18,7 +18,8 @@ python train.py
 
 The script trains an AC‑X model on a synthetic dataset and prints the final \sqrt{PEHE}.
 The `train_acx` function also supports returning a full history of generator and
-discriminator losses to make experiment tracking easier.
+discriminator losses to make experiment tracking easier. Optionally pass a
+TensorBoard log directory to write these metrics for live dashboards.
 
 ## Benchmarking
 
@@ -38,7 +39,7 @@ This downloads the IHDP and Jobs datasets and prints the mean `sqrt(PEHE)` for e
 - `crosslearner/evaluation/` – metrics such as PEHE.
 - `crosslearner/configs/` – YAML configs with hyper‑parameters.
 
-The training code exposes toggles for Wasserstein loss, spectral normalisation, feature matching, instance noise, gradient reversal and two‑time‑scale update rule (TTUR) as described in `Prompt.txt`.
+The training code exposes toggles for Wasserstein loss (with gradient penalty or optional weight clipping), spectral normalisation, feature matching, instance noise, gradient reversal and two‑time‑scale update rule (TTUR). Early stopping on validation \sqrt{PEHE} is also available.
 
 Use the config file as a starting point for your own experiments on IHDP, ACIC or other datasets.
 
