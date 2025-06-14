@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crosslearner"
+version = "0.1.0"
+description = "Research implementation of the Adversarial-Consistency X-learner (AC-X)"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Matthew Simmons" }]
+license = { file = "LICENSE" }
+dependencies = [
+    "torch>=1.13",
+    "numpy",
+    "PyYAML",
+    "matplotlib",
+    "scikit-learn",
+    "causaldata",
+    "tensorboard",
+]
+
+[project.scripts]
+crosslearner-train = "crosslearner.__main__:main"
+crosslearner-benchmarks = "crosslearner.benchmarks.run_benchmarks:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["crosslearner*", "train"]
+

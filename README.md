@@ -4,16 +4,16 @@ This project provides a research friendly implementation of the **Adversarial–
 
 ## Getting Started
 
-Install dependencies:
+Install the package from source:
 
 ```bash
-pip install -r requirements.txt
+pip install .
 ```
 
 Run the toy example training loop:
 
 ```bash
-python train.py
+crosslearner-train
 ```
 
 The script trains an AC‑X model on a synthetic dataset and prints the final \sqrt{PEHE}.
@@ -26,7 +26,7 @@ TensorBoard log directory to write these metrics for live dashboards.
 To run a small benchmark across multiple datasets use:
 
 ```bash
-python -m crosslearner.benchmarks.run_benchmarks all --replicates 1 --epochs 1
+crosslearner-benchmarks all --replicates 1 --epochs 1
 ```
 
 This downloads the IHDP and Jobs datasets and prints the mean `sqrt(PEHE)` for each available task.
