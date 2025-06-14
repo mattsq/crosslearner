@@ -41,3 +41,11 @@ Replace `toy` with `complex` for a harder synthetic task or `iris` to automatica
 The training code exposes toggles for Wasserstein loss, spectral normalisation, feature matching, instance noise, gradient reversal and two‑time‑scale update rule (TTUR) as described in `Prompt.txt`.
 
 Use the config file as a starting point for your own experiments on IHDP, ACIC or other datasets.
+
+## Visualisation
+
+To diagnose training and model fit visually, pass the `History` returned by
+`train_acx` to `crosslearner.visualization.plot_losses` to plot generator and
+discriminator losses over time.  The module also provides
+`crosslearner.visualization.scatter_tau` for a scatter plot of predicted versus
+true treatment effects.
