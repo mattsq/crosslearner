@@ -3,3 +3,5 @@ numpy
 PyYAML
 pytest
 matplotlib
+scikit-learn
+causaldata

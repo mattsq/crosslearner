@@ -25,10 +25,10 @@ discriminator losses to make experiment tracking easier.
 To run a small benchmark across multiple datasets use:
 
 ```bash
-python -m crosslearner.benchmarks.run_benchmarks toy --replicates 3
+python -m crosslearner.benchmarks.run_benchmarks all --replicates 1 --epochs 1
 ```
 
-Replace `toy` with `complex` for a harder synthetic task or `iris` to automatically download a tiny external dataset and evaluate on it.
+This downloads the IHDP and Jobs datasets and prints the mean `sqrt(PEHE)` for each available task.
 
 ## Repository Layout
 
