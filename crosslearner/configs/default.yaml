@@ -16,3 +16,6 @@ ttur: false
 lambda_gp: 10.0
 eta_fm: 5.0
 grl_weight: 1.0
+tensorboard_logdir: null
+weight_clip: null
+patience: 0
