@@ -3,6 +3,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from typing import Optional
 
+from crosslearner.training.history import EpochStats, History
+
 from crosslearner.models.acx import ACX
 from crosslearner.training.grl import grad_reverse
 
@@ -30,6 +32,8 @@ def train_acx(
     lambda_gp: float = 10.0,
     eta_fm: float = 5.0,
     grl_weight: float = 1.0,
+    verbose: bool = True,
+    return_history: bool = False,
 ):
     """Train AC-X model with optional GAN tricks."""
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
@@ -52,7 +56,12 @@ def train_acx(
     bce = nn.BCEWithLogitsLoss()
     mse = nn.MSELoss()
 
+    history: History = []
+
     for epoch in range(epochs):
+        loss_d_sum = loss_g_sum = 0.0
+        loss_y_sum = loss_cons_sum = loss_adv_sum = 0.0
+        batch_count = 0
         for Xb, Tb, Yb in loader:
             Xb, Tb, Yb = Xb.to(device), Tb.to(device), Yb.to(device)
             hb, m0, m1, tau = model(Xb)
@@ -97,6 +106,7 @@ def train_acx(
                     fake_lbl = fake_lbl + 0.1
                 loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
             opt_d.zero_grad(); loss_d.backward(); opt_d.step()
+            loss_d_sum += loss_d.item()
 
             # ------------- generator update -----------------------------
             hb, m0, m1, tau = model(Xb)
@@ -130,14 +140,29 @@ def train_acx(
             if grad_clip:
                 nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
             opt_g.step()
+            loss_g_sum += loss_g.item()
+            loss_y_sum += loss_y.item()
+            loss_cons_sum += loss_cons.item()
+            loss_adv_sum += loss_adv.item()
+            batch_count += 1
 
-        if epoch % 5 == 0 or epoch == epochs - 1:
+        stats = EpochStats(
+            epoch=epoch,
+            loss_d=loss_d_sum / max(1, batch_count),
+            loss_g=loss_g_sum / max(1, batch_count),
+            loss_y=loss_y_sum / max(1, batch_count),
+            loss_cons=loss_cons_sum / max(1, batch_count),
+            loss_adv=loss_adv_sum / max(1, batch_count),
+        )
+        history.append(stats)
+
+        if verbose and (epoch % 5 == 0 or epoch == epochs - 1):
             print(
                 f"epoch {epoch:2d}",
-                f"Ly={loss_y.item():.3f}",
-                f"Lcons={loss_cons.item():.3f}",
-                f"Ladv={loss_adv.item():.3f}",
+                f"Ly={stats.loss_y:.3f}",
+                f"Lcons={stats.loss_cons:.3f}",
+                f"Ladv={stats.loss_adv:.3f}",
             )
 
     model.eval()
-    return model
+    return (model, history) if return_history else model
