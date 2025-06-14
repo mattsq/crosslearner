@@ -3,7 +3,7 @@ from torch.utils.data import TensorDataset, DataLoader
 
 
 def get_toy_dataloader(batch_size: int = 256, n: int = 8000, p: int = 10):
-    """Return DataLoader with simple synthetic data used in Prompt.txt."""
+    """Return DataLoader with simple synthetic data."""
     X = torch.randn(n, p)
     pi = torch.sigmoid(X[:, :2].sum(-1))
     T = torch.bernoulli(pi).float()
