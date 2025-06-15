@@ -4,6 +4,7 @@ from .datasets import get_toy_dataloader, get_complex_dataloader
 from .training.train_acx import train_acx
 from .training.history import EpochStats, History
 from .evaluation.evaluate import evaluate
+from .experiments import ExperimentManager, cross_validate_acx
 from .visualization import (
     plot_losses,
     scatter_tau,
@@ -26,4 +27,6 @@ __all__ = [
     "plot_covariate_balance",
     "plot_propensity_overlap",
     "plot_residuals",
+    "ExperimentManager",
+    "cross_validate_acx",
 ]
