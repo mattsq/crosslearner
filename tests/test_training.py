@@ -72,10 +72,15 @@ def test_run_benchmarks_all(monkeypatch):
     monkeypatch.setattr(run_benchmarks, "load_external_iris", fake_loader)
     monkeypatch.setattr(run_benchmarks, "get_ihdp_dataloader", fake_loader)
     monkeypatch.setattr(run_benchmarks, "get_jobs_dataloader", fake_loader)
+    monkeypatch.setattr(run_benchmarks, "get_acic2016_dataloader", fake_loader)
+    monkeypatch.setattr(run_benchmarks, "get_acic2018_dataloader", fake_loader)
+    monkeypatch.setattr(run_benchmarks, "get_twins_dataloader", fake_loader)
+    monkeypatch.setattr(run_benchmarks, "get_lalonde_dataloader", fake_loader)
+    monkeypatch.setattr(run_benchmarks, "get_confounding_dataloader", fake_loader)
     monkeypatch.setattr(run_benchmarks, "train_acx", lambda *a, **k: ACX(p=3))
     monkeypatch.setattr(run_benchmarks, "evaluate", lambda *a, **k: 0.0)
     results = run_benchmarks.run("all", replicates=1, epochs=1)
-    assert len(results) == 5
+    assert len(results) == 10
 
 
 def test_train_acx_options():

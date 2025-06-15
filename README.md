@@ -45,12 +45,12 @@ To benchmark across available datasets:
 crosslearner-benchmarks all --replicates 1 --epochs 1
 ```
 
-This downloads the IHDP and Jobs datasets and prints the mean $\sqrt{\mathrm{PEHE}}$ for each task.
+This downloads the IHDP, Jobs, ACIC and Twins datasets and prints the mean $\sqrt{\mathrm{PEHE}}$ for each task.
 
 ## Repository Layout
 
 - `crosslearner/models/` – model definitions including `ACX`.
-- `crosslearner/datasets/` – data loaders (currently a toy synthetic generator).
+- `crosslearner/datasets/` – data loaders for IHDP, Jobs, ACIC, Twins, LaLonde and synthetic generators.
 - `crosslearner/training/` – training utilities and GAN tricks.
 - `crosslearner/evaluation/` – metrics such as PEHE.
 - `crosslearner/configs/` – YAML configs with hyper‑parameters.
