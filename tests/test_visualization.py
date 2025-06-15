@@ -10,6 +10,7 @@ from crosslearner.visualization import (
     plot_covariate_balance,
     plot_propensity_overlap,
     plot_residuals,
+    plot_cate_calibration,
 )
 from crosslearner.training.history import EpochStats
 from crosslearner.models.acx import ACX
@@ -63,5 +64,13 @@ def test_plot_residuals_returns_figure():
     y_true = torch.randn(5, 1)
     y_pred = torch.randn(5, 1)
     fig = plot_residuals(y_true, y_pred)
+    assert fig is not None
+    matplotlib.pyplot.close(fig)
+
+
+def test_plot_cate_calibration_returns_figure():
+    tau_hat = torch.randn(20, 1)
+    tau_true = torch.randn(20, 1)
+    fig = plot_cate_calibration(tau_hat, tau_true)
     assert fig is not None
     matplotlib.pyplot.close(fig)

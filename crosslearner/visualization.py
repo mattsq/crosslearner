@@ -141,3 +141,30 @@ def plot_residuals(y_true: torch.Tensor, y_pred: torch.Tensor):
     ax.set_ylabel("residual")
     fig.tight_layout()
     return fig
+
+
+def plot_cate_calibration(
+    tau_hat: torch.Tensor, tau_true: torch.Tensor, bins: int = 10
+) -> plt.Figure:
+    """Return a calibration curve for CATE estimates."""
+
+    tau_hat = tau_hat.view(-1)
+    tau_true = tau_true.view(-1)
+    edges = torch.linspace(tau_hat.min(), tau_hat.max(), bins + 1)
+    bin_idx = torch.bucketize(tau_hat, edges, right=True)
+    pred_means = []
+    true_means = []
+    for i in range(1, len(edges)):
+        mask = bin_idx == i
+        if mask.any():
+            pred_means.append(float(tau_hat[mask].mean()))
+            true_means.append(float(tau_true[mask].mean()))
+    fig, ax = plt.subplots()
+    ax.plot(pred_means, true_means, marker="o")
+    minv = float(min(pred_means + true_means))
+    maxv = float(max(pred_means + true_means))
+    ax.plot([minv, maxv], [minv, maxv], "r--", linewidth=1)
+    ax.set_xlabel("predicted tau")
+    ax.set_ylabel("true tau")
+    fig.tight_layout()
+    return fig

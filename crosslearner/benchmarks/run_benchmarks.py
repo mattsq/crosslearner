@@ -3,7 +3,7 @@
 import argparse
 import os
 import urllib.request
-from typing import List
+from typing import Dict, List
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
@@ -19,6 +19,12 @@ from crosslearner.datasets.lalonde import get_lalonde_dataloader
 from crosslearner.datasets.synthetic import get_confounding_dataloader
 from crosslearner.training.train_acx import train_acx
 from crosslearner.evaluation.evaluate import evaluate
+from crosslearner.evaluation.metrics import (
+    policy_risk,
+    ate_error,
+    att_error,
+    bootstrap_ci,
+)
 
 
 def load_external_iris(batch_size: int = 256, seed: int | None = None):
@@ -58,8 +64,8 @@ def load_external_iris(batch_size: int = 256, seed: int | None = None):
     return loader, (mu0, mu1)
 
 
-def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[float]:
-    """Run the benchmark for the given dataset and return PEHE values.
+def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, float]]:
+    """Run the benchmark for the given dataset and return metrics per replicate.
 
     Args:
         dataset: One of ``toy``, ``complex``, ``iris``, ``ihdp`` or ``jobs``.
@@ -67,9 +73,9 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[float]:
         epochs: Training epochs per replicate.
 
     Returns:
-        List of PEHE values for each replicate.
+        List of dictionaries with metrics for each replicate.
     """
-    results = []
+    results: List[Dict[str, float]] = []
     for seed in range(replicates):
         if dataset == "toy":
             loader, (mu0, mu1) = get_toy_dataloader()
@@ -117,7 +123,8 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[float]:
             summary = []
             for ds in all_ds:
                 res = run(ds, replicates, epochs)
-                summary.append((ds, sum(res) / len(res)))
+                mean_pehe_ds = sum(r["pehe"] for r in res) / len(res)
+                summary.append((ds, mean_pehe_ds))
             for ds, val in summary:
                 print(f"{ds}\t{val:.3f}")
             return [v for _, v in summary]
@@ -125,13 +132,38 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[float]:
             raise ValueError(f"Unknown dataset {dataset}")
         model = train_acx(loader, p=p, epochs=epochs)
         X = torch.cat([b[0] for b in loader])
+        T_all = torch.cat([b[1] for b in loader])
         mu0_all = mu0
         mu1_all = mu1
+        with torch.no_grad():
+            _, _, _, tau_hat = model(X)
+        tau_true = mu1_all - mu0_all
         pehe_val = evaluate(model, X, mu0_all, mu1_all)
-        print(f"replicate {seed}: sqrt PEHE {pehe_val:.3f}")
-        results.append(pehe_val)
-    mean_pehe = sum(results) / len(results)
-    print(f"mean sqrt PEHE: {mean_pehe:.3f}")
+        risk_val = policy_risk(tau_hat, mu0_all, mu1_all)
+        ate_err = ate_error(tau_hat, mu0_all, mu1_all)
+        att_err = att_error(tau_hat, mu0_all, mu1_all, T_all)
+        ci_low, ci_high = bootstrap_ci(tau_hat)
+        coverage = float(ci_low <= tau_true.mean().item() <= ci_high)
+        print(f"replicate {seed}: sqrt PEHE {pehe_val:.3f} policy risk {risk_val:.3f}")
+        results.append(
+            {
+                "pehe": pehe_val,
+                "policy_risk": risk_val,
+                "ate_error": ate_err,
+                "att_error": att_err,
+                "coverage": coverage,
+            }
+        )
+    mean_pehe = sum(r["pehe"] for r in results) / len(results)
+    mean_risk = sum(r["policy_risk"] for r in results) / len(results)
+    mean_ate_err = sum(r["ate_error"] for r in results) / len(results)
+    mean_att_err = sum(r["att_error"] for r in results) / len(results)
+    coverage_rate = sum(r["coverage"] for r in results) / len(results)
+    print(
+        "mean sqrt PEHE: {:.3f} policy risk: {:.3f} ATE err: {:.3f} ATT err: {:.3f} coverage: {:.2f}".format(
+            mean_pehe, mean_risk, mean_ate_err, mean_att_err, coverage_rate
+        )
+    )
     return results
 
 
