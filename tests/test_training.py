@@ -180,3 +180,19 @@ def test_train_acx_feature_mismatch():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(ValueError):
         train_acx(loader, p=3, device="cpu", epochs=1, verbose=False)
+
+
+def test_train_acx_val_data_mismatch():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    val_X = torch.randn(10, 5)
+    mu0 = torch.randn(10, 1)
+    mu1 = torch.randn(10, 1)
+    with pytest.raises(ValueError):
+        train_acx(
+            loader,
+            p=4,
+            device="cpu",
+            epochs=1,
+            val_data=(val_X, mu0, mu1),
+            verbose=False,
+        )

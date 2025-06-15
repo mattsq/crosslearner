@@ -110,6 +110,16 @@ def train_acx(
             f"Input dimension mismatch: dataset has {feat_dim} features but p={p}"
         )
 
+    if val_data is not None:
+        Xv, mu0v, mu1v = val_data
+        if Xv.size(-1) != p:
+            raise ValueError(
+                "Validation data dimension mismatch: "
+                f"expected {p} features but got {Xv.size(-1)}"
+            )
+        if Xv.size(0) != mu0v.size(0) or Xv.size(0) != mu1v.size(0):
+            raise ValueError("Validation data tensors must have the same length")
+
     if isinstance(activation, str):
         act_name = activation.lower()
         activations = {
