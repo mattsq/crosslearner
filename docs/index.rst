@@ -15,6 +15,8 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
+   theory
+
 
 .. toctree::
    :maxdepth: 2
