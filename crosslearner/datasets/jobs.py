@@ -1,10 +1,19 @@
+"""Jobs dataset used for off-policy evaluation."""
+
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 from causaldata import nsw_mixtape
 
 
 def get_jobs_dataloader(batch_size: int = 256):
-    """Return DataLoader for the Jobs training dataset."""
+    """Return DataLoader for the Jobs training dataset.
+
+    Args:
+        batch_size: Mini-batch size.
+
+    Returns:
+        Loader and ``(None, None)`` because counterfactuals are unavailable.
+    """
     df = nsw_mixtape.load_pandas().data
     y = torch.tensor(df["re78"].values, dtype=torch.float32).unsqueeze(-1)
     t = torch.tensor(df["treat"].values, dtype=torch.float32).unsqueeze(-1)

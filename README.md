@@ -63,6 +63,16 @@ Use the config file as a starting point for your own experiments on IHDP, ACIC o
 
 The `History` returned by `train_acx` can be passed to `crosslearner.visualization.plot_losses` to plot generator and discriminator losses. The module also provides `crosslearner.visualization.scatter_tau` for a scatter plot of predicted versus true treatment effects.
 
+## Documentation
+
+API documentation is built with Sphinx. Run the following commands to generate
+HTML docs in `docs/_build/html`:
+
+```bash
+pip install sphinx
+make -C docs html
+```
+
 ## References
 
 - J. Küenzel, J. Sekhon, P. Bickel, and B. Yu. *The X-Learner for Estimating Individualized Treatment Effects*. (2019).

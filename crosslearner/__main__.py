@@ -1,3 +1,5 @@
+"""Command-line interface for quick experimentation."""
+
 import torch
 
 from crosslearner.datasets.toy import get_toy_dataloader

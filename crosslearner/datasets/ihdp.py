@@ -1,3 +1,5 @@
+"""Loader for the IHDP semi-synthetic benchmark."""
+
 import os
 import urllib.request
 from typing import Tuple
@@ -19,7 +21,16 @@ def _download(url: str, path: str) -> str:
 def get_ihdp_dataloader(
     seed: int = 0, batch_size: int = 256, *, data_dir: str | None = None
 ) -> Tuple[DataLoader, Tuple[torch.Tensor, torch.Tensor]]:
-    """Return IHDP dataloader for the given replication index."""
+    """Return IHDP dataloader for the given replication index.
+
+    Args:
+        seed: Replication index from 0 to 99.
+        batch_size: Size of mini-batches.
+        data_dir: Optional directory to cache the dataset.
+
+    Returns:
+        Data loader and tuple ``(mu0, mu1)`` with true outcomes.
+    """
     data_dir = data_dir or os.path.join(os.path.dirname(__file__), "_data")
     os.makedirs(data_dir, exist_ok=True)
     f_train = _download(URL_TRAIN, os.path.join(data_dir, "ihdp_train.npz"))
