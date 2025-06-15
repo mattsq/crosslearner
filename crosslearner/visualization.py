@@ -1,3 +1,5 @@
+"""Utility functions for visualising training and predictions."""
+
 import torch
 from matplotlib import pyplot as plt
 
@@ -6,7 +8,14 @@ from .training.history import History
 
 
 def plot_losses(history: History):
-    """Return a matplotlib Figure showing loss curves."""
+    """Return a matplotlib Figure showing loss curves.
+
+    Args:
+        history: List of :class:`~crosslearner.training.history.EpochStats`.
+
+    Returns:
+        Matplotlib figure with the loss trajectories.
+    """
     epochs = [h.epoch for h in history]
     fig, ax = plt.subplots()
     ax.plot(epochs, [h.loss_d for h in history], label="discriminator")
@@ -19,7 +28,17 @@ def plot_losses(history: History):
 
 
 def scatter_tau(model: ACX, X: torch.Tensor, mu0: torch.Tensor, mu1: torch.Tensor):
-    """Return a Figure comparing true and predicted treatment effects."""
+    """Return a Figure comparing true and predicted treatment effects.
+
+    Args:
+        model: Trained ``ACX`` model.
+        X: Covariate matrix.
+        mu0: True control outcomes.
+        mu1: True treated outcomes.
+
+    Returns:
+        Matplotlib figure with a scatter plot of true vs predicted ``tau``.
+    """
     model.eval()
     with torch.no_grad():
         _, _, _, tau_hat = model(X)

@@ -1,3 +1,5 @@
+"""Public API for the ``crosslearner`` package."""
+
 from .datasets import get_toy_dataloader, get_complex_dataloader
 from .training.train_acx import train_acx
 from .training.history import EpochStats, History

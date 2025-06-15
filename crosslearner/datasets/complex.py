@@ -1,3 +1,5 @@
+"""More challenging synthetic dataset."""
+
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 
@@ -5,7 +7,17 @@ from torch.utils.data import TensorDataset, DataLoader
 def get_complex_dataloader(
     batch_size: int = 256, n: int = 8000, p: int = 20, seed: int | None = None
 ):
-    """Return DataLoader with a more complex synthetic dataset."""
+    """Return DataLoader with a more complex synthetic dataset.
+
+    Args:
+        batch_size: Size of the mini-batches.
+        n: Number of samples.
+        p: Number of covariates.
+        seed: Optional random seed.
+
+    Returns:
+        Tuple ``(loader, (mu0, mu1))``.
+    """
     if seed is not None:
         gen = torch.Generator().manual_seed(seed)
     else:

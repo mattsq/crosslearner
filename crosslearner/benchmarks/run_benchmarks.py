@@ -1,3 +1,5 @@
+"""Command-line entry points for running benchmarks."""
+
 import argparse
 import os
 import urllib.request
@@ -15,7 +17,15 @@ from crosslearner.evaluation.evaluate import evaluate
 
 
 def load_external_iris(batch_size: int = 256, seed: int | None = None):
-    """Download the Iris dataset and create a synthetic causal task."""
+    """Download the Iris dataset and create a synthetic causal task.
+
+    Args:
+        batch_size: Size of the batches.
+        seed: Optional random seed for reproducibility.
+
+    Returns:
+        Data loader and tuple of true potential outcomes.
+    """
     url = (
         "https://raw.githubusercontent.com/scikit-learn/"
         "scikit-learn/main/sklearn/datasets/data/iris.csv"
@@ -44,7 +54,16 @@ def load_external_iris(batch_size: int = 256, seed: int | None = None):
 
 
 def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[float]:
-    """Run the benchmark for the given dataset and return list of PEHE values."""
+    """Run the benchmark for the given dataset and return PEHE values.
+
+    Args:
+        dataset: One of ``toy``, ``complex``, ``iris``, ``ihdp`` or ``jobs``.
+        replicates: Number of random seeds to evaluate.
+        epochs: Training epochs per replicate.
+
+    Returns:
+        List of PEHE values for each replicate.
+    """
     results = []
     for seed in range(replicates):
         if dataset == "toy":

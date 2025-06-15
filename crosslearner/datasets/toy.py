@@ -1,9 +1,21 @@
+"""Synthetic toy dataset."""
+
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 
 
 def get_toy_dataloader(batch_size: int = 256, n: int = 8000, p: int = 10):
-    """Return DataLoader with simple synthetic data."""
+    """Return ``DataLoader`` with simple synthetic data.
+
+    Args:
+        batch_size: Size of the mini-batches.
+        n: Number of samples.
+        p: Number of covariates.
+
+    Returns:
+        Tuple ``(loader, (mu0, mu1))`` where ``mu0`` and ``mu1`` are the true
+        potential outcomes.
+    """
     X = torch.randn(n, p)
     pi = torch.sigmoid(X[:, :2].sum(-1))
     T = torch.bernoulli(pi).float()

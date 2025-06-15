@@ -1,3 +1,5 @@
+"""Example script for running a toy experiment."""
+
 import torch
 
 from crosslearner.datasets.toy import get_toy_dataloader
@@ -6,6 +8,8 @@ from crosslearner.evaluation.evaluate import evaluate
 
 
 def main():
+    """Train a toy model and print the PEHE."""
+
     loader, (mu0, mu1) = get_toy_dataloader()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = train_acx(loader, p=10, device=device)

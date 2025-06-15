@@ -41,7 +41,41 @@ def train_acx(
     verbose: bool = True,
     return_history: bool = False,
 ):
-    """Train AC-X model with optional GAN tricks."""
+    """Train AC-X model with optional GAN tricks.
+
+    Args:
+        loader: PyTorch dataloader yielding ``(X, T, Y)`` batches.
+        p: Number of covariates.
+        device: Device string, defaults to CUDA if available.
+        epochs: Number of training epochs.
+        alpha_out: Weight of the outcome loss.
+        beta_cons: Weight of the consistency term.
+        gamma_adv: Weight of the adversarial loss.
+        lr_g: Learning rate for generator parameters.
+        lr_d: Learning rate for the discriminator.
+        grad_clip: Maximum gradient norm.
+        warm_start: Number of epochs to train without adversary.
+        use_wgan_gp: Use WGAN-GP loss for the discriminator.
+        spectral_norm: Apply spectral normalization to all linear layers.
+        feature_matching: Add feature matching loss.
+        label_smoothing: Use label smoothing for the adversary.
+        instance_noise: Inject Gaussian noise into real and fake samples.
+        gradient_reversal: Replace adversary with gradient reversal.
+        ttur: Use Two-Time-Update-Rule with different learning rates.
+        lambda_gp: Gradient penalty coefficient for WGAN-GP.
+        eta_fm: Weight of the feature matching term.
+        grl_weight: Scale of the gradient reversal layer.
+        tensorboard_logdir: Directory for TensorBoard logs.
+        weight_clip: Optional weight clipping for the discriminator.
+        val_data: Tuple ``(X, mu0, mu1)`` for validation PEHE.
+        patience: Early-stopping patience based on validation PEHE.
+        verbose: Print progress every 5 epochs.
+        return_history: If ``True`` also return training history.
+
+    Returns:
+        The trained ``ACX`` model or tuple ``(model, history)`` when
+        ``return_history`` is ``True``.
+    """
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
     model = ACX(p).to(device)

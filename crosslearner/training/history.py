@@ -1,3 +1,5 @@
+"""Utilities for tracking training statistics."""
+
 from dataclasses import dataclass
 from typing import List, Optional
 
