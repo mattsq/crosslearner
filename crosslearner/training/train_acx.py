@@ -98,6 +98,18 @@ def train_acx(
     """
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
+    # sanity check for feature dimension mismatches
+    feat_dim = None
+    try:
+        feat_dim = loader.dataset[0][0].shape[-1]
+    except Exception:
+        # ignore datasets without random access
+        pass
+    if feat_dim is not None and feat_dim != p:
+        raise ValueError(
+            f"Input dimension mismatch: dataset has {feat_dim} features but p={p}"
+        )
+
     if isinstance(activation, str):
         act_name = activation.lower()
         activations = {
