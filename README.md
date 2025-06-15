@@ -89,6 +89,30 @@ study.optimize(objective, n_trials=50)
 
 See :doc:`hyperparameter_sweeps` in the documentation for more details.
 
+## Experiment Manager
+
+To streamline large-scale experiments the package ships with
+``ExperimentManager`` which marries cross-validation, Optuna searches and
+TensorBoard logging. It takes a data loader and true potential outcomes and
+automatically performs repeated training and evaluation:
+
+```python
+from crosslearner.datasets.toy import get_toy_dataloader
+from crosslearner.experiments import ExperimentManager
+import optuna
+
+loader, (mu0, mu1) = get_toy_dataloader()
+manager = ExperimentManager(loader, mu0, mu1, p=10, folds=3, log_dir="runs")
+
+def space(trial: optuna.Trial) -> dict:
+    return {"rep_dim": trial.suggest_int("rep_dim", 32, 64), "epochs": 5}
+
+study = manager.optimize(space, n_trials=10)
+print("best PEHE", study.best_value)
+```
+
+Each fold and trial is logged under ``log_dir`` to make results reproducible.
+
 ## Repository Layout
 
 - `crosslearner/models/` – model definitions including `ACX`.
