@@ -36,6 +36,14 @@ crosslearner.datasets.toy module
    :show-inheritance:
    :undoc-members:
 
+crosslearner.datasets.aircraft module
+-------------------------------------
+
+.. automodule:: crosslearner.datasets.aircraft
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 

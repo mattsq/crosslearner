@@ -2,6 +2,7 @@ import numpy as np
 from crosslearner.datasets.toy import get_toy_dataloader
 from crosslearner.datasets.complex import get_complex_dataloader
 from crosslearner.datasets.jobs import get_jobs_dataloader
+from crosslearner.datasets.aircraft import get_aircraft_dataloader
 from crosslearner.datasets import ihdp, acic2016, acic2018, twins, lalonde, synthetic
 
 
@@ -137,6 +138,16 @@ def test_get_confounding_dataloader():
     )
     X, T, Y = next(iter(loader))
     assert X.shape == (2, 3)
+    assert T.shape == (2, 1)
+    assert Y.shape == (2, 1)
+    assert mu0.shape == (4, 1)
+    assert mu1.shape == (4, 1)
+
+
+def test_get_aircraft_dataloader():
+    loader, (mu0, mu1) = get_aircraft_dataloader(batch_size=2, n=4, seed=0)
+    X, T, Y = next(iter(loader))
+    assert X.shape == (2, 5)
     assert T.shape == (2, 1)
     assert Y.shape == (2, 1)
     assert mu0.shape == (4, 1)
