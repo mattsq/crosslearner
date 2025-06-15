@@ -159,6 +159,7 @@ def train_acx(
     writer = SummaryWriter(tensorboard_logdir) if tensorboard_logdir else None
     best_val = float("inf")
     epochs_no_improve = 0
+    freeze_d = False
 
     for epoch in range(epochs):
         loss_d_sum = loss_g_sum = 0.0
@@ -214,12 +215,13 @@ def train_acx(
                     real_lbl = real_lbl * 0.9
                     fake_lbl = fake_lbl + 0.1
                 loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
-            opt_d.zero_grad()
-            loss_d.backward()
-            opt_d.step()
-            if weight_clip is not None:
-                for p_ in model.disc.parameters():
-                    p_.data.clamp_(-weight_clip, weight_clip)
+            if not freeze_d:
+                opt_d.zero_grad()
+                loss_d.backward()
+                opt_d.step()
+                if weight_clip is not None:
+                    for p_ in model.disc.parameters():
+                        p_.data.clamp_(-weight_clip, weight_clip)
             loss_d_sum += loss_d.item()
 
             # ------------- generator update -----------------------------
@@ -293,6 +295,9 @@ def train_acx(
         if writer:
             writer.add_scalar("loss/discriminator", stats.loss_d, epoch)
             writer.add_scalar("loss/generator", stats.loss_g, epoch)
+
+        if ttur:
+            freeze_d = stats.loss_d < 0.3
 
         if verbose and (epoch % 5 == 0 or epoch == epochs - 1):
             msg = (
