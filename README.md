@@ -135,6 +135,7 @@ cross-validated $\sqrt{\mathrm{PEHE}}$ across the built-in synthetic datasets:
 | ``toy``            | 10 | -- | **0.69** |
 | ``complex``        | 20 | -- | **0.95** |
 | ``confounding=0.5``| 10 | 0.5 | **0.59** |
+| ``aircraft``       | 5  | -- | **430.87** |
 
 ## Repository Layout
 
