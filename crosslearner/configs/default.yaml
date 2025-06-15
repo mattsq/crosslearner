@@ -1,6 +1,11 @@
 alpha_out: 1.0
 beta_cons: 10.0
 gamma_adv: 1.0
+rep_dim: 64
+phi_layers: [128]
+head_layers: [64]
+disc_layers: [64]
+activation: relu
 lr_g: 0.001
 lr_d: 0.001
 epochs: 30

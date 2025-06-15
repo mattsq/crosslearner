@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Iterable, Callable
 from torch.utils.tensorboard import SummaryWriter
 
 from crosslearner.training.history import EpochStats, History
@@ -15,6 +15,11 @@ def train_acx(
     loader: DataLoader,
     p: int,
     *,
+    rep_dim: int = 64,
+    phi_layers: Iterable[int] | None = (128,),
+    head_layers: Iterable[int] | None = (64,),
+    disc_layers: Iterable[int] | None = (64,),
+    activation: str | Callable[[], nn.Module] = "relu",
     device: Optional[str] = None,
     epochs: int = 30,
     alpha_out: float = 1.0,
@@ -46,6 +51,11 @@ def train_acx(
     Args:
         loader: PyTorch dataloader yielding ``(X, T, Y)`` batches.
         p: Number of covariates.
+        rep_dim: Dimensionality of the shared representation ``phi``.
+        phi_layers: Hidden layers for the representation MLP.
+        head_layers: Hidden layers for the outcome and effect heads.
+        disc_layers: Hidden layers for the discriminator.
+        activation: Activation function used in all networks.
         device: Device string, defaults to CUDA if available.
         epochs: Number of training epochs.
         alpha_out: Weight of the outcome loss.
@@ -78,7 +88,29 @@ def train_acx(
     """
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
-    model = ACX(p).to(device)
+    if isinstance(activation, str):
+        act_name = activation.lower()
+        activations = {
+            "relu": nn.ReLU,
+            "tanh": nn.Tanh,
+            "elu": nn.ELU,
+            "gelu": nn.GELU,
+            "leakyrelu": nn.LeakyReLU,
+        }
+        if act_name not in activations:
+            raise ValueError(f"Unknown activation '{activation}'")
+        activation_fn = activations[act_name]
+    else:
+        activation_fn = activation
+
+    model = ACX(
+        p,
+        rep_dim=rep_dim,
+        phi_layers=phi_layers,
+        head_layers=head_layers,
+        disc_layers=disc_layers,
+        activation=activation_fn,
+    ).to(device)
     if spectral_norm:
         for m in model.modules():
             if isinstance(m, nn.Linear):
