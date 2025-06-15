@@ -2,6 +2,24 @@
 
 import torch
 import torch.nn as nn
+from typing import Callable, Iterable
+
+
+def _get_activation(act: str | Callable[[], nn.Module]) -> Callable[[], nn.Module]:
+    """Return an activation constructor from string or callable."""
+    if isinstance(act, str):
+        name = act.lower()
+        mapping = {
+            "relu": nn.ReLU,
+            "tanh": nn.Tanh,
+            "elu": nn.ELU,
+            "gelu": nn.GELU,
+            "leakyrelu": nn.LeakyReLU,
+        }
+        if name not in mapping:
+            raise ValueError(f"Unknown activation '{act}'")
+        return mapping[name]
+    return act
 
 
 class MLP(nn.Module):
@@ -10,15 +28,25 @@ class MLP(nn.Module):
     Args:
         in_dim: Size of the input features.
         out_dim: Output dimension.
-        hidden: Tuple with hidden layer sizes.
+        hidden: Iterable with hidden layer sizes.
+        activation: Activation function to apply between layers.
     """
 
-    def __init__(self, in_dim: int, out_dim: int, hidden=(128, 64)) -> None:
+    def __init__(
+        self,
+        in_dim: int,
+        out_dim: int,
+        hidden: Iterable[int] | None = None,
+        *,
+        activation: str | Callable[[], nn.Module] = nn.ReLU,
+    ) -> None:
         super().__init__()
         layers = []
         d = in_dim
+        hidden = tuple(hidden or [])
+        act_fn = _get_activation(activation)
         for h in hidden:
-            layers += [nn.Linear(d, h), nn.ReLU()]
+            layers += [nn.Linear(d, h), act_fn()]
             d = h
         layers += [nn.Linear(d, out_dim)]
         self.net = nn.Sequential(*layers)
@@ -39,20 +67,34 @@ class MLP(nn.Module):
 class ACX(nn.Module):
     """Adversarial-Consistency X-learner model."""
 
-    def __init__(self, p: int, rep_dim: int = 64) -> None:
+    def __init__(
+        self,
+        p: int,
+        *,
+        rep_dim: int = 64,
+        phi_layers: Iterable[int] | None = (128,),
+        head_layers: Iterable[int] | None = (64,),
+        disc_layers: Iterable[int] | None = (64,),
+        activation: str | Callable[[], nn.Module] = nn.ReLU,
+    ) -> None:
         """Instantiate the model.
 
         Args:
             p: Number of covariates.
             rep_dim: Dimensionality of the shared representation ``phi``.
+            phi_layers: Sizes of hidden layers for the representation MLP.
+            head_layers: Hidden layers for the outcome and effect heads.
+            disc_layers: Hidden layers for the discriminator.
+            activation: Activation function used in all networks.
         """
 
         super().__init__()
-        self.phi = MLP(p, rep_dim, hidden=(128,))
-        self.mu0 = MLP(rep_dim, 1, hidden=(64,))
-        self.mu1 = MLP(rep_dim, 1, hidden=(64,))
-        self.tau = MLP(rep_dim, 1, hidden=(64,))
-        self.disc = MLP(rep_dim + 2, 1, hidden=(64,))
+        act_fn = _get_activation(activation)
+        self.phi = MLP(p, rep_dim, hidden=phi_layers, activation=act_fn)
+        self.mu0 = MLP(rep_dim, 1, hidden=head_layers, activation=act_fn)
+        self.mu1 = MLP(rep_dim, 1, hidden=head_layers, activation=act_fn)
+        self.tau = MLP(rep_dim, 1, hidden=head_layers, activation=act_fn)
+        self.disc = MLP(rep_dim + 2, 1, hidden=disc_layers, activation=act_fn)
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, ...]:
         """Forward pass.

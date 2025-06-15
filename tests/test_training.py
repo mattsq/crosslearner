@@ -122,3 +122,20 @@ def test_train_acx_options():
         )
     finally:
         ACX.discriminator = orig_disc
+
+
+def test_train_acx_custom_architecture():
+    loader, _ = get_toy_dataloader(batch_size=8, n=32, p=3)
+    model = train_acx(
+        loader,
+        p=3,
+        device="cpu",
+        epochs=1,
+        rep_dim=16,
+        phi_layers=[8],
+        head_layers=[4],
+        disc_layers=[4],
+        activation="elu",
+        verbose=False,
+    )
+    assert isinstance(model, ACX)
