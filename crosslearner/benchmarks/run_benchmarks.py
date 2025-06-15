@@ -12,6 +12,11 @@ from crosslearner.datasets.toy import get_toy_dataloader
 from crosslearner.datasets.complex import get_complex_dataloader
 from crosslearner.datasets.ihdp import get_ihdp_dataloader
 from crosslearner.datasets.jobs import get_jobs_dataloader
+from crosslearner.datasets.acic2016 import get_acic2016_dataloader
+from crosslearner.datasets.acic2018 import get_acic2018_dataloader
+from crosslearner.datasets.twins import get_twins_dataloader
+from crosslearner.datasets.lalonde import get_lalonde_dataloader
+from crosslearner.datasets.synthetic import get_confounding_dataloader
 from crosslearner.training.train_acx import train_acx
 from crosslearner.evaluation.evaluate import evaluate
 
@@ -81,8 +86,34 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[float]:
         elif dataset == "jobs":
             loader, (mu0, mu1) = get_jobs_dataloader()
             p = loader.dataset.tensors[0].size(1)
+        elif dataset == "acic2016":
+            loader, (mu0, mu1) = get_acic2016_dataloader(seed=seed)
+            p = loader.dataset.tensors[0].size(1)
+        elif dataset == "acic2018":
+            loader, (mu0, mu1) = get_acic2018_dataloader(seed=seed)
+            p = loader.dataset.tensors[0].size(1)
+        elif dataset == "twins":
+            loader, (mu0, mu1) = get_twins_dataloader()
+            p = loader.dataset.tensors[0].size(1)
+        elif dataset == "lalonde":
+            loader, (mu0, mu1) = get_lalonde_dataloader()
+            p = loader.dataset.tensors[0].size(1)
+        elif dataset == "confounded":
+            loader, (mu0, mu1) = get_confounding_dataloader(seed=seed)
+            p = loader.dataset.tensors[0].size(1)
         elif dataset == "all":
-            all_ds = ["toy", "complex", "iris", "ihdp", "jobs"]
+            all_ds = [
+                "toy",
+                "complex",
+                "iris",
+                "ihdp",
+                "jobs",
+                "acic2016",
+                "acic2018",
+                "twins",
+                "lalonde",
+                "confounded",
+            ]
             summary = []
             for ds in all_ds:
                 res = run(ds, replicates, epochs)
@@ -108,7 +139,19 @@ def main():
     parser = argparse.ArgumentParser(description="Run CrossLearner benchmarks")
     parser.add_argument(
         "dataset",
-        choices=["toy", "complex", "iris", "ihdp", "jobs", "all"],
+        choices=[
+            "toy",
+            "complex",
+            "iris",
+            "ihdp",
+            "jobs",
+            "acic2016",
+            "acic2018",
+            "twins",
+            "lalonde",
+            "confounded",
+            "all",
+        ],
         help="dataset to benchmark or 'all'",
     )
     parser.add_argument("--replicates", type=int, default=3)
