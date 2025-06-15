@@ -139,3 +139,18 @@ def test_train_acx_custom_architecture():
         verbose=False,
     )
     assert isinstance(model, ACX)
+
+
+def test_train_acx_custom_optimizer():
+    loader, _ = get_toy_dataloader(batch_size=8, n=32, p=3)
+    model = train_acx(
+        loader,
+        p=3,
+        device="cpu",
+        epochs=1,
+        optimizer="sgd",
+        opt_g_kwargs={"momentum": 0.0},
+        opt_d_kwargs={"momentum": 0.0},
+        verbose=False,
+    )
+    assert isinstance(model, ACX)
