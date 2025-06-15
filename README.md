@@ -140,6 +140,9 @@ cross-validated $\sqrt{\mathrm{PEHE}}$ across the built-in synthetic datasets:
 
 - `crosslearner/models/` – model definitions including `ACX`.
 - `crosslearner/datasets/` – data loaders for IHDP, Jobs, ACIC, Twins, LaLonde and synthetic generators.
+  The ACIC loaders attempt to download `.npz` files from GitHub. If the URLs are
+  unavailable, download the files manually and place them under
+  `crosslearner/datasets/_data`.
 - `crosslearner/training/` – training utilities and GAN tricks.
 - `crosslearner/evaluation/` – metrics such as PEHE.
 - `crosslearner/configs/` – YAML configs with hyper‑parameters.
