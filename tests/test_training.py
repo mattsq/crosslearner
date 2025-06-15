@@ -180,3 +180,27 @@ def test_train_acx_feature_mismatch():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(ValueError):
         train_acx(loader, p=3, device="cpu", epochs=1, verbose=False)
+
+
+def test_train_acx_invalid_activation():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    with pytest.raises(ValueError):
+        train_acx(loader, p=4, device="cpu", epochs=1, activation="bad", verbose=False)
+
+
+def test_train_acx_invalid_optimizer():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    with pytest.raises(ValueError):
+        train_acx(loader, p=4, device="cpu", epochs=1, optimizer="bad", verbose=False)
+
+
+def test_train_acx_negative_grad_clip():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    with pytest.raises(ValueError):
+        train_acx(loader, p=4, device="cpu", epochs=1, grad_clip=-1, verbose=False)
+
+
+def test_train_acx_negative_weight_clip():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    with pytest.raises(ValueError):
+        train_acx(loader, p=4, device="cpu", epochs=1, weight_clip=-0.1, verbose=False)

@@ -98,6 +98,11 @@ def train_acx(
     """
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
+    if grad_clip is not None and grad_clip < 0:
+        raise ValueError("grad_clip must be non-negative")
+    if weight_clip is not None and weight_clip <= 0:
+        raise ValueError("weight_clip must be positive")
+
     # sanity check for feature dimension mismatches
     feat_dim = None
     try:
