@@ -5,6 +5,7 @@ from crosslearner.datasets.toy import get_toy_dataloader
 from crosslearner.evaluation.evaluate import evaluate
 from crosslearner.models.acx import ACX
 from crosslearner.training.train_acx import train_acx
+import pytest
 from torch.utils.data import DataLoader, TensorDataset
 
 
@@ -173,3 +174,9 @@ def test_instance_noise_keeps_targets(monkeypatch):
     train_acx(loader, p=4, device="cpu", epochs=1, instance_noise=True, verbose=False)
 
     assert torch.allclose(targets[0], loader.dataset.tensors[2][:4])
+
+
+def test_train_acx_feature_mismatch():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    with pytest.raises(ValueError):
+        train_acx(loader, p=3, device="cpu", epochs=1, verbose=False)
