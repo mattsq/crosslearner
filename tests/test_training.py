@@ -89,40 +89,27 @@ def test_train_acx_options():
     loader, (mu0, mu1) = get_toy_dataloader(batch_size=4, n=16, p=4)
     X = torch.cat([b[0] for b in loader])
     val_data = (X, mu0, mu1)
-    # Patch discriminator to accept concatenated inputs used with gradient
-    # reversal in the training loop.
-    orig_disc = ACX.discriminator
-
-    def safe_disc(self, h, y=None, t=None):
-        if y is None and t is None:
-            return self.disc(h)
-        return orig_disc(self, h, y, t)
-
-    ACX.discriminator = safe_disc
-    try:
-        train_acx(
-            loader,
-            p=4,
-            device="cpu",
-            epochs=2,
-            warm_start=1,
-            use_wgan_gp=True,
-            spectral_norm=True,
-            feature_matching=True,
-            label_smoothing=True,
-            instance_noise=True,
-            gradient_reversal=True,
-            ttur=True,
-            lambda_gp=0.1,
-            eta_fm=1.0,
-            grl_weight=0.5,
-            weight_clip=0.1,
-            val_data=val_data,
-            patience=1,
-            verbose=False,
-        )
-    finally:
-        ACX.discriminator = orig_disc
+    train_acx(
+        loader,
+        p=4,
+        device="cpu",
+        epochs=2,
+        warm_start=1,
+        use_wgan_gp=True,
+        spectral_norm=True,
+        feature_matching=True,
+        label_smoothing=True,
+        instance_noise=True,
+        gradient_reversal=True,
+        ttur=True,
+        lambda_gp=0.1,
+        eta_fm=1.0,
+        grl_weight=0.5,
+        weight_clip=0.1,
+        val_data=val_data,
+        patience=1,
+        verbose=False,
+    )
 
 
 def test_train_acx_custom_architecture():

@@ -242,7 +242,9 @@ def train_acx(
 
             if gradient_reversal:
                 t_logits = model.discriminator(
-                    torch.cat([grad_reverse(hb, grl_weight), Yb, Tb], 1)
+                    grad_reverse(hb, grl_weight),
+                    Yb,
+                    Tb,
                 )
                 loss_grl = bce(t_logits, Tb)
                 loss_g += loss_grl
