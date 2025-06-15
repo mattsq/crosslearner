@@ -16,6 +16,7 @@ documentation for details.
    :caption: Contents:
 
    theory
+   hyperparameter_sweeps
 
 
 .. toctree::
