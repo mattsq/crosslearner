@@ -47,6 +47,48 @@ crosslearner-benchmarks all --replicates 1 --epochs 1
 
 This downloads the IHDP, Jobs, ACIC and Twins datasets and prints the mean $\sqrt{\mathrm{PEHE}}$ for each task.
 
+## Hyperparameter Sweeps
+
+`optuna` can automate tuning of the many options exposed by
+`train_acx`. Define an objective that trains a model with parameters
+sampled from a search space and returns the validation
+\(\sqrt{\mathrm{PEHE}}\). Running the study explores different
+configurations and reports the best one:
+
+```python
+import optuna
+import torch
+from crosslearner.datasets.toy import get_toy_dataloader
+from crosslearner.training.train_acx import train_acx
+from crosslearner.evaluation.evaluate import evaluate
+
+loader, (mu0, mu1) = get_toy_dataloader()
+X = torch.cat([b[0] for b in loader])
+mu0_all = mu0
+mu1_all = mu1
+
+def objective(trial):
+    return evaluate(
+        train_acx(
+            loader,
+            p=10,
+            rep_dim=trial.suggest_int("rep_dim", 32, 128),
+            lr_g=trial.suggest_loguniform("lr_g", 1e-4, 1e-2),
+            lr_d=trial.suggest_loguniform("lr_d", 1e-4, 1e-2),
+            beta_cons=trial.suggest_float("beta_cons", 1.0, 20.0),
+            epochs=30,
+        ),
+        X,
+        mu0_all,
+        mu1_all,
+    )
+
+study = optuna.create_study(direction="minimize")
+study.optimize(objective, n_trials=50)
+```
+
+See :doc:`hyperparameter_sweeps` in the documentation for more details.
+
 ## Repository Layout
 
 - `crosslearner/models/` – model definitions including `ACX`.
