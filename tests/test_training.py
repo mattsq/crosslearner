@@ -5,6 +5,7 @@ from crosslearner.datasets.toy import get_toy_dataloader
 from crosslearner.evaluation.evaluate import evaluate
 from crosslearner.models.acx import ACX
 from crosslearner.training.train_acx import train_acx
+from torch.utils.data import DataLoader, TensorDataset
 
 
 def test_train_acx_short():
@@ -141,4 +142,15 @@ def test_train_acx_custom_optimizer():
         opt_d_kwargs={"momentum": 0.0},
         verbose=False,
     )
+    assert isinstance(model, ACX)
+
+
+def test_train_acx_1d_targets():
+    X = torch.randn(16, 4)
+    T = torch.randint(0, 2, (16,))
+    mu0 = torch.randn(16)
+    mu1 = mu0 + torch.randn(16)
+    Y = torch.where(T.bool(), mu1, mu0) + 0.1 * torch.randn(16)
+    loader = DataLoader(TensorDataset(X, T, Y), batch_size=8)
+    model = train_acx(loader, p=4, device="cpu", epochs=1, verbose=False)
     assert isinstance(model, ACX)
