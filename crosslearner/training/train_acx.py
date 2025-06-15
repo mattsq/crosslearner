@@ -166,6 +166,10 @@ def train_acx(
         batch_count = 0
         for Xb, Tb, Yb in loader:
             Xb, Tb, Yb = Xb.to(device), Tb.to(device), Yb.to(device)
+            if Tb.ndim == 1:
+                Tb = Tb.unsqueeze(-1)
+            if Yb.ndim == 1:
+                Yb = Yb.unsqueeze(-1)
             hb, m0, m1, tau = model(Xb)
 
             if warm_start > 0 and epoch < warm_start:
@@ -270,6 +274,10 @@ def train_acx(
         )
         if val_data is not None:
             Xv, mu0v, mu1v = (v.to(device) for v in val_data)
+            if mu0v.ndim == 1:
+                mu0v = mu0v.unsqueeze(-1)
+            if mu1v.ndim == 1:
+                mu1v = mu1v.unsqueeze(-1)
             val_pehe = evaluate(model, Xv, mu0v, mu1v)
             stats.val_pehe = val_pehe
             if writer:
