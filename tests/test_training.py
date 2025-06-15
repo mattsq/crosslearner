@@ -154,3 +154,22 @@ def test_train_acx_1d_targets():
     loader = DataLoader(TensorDataset(X, T, Y), batch_size=8)
     model = train_acx(loader, p=4, device="cpu", epochs=1, verbose=False)
     assert isinstance(model, ACX)
+
+
+def test_instance_noise_keeps_targets(monkeypatch):
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    loader = DataLoader(loader.dataset, batch_size=4, shuffle=False)
+
+    targets: list[torch.Tensor] = []
+
+    class RecMSE(torch.nn.Module):
+        def forward(self, inp, tgt):
+            targets.append(tgt.clone())
+            return torch.nn.functional.mse_loss(inp, tgt)
+
+    monkeypatch.setattr(torch.nn, "MSELoss", lambda: RecMSE())
+    monkeypatch.setattr(torch, "randn_like", lambda t: torch.ones_like(t))
+
+    train_acx(loader, p=4, device="cpu", epochs=1, instance_noise=True, verbose=False)
+
+    assert torch.allclose(targets[0], loader.dataset.tensors[2][:4])

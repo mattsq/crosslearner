@@ -182,18 +182,19 @@ def train_acx(
             # ------------- discriminator update -------------------------
             with torch.no_grad():
                 Ycf = torch.where(Tb.bool(), m0, m1).detach()
+                Yb_disc = Yb
                 if instance_noise:
                     noise = torch.randn_like(Ycf) * max(0.0, 0.2 * (1 - epoch / epochs))
                     Ycf = Ycf + noise
-                    Yb = Yb + noise
-            real_logits = model.discriminator(hb, Yb, Tb)
+                    Yb_disc = Yb_disc + noise
+            real_logits = model.discriminator(hb, Yb_disc, Tb)
             fake_logits = model.discriminator(hb, Ycf, Tb)
             if use_wgan_gp:
                 wdist = fake_logits.mean() - real_logits.mean()
                 gp = 0.0
                 if lambda_gp > 0:
-                    eps = torch.rand_like(Yb)
-                    interpolates = eps * Yb + (1 - eps) * Ycf
+                    eps = torch.rand_like(Yb_disc)
+                    interpolates = eps * Yb_disc + (1 - eps) * Ycf
                     interpolates.requires_grad_(True)
                     interp_logits = model.discriminator(hb, interpolates, Tb)
                     grads = torch.autograd.grad(
