@@ -103,7 +103,18 @@ Use the config file as a starting point for your own experiments on IHDP, ACIC o
 
 ## Visualisation
 
-The `History` returned by `train_acx` can be passed to `crosslearner.visualization.plot_losses` to plot generator and discriminator losses. The module also provides `crosslearner.visualization.scatter_tau` for a scatter plot of predicted versus true treatment effects.
+The `History` returned by `train_acx` can be passed to
+`crosslearner.visualization.plot_losses` to plot generator and discriminator
+losses.  The module also provides several utilities for exploring model
+behaviour:
+
+- `scatter_tau` produces a scatter plot of predicted versus true treatment
+  effects.
+- `plot_tau_distribution` shows the distribution of estimated effects.
+- `plot_covariate_balance` visualises covariate balance using standardised mean
+  differences.
+- `plot_propensity_overlap` plots propensity score overlap.
+- `plot_residuals` displays residuals against predictions.
 
 ## Documentation
 
