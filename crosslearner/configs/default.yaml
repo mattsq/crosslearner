@@ -8,6 +8,9 @@ disc_layers: [64]
 activation: relu
 lr_g: 0.001
 lr_d: 0.001
+optimizer: adam
+opt_g_kwargs: {}
+opt_d_kwargs: {}
 epochs: 30
 grad_clip: 2.0
 warm_start: 0

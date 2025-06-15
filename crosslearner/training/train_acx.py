@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from typing import Optional, Tuple, Iterable, Callable
+from typing import Optional, Tuple, Iterable, Callable, Type
 from torch.utils.tensorboard import SummaryWriter
 
 from crosslearner.training.history import EpochStats, History
@@ -27,6 +27,9 @@ def train_acx(
     gamma_adv: float = 1.0,
     lr_g: float = 1e-3,
     lr_d: float = 1e-3,
+    optimizer: str | Type[torch.optim.Optimizer] = "adam",
+    opt_g_kwargs: dict | None = None,
+    opt_d_kwargs: dict | None = None,
     grad_clip: float = 2.0,
     warm_start: int = 0,
     use_wgan_gp: bool = False,
@@ -63,6 +66,13 @@ def train_acx(
         gamma_adv: Weight of the adversarial loss.
         lr_g: Learning rate for generator parameters.
         lr_d: Learning rate for the discriminator.
+        optimizer: Optimiser used for both generator and discriminator. Either
+            a string (``"adam"``, ``"sgd"``, ``"adamw"`` or ``"rmsprop"``) or an
+            optimiser class.
+        opt_g_kwargs: Optional dictionary with extra arguments for the generator
+            optimiser.
+        opt_d_kwargs: Optional dictionary with extra arguments for the
+            discriminator optimiser.
         grad_clip: Maximum gradient norm.
         warm_start: Number of epochs to train without adversary.
         use_wgan_gp: Use WGAN-GP loss for the discriminator.
@@ -116,14 +126,31 @@ def train_acx(
             if isinstance(m, nn.Linear):
                 nn.utils.spectral_norm(m)
 
-    opt_g = torch.optim.Adam(
+    if isinstance(optimizer, str):
+        opt_name = optimizer.lower()
+        optimisers = {
+            "adam": torch.optim.Adam,
+            "adamw": torch.optim.AdamW,
+            "sgd": torch.optim.SGD,
+            "rmsprop": torch.optim.RMSprop,
+        }
+        if opt_name not in optimisers:
+            raise ValueError(f"Unknown optimizer '{optimizer}'")
+        opt_cls = optimisers[opt_name]
+    else:
+        opt_cls = optimizer
+    opt_g_kwargs = opt_g_kwargs or {}
+    opt_d_kwargs = opt_d_kwargs or {}
+
+    opt_g = opt_cls(
         list(model.phi.parameters())
         + list(model.mu0.parameters())
         + list(model.mu1.parameters())
         + list(model.tau.parameters()),
         lr=lr_g,
+        **opt_g_kwargs,
     )
-    opt_d = torch.optim.Adam(model.disc.parameters(), lr=lr_d)
+    opt_d = opt_cls(model.disc.parameters(), lr=lr_d, **opt_d_kwargs)
 
     bce = nn.BCEWithLogitsLoss()
     mse = nn.MSELoss()
