@@ -80,7 +80,7 @@ def test_run_benchmarks_all(monkeypatch):
     monkeypatch.setattr(run_benchmarks, "train_acx", lambda *a, **k: ACX(p=3))
     monkeypatch.setattr(run_benchmarks, "evaluate", lambda *a, **k: 0.0)
     results = run_benchmarks.run("all", replicates=1, epochs=1)
-    assert len(results) == 10
+    assert len(results) == 5
     assert all(isinstance(r, float) for r in results)
 
 

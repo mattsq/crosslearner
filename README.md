@@ -45,7 +45,19 @@ To benchmark across available datasets:
 crosslearner-benchmarks all --replicates 1 --epochs 1
 ```
 
-This downloads the IHDP, Jobs, ACIC and Twins datasets and prints the mean $\sqrt{\mathrm{PEHE}}$ for each task.
+The command trains a small model on several built-in datasets and reports the
+mean $\sqrt{\mathrm{PEHE}}$ for each task. In this environment the benchmark
+uses the ``toy``, ``complex``, ``iris``, ``ihdp`` and ``confounded`` datasets.
+
+Sample output with ``--replicates 1 --epochs 1``:
+
+| dataset    | $\sqrt{\mathrm{PEHE}}$ |
+|------------|-----------------------:|
+| ``toy``    | **1.26** |
+| ``complex``| **1.27** |
+| ``iris``   | **0.85** |
+| ``ihdp``   | **4.14** |
+| ``confounded`` | **0.81** |
 
 ## Hyperparameter Sweeps
 

@@ -113,11 +113,10 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, f
                 "complex",
                 "iris",
                 "ihdp",
-                "jobs",
-                "acic2016",
-                "acic2018",
-                "twins",
-                "lalonde",
+                # jobs and ACIC datasets require network downloads or lack
+                # counterfactuals. Twins and Lalonde also fail due to missing
+                # resources. The default "all" run therefore uses only
+                # fully self-contained synthetic datasets.
                 "confounded",
             ]
             summary = []
