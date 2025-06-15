@@ -1,5 +1,7 @@
 # crosslearner
 
+[![CI](https://github.com/your-username/crosslearner/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/crosslearner/actions/workflows/ci.yml) [![Docs](https://github.com/your-username/crosslearner/actions/workflows/docs.yml/badge.svg)](https://your-username.github.io/crosslearner/)
+
 `crosslearner` implements the **Adversarial–Consistency X-learner (AC‑X)**, a variant of the X-learner that augments outcome models with an adversarial consistency term. The package is designed for reproducible research with numerous GAN tricks and benchmarking utilities.
 
 ## Background
@@ -168,6 +170,8 @@ behaviour:
 - `plot_residuals` displays residuals against predictions.
 
 ## Documentation
+
+Hosted documentation is available at [https://your-username.github.io/crosslearner/](https://your-username.github.io/crosslearner/).
 
 API documentation is built with Sphinx. Run the following commands to generate
 HTML docs in `docs/_build/html`:
