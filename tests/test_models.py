@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 from crosslearner.models.acx import ACX
-from crosslearner.models.baselines import SLearner, TLearner, XLearner
+from crosslearner.models.baselines import DRLearner, SLearner, TLearner, XLearner
 
 
 def _make_data(n=20, p=3):
@@ -42,6 +42,14 @@ def test_tlearner_fit_predict():
 def test_xlearner_fit_predict():
     X, T, Y = _make_data()
     model = XLearner(p=X.shape[1])
+    model.fit(X, T, Y)
+    tau = model.predict_tau(X)
+    assert tau.shape == (X.shape[0],)
+
+
+def test_drlearner_fit_predict():
+    X, T, Y = _make_data()
+    model = DRLearner(p=X.shape[1])
     model.fit(X, T, Y)
     tau = model.predict_tau(X)
     assert tau.shape == (X.shape[0],)
