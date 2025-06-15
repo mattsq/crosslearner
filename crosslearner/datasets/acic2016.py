@@ -12,8 +12,20 @@ URL_2016 = "https://raw.githubusercontent.com/py-why/BenchmarkDatasets/master/ac
 
 
 def _download(url: str, path: str) -> str:
-    if not os.path.exists(path):
+    """Download ``url`` to ``path`` if missing.
+
+    Raises a ``RuntimeError`` with a helpful message when the download fails so
+    users can fetch the file manually.
+    """
+    if os.path.exists(path):
+        return path
+    try:
         urllib.request.urlretrieve(url, path)
+    except Exception as exc:  # pragma: no cover - network errors
+        raise RuntimeError(
+            f"Failed to download ACIC 2016 dataset from {url}. "
+            f"Please download the file manually and place it at {path}."
+        ) from exc
     return path
 
 
