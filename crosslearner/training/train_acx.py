@@ -20,6 +20,7 @@ def train_acx(
     head_layers: Iterable[int] | None = (64,),
     disc_layers: Iterable[int] | None = (64,),
     activation: str | Callable[[], nn.Module] = "relu",
+    residual: bool = False,
     device: Optional[str] = None,
     epochs: int = 30,
     alpha_out: float = 1.0,
@@ -62,6 +63,7 @@ def train_acx(
         head_layers: Hidden layers for the outcome and effect heads.
         disc_layers: Hidden layers for the discriminator.
         activation: Activation function used in all networks.
+        residual: Enable residual connections in all MLPs.
         device: Device string, defaults to CUDA if available.
         epochs: Number of training epochs.
         alpha_out: Weight of the outcome loss.
@@ -145,6 +147,7 @@ def train_acx(
         head_layers=head_layers,
         disc_layers=disc_layers,
         activation=activation_fn,
+        residual=residual,
     ).to(device)
     if spectral_norm:
         for m in model.modules():

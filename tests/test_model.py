@@ -32,3 +32,10 @@ def test_acx_dropout_layers():
     assert any(isinstance(m, nn.Dropout) for m in model.phi.net.modules())
     assert any(isinstance(m, nn.Dropout) for m in model.mu0.net.modules())
     assert any(isinstance(m, nn.Dropout) for m in model.disc.net.modules())
+
+
+def test_acx_residual_option():
+    model = ACX(p=3, residual=True)
+    X = torch.randn(2, 3)
+    h, _, _, _ = model(X)
+    assert h.shape[0] == 2
