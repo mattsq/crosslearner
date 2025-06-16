@@ -53,6 +53,26 @@ def test_early_stopping():
     assert len(history) <= 5
 
 
+def test_risk_early_stopping():
+    torch.manual_seed(0)
+    loader, _ = get_toy_dataloader(batch_size=16, n=64, p=4)
+    X = torch.cat([b[0] for b in loader])
+    T_all = torch.cat([b[1] for b in loader])
+    Y_all = torch.cat([b[2] for b in loader])
+    _, history = train_acx(
+        loader,
+        p=4,
+        device="cpu",
+        epochs=5,
+        risk_data=(X, T_all, Y_all),
+        risk_folds=2,
+        patience=1,
+        return_history=True,
+        verbose=False,
+    )
+    assert len(history) <= 5
+
+
 def test_cli_main(monkeypatch, capsys):
     loader, data = get_toy_dataloader(batch_size=4, n=8, p=3)
     monkeypatch.setattr(cli, "get_toy_dataloader", lambda: (loader, data))
