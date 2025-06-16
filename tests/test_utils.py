@@ -27,3 +27,11 @@ def test_mlp_residual_forward():
     x = torch.randn(2, 4)
     y = mlp(x)
     assert y.shape == (2, 4)
+
+
+def test_mlp_forward_matches_sequential_without_residual():
+    mlp = MLP(3, 2, hidden=(5,), residual=False)
+    x = torch.randn(4, 3)
+    y_seq = mlp.net(x)
+    y = mlp(x)
+    assert torch.allclose(y, y_seq)
