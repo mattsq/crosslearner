@@ -342,10 +342,14 @@ def train_acx(
             m0_det = m0.detach()
             m1_det = m1.detach()
 
+            # warm start: train generator without adversary
             if warm_start > 0 and epoch < warm_start:
                 loss_y = mse(torch.where(Tb.bool(), m1, m0), Yb)
                 opt_g.zero_grad()
                 loss_y.backward()
+                # clip before stepping to avoid exploding gradients
+                if grad_clip:
+                    nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
                 opt_g.step()
                 loss_y_sum += loss_y.item()
                 loss_g_sum += loss_y.item()

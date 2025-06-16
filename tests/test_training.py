@@ -208,6 +208,20 @@ def test_warm_start_logs_losses():
     assert history[0].loss_g > 0
 
 
+def test_warm_start_grad_clip():
+    loader, _ = get_toy_dataloader(batch_size=8, n=32, p=4)
+    model = train_acx(
+        loader,
+        p=4,
+        device="cpu",
+        epochs=2,
+        warm_start=1,
+        grad_clip=1.0,
+        verbose=False,
+    )
+    assert isinstance(model, ACX)
+
+
 def test_train_acx_1d_targets():
     X = torch.randn(16, 4)
     T = torch.randint(0, 2, (16,))
