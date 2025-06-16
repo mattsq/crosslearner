@@ -146,6 +146,32 @@ def test_train_acx_custom_optimizer():
     assert isinstance(model, ACX)
 
 
+def test_train_acx_custom_scheduler(monkeypatch):
+    loader, _ = get_toy_dataloader(batch_size=8, n=32, p=3)
+
+    steps = {"count": 0}
+
+    class DummyScheduler:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def step(self, *args, **kwargs):
+            steps["count"] += 1
+
+    monkeypatch.setattr(torch.optim.lr_scheduler, "StepLR", DummyScheduler)
+
+    train_acx(
+        loader,
+        p=3,
+        device="cpu",
+        epochs=1,
+        lr_scheduler="step",
+        verbose=False,
+    )
+
+    assert steps["count"] == 2
+
+
 def test_train_acx_1d_targets():
     X = torch.randn(16, 4)
     T = torch.randint(0, 2, (16,))
@@ -192,6 +218,14 @@ def test_train_acx_invalid_optimizer():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(ValueError):
         train_acx(loader, p=4, device="cpu", epochs=1, optimizer="bad", verbose=False)
+
+
+def test_train_acx_invalid_scheduler():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    with pytest.raises(ValueError):
+        train_acx(
+            loader, p=4, device="cpu", epochs=1, lr_scheduler="bad", verbose=False
+        )
 
 
 def test_train_acx_negative_grad_clip():
