@@ -24,9 +24,21 @@ jobs:
           pip install -r requirements.txt
           pip install black ruff
           pip install torch --extra-index-url https://download.pytorch.org/whl/${{ matrix.cuda }}
-      - name: Lint
+      - name: Lint and auto-format
         run: |
           ruff check .
-          black --check .
+          black .
+      - name: Push changes back to the branch
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if [[ `git status --porcelain` ]]; then
+            git add .
+            git commit -m "CI: auto-format Python code with black"
+            git push
+          fi
       - name: Run tests
         run: pytest -q
