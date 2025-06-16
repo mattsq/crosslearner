@@ -220,6 +220,7 @@ def train_acx(
     freeze_d = False
 
     for epoch in range(epochs):
+        model.train()
         loss_d_sum = loss_g_sum = 0.0
         loss_y_sum = loss_cons_sum = loss_adv_sum = 0.0
         batch_count = 0
