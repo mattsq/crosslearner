@@ -13,6 +13,16 @@ from crosslearner.training.grl import grad_reverse
 
 
 def _make_regressor(inp: int, hid: Iterable[int] = (64, 64)) -> nn.Sequential:
+    """Return a simple fully connected regressor.
+
+    Args:
+        inp: Number of input features.
+        hid: Sizes of the hidden layers.
+
+    Returns:
+        Sequential network ending with a single linear output.
+    """
+
     layers: list[nn.Module] = []
     d = inp
     for h in hid:
@@ -23,6 +33,8 @@ def _make_regressor(inp: int, hid: Iterable[int] = (64, 64)) -> nn.Sequential:
 
 
 def _make_propensity_net(inp: int, hid: Iterable[int] = (64, 64)) -> nn.Sequential:
+    """Return a sigmoid-activated regressor for propensity scores."""
+
     net = _make_regressor(inp, hid)
     net.add_module("sigmoid", nn.Sigmoid())
     return net
@@ -39,7 +51,22 @@ def _estimate_nuisances(
     device: str,
     seed: int = 0,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Return cross-fitted nuisance predictions."""
+    """Return cross-fitted nuisance predictions.
+
+    Args:
+        X: Covariates ``(n, p)``.
+        T: Treatment indicators ``(n, 1)``.
+        Y: Observed outcomes ``(n, 1)``.
+        folds: Number of cross-fitting folds.
+        lr: Learning rate used for the nuisance regressors.
+        batch: Mini-batch size for the outcome regressors.
+        device: Device used for training the nuisances.
+        seed: Random seed for reproducibility.
+
+    Returns:
+        Tuple ``(e_hat, mu0_hat, mu1_hat)`` with cross-fitted propensity and
+        outcome predictions.
+    """
 
     bce = nn.BCELoss()
     mse = nn.MSELoss()
@@ -97,7 +124,19 @@ def _orthogonal_risk(
     mu0_hat: torch.Tensor,
     mu1_hat: torch.Tensor,
 ) -> float:
-    """Return the orthogonal risk."""
+    """Return the orthogonal risk.
+
+    Args:
+        tau_hat: Predicted treatment effects.
+        y: Observed outcomes ``(n, 1)``.
+        t: Treatment indicators ``(n, 1)``.
+        e_hat: Cross-fitted propensity estimates.
+        mu0_hat: Predicted outcome under control.
+        mu1_hat: Predicted outcome under treatment.
+
+    Returns:
+        Scalar orthogonal risk value.
+    """
 
     mse = nn.MSELoss()
     y_resid = y - torch.where(t.bool(), mu1_hat, mu0_hat)
@@ -151,7 +190,7 @@ def train_acx(
     patience: int = 0,
     verbose: bool = True,
     return_history: bool = False,
-):
+) -> ACX | tuple[ACX, History]:
     """Train AC-X model with optional GAN tricks.
 
     Args:
@@ -193,8 +232,11 @@ def train_acx(
         label_smoothing: Use label smoothing for the adversary.
         instance_noise: Inject Gaussian noise into real and fake samples.
         gradient_reversal: Use gradient reversal instead of the adversary.
-        ttur: Use Two-Time-Update-Rule with different learning rates.
-        lambda_gp: Gradient penalty coefficient for WGAN-GP.
+        ttur: Enable the Two Time-Update Rule which freezes the discriminator
+            once its loss drops below a threshold, allowing the generator to
+            catch up.
+        lambda_gp: Coefficient of the gradient penalty term used in the
+            WGAN-GP objective. Only effective when ``use_wgan_gp`` is ``True``.
         eta_fm: Weight of the feature matching term.
         grl_weight: Scale of the gradient reversal layer.
         tensorboard_logdir: Directory for TensorBoard logs.
@@ -208,8 +250,9 @@ def train_acx(
         return_history: If ``True`` also return training history.
 
     Returns:
-        The trained ``ACX`` model or tuple ``(model, history)`` when
-        ``return_history`` is ``True``.
+        The trained ``ACX`` model. If ``return_history`` is ``True`` the
+        function instead returns ``(model, history)`` where ``history`` is a
+        list of :class:`EpochStats`.
     """
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
 
