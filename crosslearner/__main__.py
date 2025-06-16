@@ -2,6 +2,8 @@
 
 import torch
 
+from crosslearner.utils import set_seed
+
 from crosslearner.datasets.toy import get_toy_dataloader
 from crosslearner.training.train_acx import train_acx
 from crosslearner.evaluation.evaluate import evaluate
@@ -9,6 +11,7 @@ from crosslearner.evaluation.evaluate import evaluate
 
 def main() -> None:
     """Run the toy training loop from the command line."""
+    set_seed(0)
     loader, (mu0, mu1) = get_toy_dataloader()
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = train_acx(loader, p=10, device=device)

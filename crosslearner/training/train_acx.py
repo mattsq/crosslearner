@@ -7,6 +7,7 @@ from sklearn.model_selection import StratifiedKFold
 
 from crosslearner.training.history import EpochStats, History
 from crosslearner.evaluation.evaluate import evaluate
+from crosslearner.utils import set_seed
 
 from crosslearner.models.acx import ACX
 from crosslearner.training.grl import grad_reverse
@@ -44,7 +45,7 @@ def _estimate_nuisances(
     bce = nn.BCELoss()
     mse = nn.MSELoss()
 
-    torch.manual_seed(seed)
+    set_seed(seed)
     kfold = StratifiedKFold(folds, shuffle=True, random_state=seed)
     e_hat = torch.empty_like(T, device=device)
     mu0_hat = torch.empty_like(Y, device=device)
@@ -119,6 +120,7 @@ def train_acx(
     disc_dropout: float = 0.0,
     residual: bool = False,
     device: Optional[str] = None,
+    seed: int | None = None,
     epochs: int = 30,
     alpha_out: float = 1.0,
     beta_cons: float = 10.0,
@@ -167,6 +169,7 @@ def train_acx(
         disc_dropout: Dropout probability for the discriminator.
         residual: Enable residual connections in all MLPs.
         device: Device string, defaults to CUDA if available.
+        seed: Optional random seed for reproducibility.
         epochs: Number of training epochs.
         alpha_out: Weight of the outcome loss.
         beta_cons: Weight of the consistency term.
@@ -212,6 +215,8 @@ def train_acx(
         ``return_history`` is ``True``.
     """
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    if seed is not None:
+        set_seed(seed)
 
     if grad_clip is not None and grad_clip < 0:
         raise ValueError("grad_clip must be non-negative")

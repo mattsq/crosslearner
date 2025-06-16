@@ -25,6 +25,7 @@ from crosslearner.evaluation.metrics import (
     att_error,
     bootstrap_ci,
 )
+from crosslearner.utils import set_seed
 
 
 def load_external_iris(batch_size: int = 256, seed: int | None = None):
@@ -77,6 +78,7 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, f
     """
     results: List[Dict[str, float]] = []
     for seed in range(replicates):
+        set_seed(seed)
         if dataset == "toy":
             loader, (mu0, mu1) = get_toy_dataloader()
             p = 10
@@ -129,7 +131,7 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, f
             return [v for _, v in summary]
         else:
             raise ValueError(f"Unknown dataset {dataset}")
-        model = train_acx(loader, p=p, epochs=epochs)
+        model = train_acx(loader, p=p, epochs=epochs, seed=seed)
         X = torch.cat([b[0] for b in loader])
         T_all = torch.cat([b[1] for b in loader])
         mu0_all = mu0
