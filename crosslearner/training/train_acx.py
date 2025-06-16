@@ -300,8 +300,9 @@ def train_acx(
             loss_g = alpha_out * loss_y + beta_cons * loss_cons + gamma_adv * loss_adv
 
             if feature_matching:
-                real_f = hb.detach()
-                fake_f = hb
+                with torch.no_grad():
+                    real_f = model.disc_features(hb.detach(), Yb, Tb)
+                fake_f = model.disc_features(hb, Ycf, Tb)
                 loss_fm = ((real_f.mean(0) - fake_f.mean(0)) ** 2).mean()
                 loss_g += eta_fm * loss_fm
 
