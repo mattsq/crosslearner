@@ -50,7 +50,7 @@ def _estimate_nuisances(
     mu0_hat = torch.empty_like(Y, device=device)
     mu1_hat = torch.empty_like(Y, device=device)
 
-    for train_idx, val_idx in kfold.split(X, T.cpu()):
+    for train_idx, val_idx in kfold.split(X.cpu(), T.cpu()):
         Xtr, Ttr, Ytr = X[train_idx], T[train_idx], Y[train_idx]
         Xva = X[val_idx]
 
@@ -72,9 +72,13 @@ def _estimate_nuisances(
         for _ in range(3):
             for xb, tb, yb in loader:
                 pred0, pred1 = mu0(xb), mu1(xb)
-                loss = mse(pred0[tb == 0], yb[tb == 0]) + mse(
-                    pred1[tb == 1], yb[tb == 1]
-                )
+                loss = torch.tensor(0.0, device=device)
+                mask0 = tb == 0
+                mask1 = tb == 1
+                if mask0.any():
+                    loss = loss + mse(pred0[mask0], yb[mask0])
+                if mask1.any():
+                    loss = loss + mse(pred1[mask1], yb[mask1])
                 opt_mu.zero_grad()
                 loss.backward()
                 opt_mu.step()
