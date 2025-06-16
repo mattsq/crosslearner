@@ -30,6 +30,7 @@ class MLP(nn.Module):
         out_dim: Output dimension.
         hidden: Iterable with hidden layer sizes.
         activation: Activation function to apply between layers.
+        dropout: Dropout probability applied after each hidden layer.
     """
 
     def __init__(
@@ -39,14 +40,18 @@ class MLP(nn.Module):
         hidden: Iterable[int] | None = None,
         *,
         activation: str | Callable[[], nn.Module] = nn.ReLU,
+        dropout: float = 0.0,
     ) -> None:
         super().__init__()
         layers = []
         d = in_dim
         hidden = tuple(hidden or [])
         act_fn = _get_activation(activation)
+        dropout = float(dropout)
         for h in hidden:
             layers += [nn.Linear(d, h), act_fn()]
+            if dropout > 0:
+                layers.append(nn.Dropout(dropout))
             d = h
         layers += [nn.Linear(d, out_dim)]
         self.net = nn.Sequential(*layers)
@@ -76,6 +81,9 @@ class ACX(nn.Module):
         head_layers: Iterable[int] | None = (64,),
         disc_layers: Iterable[int] | None = (64,),
         activation: str | Callable[[], nn.Module] = nn.ReLU,
+        phi_dropout: float = 0.0,
+        head_dropout: float = 0.0,
+        disc_dropout: float = 0.0,
     ) -> None:
         """Instantiate the model.
 
@@ -86,15 +94,48 @@ class ACX(nn.Module):
             head_layers: Hidden layers for the outcome and effect heads.
             disc_layers: Hidden layers for the discriminator.
             activation: Activation function used in all networks.
+            phi_dropout: Dropout probability for the representation MLP.
+            head_dropout: Dropout probability for the outcome and effect heads.
+            disc_dropout: Dropout probability for the discriminator.
         """
 
         super().__init__()
         act_fn = _get_activation(activation)
-        self.phi = MLP(p, rep_dim, hidden=phi_layers, activation=act_fn)
-        self.mu0 = MLP(rep_dim, 1, hidden=head_layers, activation=act_fn)
-        self.mu1 = MLP(rep_dim, 1, hidden=head_layers, activation=act_fn)
-        self.tau = MLP(rep_dim, 1, hidden=head_layers, activation=act_fn)
-        self.disc = MLP(rep_dim + 2, 1, hidden=disc_layers, activation=act_fn)
+        self.phi = MLP(
+            p,
+            rep_dim,
+            hidden=phi_layers,
+            activation=act_fn,
+            dropout=phi_dropout,
+        )
+        self.mu0 = MLP(
+            rep_dim,
+            1,
+            hidden=head_layers,
+            activation=act_fn,
+            dropout=head_dropout,
+        )
+        self.mu1 = MLP(
+            rep_dim,
+            1,
+            hidden=head_layers,
+            activation=act_fn,
+            dropout=head_dropout,
+        )
+        self.tau = MLP(
+            rep_dim,
+            1,
+            hidden=head_layers,
+            activation=act_fn,
+            dropout=head_dropout,
+        )
+        self.disc = MLP(
+            rep_dim + 2,
+            1,
+            hidden=disc_layers,
+            activation=act_fn,
+            dropout=disc_dropout,
+        )
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, ...]:
         """Forward pass.

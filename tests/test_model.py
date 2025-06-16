@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 from crosslearner.models.acx import ACX
 
 
@@ -24,3 +25,10 @@ def test_acx_custom_architecture():
     X = torch.randn(4, 3)
     h, *_ = model(X)
     assert h.shape == (4, 32)
+
+
+def test_acx_dropout_layers():
+    model = ACX(p=2, phi_dropout=0.1, head_dropout=0.2, disc_dropout=0.3)
+    assert any(isinstance(m, nn.Dropout) for m in model.phi.net.modules())
+    assert any(isinstance(m, nn.Dropout) for m in model.mu0.net.modules())
+    assert any(isinstance(m, nn.Dropout) for m in model.disc.net.modules())
