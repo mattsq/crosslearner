@@ -36,10 +36,13 @@ class DRLearner:
         T = T.ravel()
         self.model_mu0.fit(X, Y.ravel())
         self.model_mu1.fit(X, Y.ravel())
-        self.model_e.fit(X, T)
+        if np.unique(T).size < 2:
+            e_hat = np.full_like(T, fill_value=T.mean(), dtype=float)
+        else:
+            self.model_e.fit(X, T)
+            e_hat = self.model_e.predict_proba(X)[:, 1]
         mu0_hat = self.model_mu0.predict(X)
         mu1_hat = self.model_mu1.predict(X)
-        e_hat = self.model_e.predict_proba(X)[:, 1]
         tau_tilde = (
             mu1_hat
             - mu0_hat

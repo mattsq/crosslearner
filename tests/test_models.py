@@ -53,3 +53,21 @@ def test_drlearner_fit_predict():
     model.fit(X, T, Y)
     tau = model.predict_tau(X)
     assert tau.shape == (X.shape[0],)
+
+
+def test_tlearner_single_group():
+    X, T, Y = _make_data()
+    T[:] = 1
+    model = TLearner(p=X.shape[1])
+    model.fit(X, T, Y)
+    tau = model.predict_tau(X)
+    assert tau.shape == (X.shape[0],)
+
+
+def test_xlearner_single_group():
+    X, T, Y = _make_data()
+    T[:] = 0
+    model = XLearner(p=X.shape[1])
+    model.fit(X, T, Y)
+    tau = model.predict_tau(X)
+    assert tau.shape == (X.shape[0],)
