@@ -6,6 +6,9 @@ phi_layers: [128]
 head_layers: [64]
 disc_layers: [64]
 activation: relu
+phi_dropout: 0.0
+head_dropout: 0.0
+disc_dropout: 0.0
 lr_g: 0.001
 lr_d: 0.001
 optimizer: adam

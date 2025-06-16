@@ -5,6 +5,7 @@ from crosslearner.datasets.toy import get_toy_dataloader
 from crosslearner.evaluation.evaluate import evaluate
 from crosslearner.models.acx import ACX
 from crosslearner.training.train_acx import train_acx
+import torch.nn as nn
 import pytest
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -273,3 +274,20 @@ def test_train_acx_negative_weight_clip():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(ValueError):
         train_acx(loader, p=4, device="cpu", epochs=1, weight_clip=-0.1, verbose=False)
+
+
+def test_train_acx_dropout_options():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model = train_acx(
+        loader,
+        p=4,
+        device="cpu",
+        epochs=1,
+        phi_dropout=0.1,
+        head_dropout=0.1,
+        disc_dropout=0.1,
+        verbose=False,
+    )
+    assert any(isinstance(m, nn.Dropout) for m in model.phi.net.modules())
+    assert any(isinstance(m, nn.Dropout) for m in model.mu0.net.modules())
+    assert any(isinstance(m, nn.Dropout) for m in model.disc.net.modules())
