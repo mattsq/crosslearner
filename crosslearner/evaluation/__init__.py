@@ -1,6 +1,7 @@
 """Evaluation metrics and helpers."""
 
 from .evaluate import evaluate, evaluate_ipw, evaluate_dr
+from .propensity import estimate_propensity
 from .metrics import (
     pehe,
     policy_risk,
@@ -18,4 +19,5 @@ __all__ = [
     "ate_error",
     "att_error",
     "bootstrap_ci",
+    "estimate_propensity",
 ]
