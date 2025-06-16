@@ -48,6 +48,8 @@ class MLP(nn.Module):
         hidden = tuple(hidden or [])
         act_fn = _get_activation(activation)
         dropout = float(dropout)
+        if not (0 <= dropout < 1):
+            raise ValueError(f"Dropout must be in the range [0, 1), but got {dropout}.")
         for h in hidden:
             layers += [nn.Linear(d, h), act_fn()]
             if dropout > 0:
