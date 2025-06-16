@@ -236,6 +236,9 @@ def train_acx(
                 opt_g.zero_grad()
                 loss_y.backward()
                 opt_g.step()
+                loss_y_sum += loss_y.item()
+                loss_g_sum += loss_y.item()
+                batch_count += 1
                 continue
 
             # ------------- discriminator update -------------------------
