@@ -155,6 +155,29 @@ against always choosing the best potential outcome.</p>
 </dd></dl>
 
 </section>
+<section id="module-crosslearner.evaluation.propensity">
+<span id="crosslearner-evaluation-propensity-module"></span><h2>crosslearner.evaluation.propensity module<a class="headerlink" href="#module-crosslearner.evaluation.propensity" title="Link to this heading">¶</a></h2>
+<p>Propensity score estimation helpers.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.propensity.estimate_propensity">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.propensity.</span></span><span class="sig-name descname"><span class="pre">estimate_propensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#crosslearner.evaluation.propensity.estimate_propensity" title="Link to this definition">¶</a></dt>
+<dd><p>Return cross-fitted propensity scores via logistic regression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – Covariates <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p></li>
+<li><p><strong>T</strong> – Binary treatment indicators <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code> or <code class="docutils literal notranslate"><span class="pre">(n,)</span></code>.</p></li>
+<li><p><strong>folds</strong> – Number of cross-fitting folds.</p></li>
+<li><p><strong>seed</strong> – Random seed controlling the CV split.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estimated propensity scores <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-crosslearner.evaluation">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-crosslearner.evaluation" title="Link to this heading">¶</a></h2>
 <p>Evaluation metrics and helpers.</p>
@@ -174,6 +197,25 @@ against always choosing the best potential outcome.</p>
 <dt class="sig sig-object py" id="crosslearner.evaluation.bootstrap_ci">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">bootstrap_ci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_boot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#crosslearner.evaluation.bootstrap_ci" title="Link to this definition">¶</a></dt>
 <dd><p>Return a bootstrap confidence interval for the mean of <code class="docutils literal notranslate"><span class="pre">values</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.estimate_propensity">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">estimate_propensity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#crosslearner.evaluation.estimate_propensity" title="Link to this definition">¶</a></dt>
+<dd><p>Return cross-fitted propensity scores via logistic regression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – Covariates <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p></li>
+<li><p><strong>T</strong> – Binary treatment indicators <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code> or <code class="docutils literal notranslate"><span class="pre">(n,)</span></code>.</p></li>
+<li><p><strong>folds</strong> – Number of cross-fitting folds.</p></li>
+<li><p><strong>seed</strong> – Random seed controlling the CV split.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estimated propensity scores <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

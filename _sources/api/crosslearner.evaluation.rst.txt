@@ -20,6 +20,14 @@ crosslearner.evaluation.metrics module
    :show-inheritance:
    :undoc-members:
 
+crosslearner.evaluation.propensity module
+-----------------------------------------
+
+.. automodule:: crosslearner.evaluation.propensity
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 
