@@ -184,15 +184,18 @@ def train_acx(
         if isinstance(lr_scheduler, str):
             name = lr_scheduler.lower()
             schedulers = {
-                "step": torch.optim.lr_scheduler.StepLR,
-                "multistep": torch.optim.lr_scheduler.MultiStepLR,
-                "exponential": torch.optim.lr_scheduler.ExponentialLR,
-                "cosine": torch.optim.lr_scheduler.CosineAnnealingLR,
-                "plateau": torch.optim.lr_scheduler.ReduceLROnPlateau,
+                "step": (torch.optim.lr_scheduler.StepLR, {"step_size": 1, "gamma": 0.9}),
+                "multistep": (torch.optim.lr_scheduler.MultiStepLR, {"milestones": [10, 20], "gamma": 0.1}),
+                "exponential": (torch.optim.lr_scheduler.ExponentialLR, {"gamma": 0.9}),
+                "cosine": (torch.optim.lr_scheduler.CosineAnnealingLR, {"T_max": 10}),
+                "plateau": (torch.optim.lr_scheduler.ReduceLROnPlateau, {"mode": "min", "factor": 0.1, "patience": 10}),
             }
             if name not in schedulers:
                 raise ValueError(f"Unknown lr scheduler '{lr_scheduler}'")
-            sched_cls = schedulers[name]
+            sched_cls, default_args = schedulers[name]
+            # Merge default arguments with user-supplied arguments
+            sched_g_kwargs = {**default_args, **sched_g_kwargs}
+            sched_d_kwargs = {**default_args, **sched_d_kwargs}
         else:
             sched_cls = lr_scheduler
         sched_g = sched_cls(opt_g, **sched_g_kwargs)
