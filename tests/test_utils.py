@@ -1,8 +1,11 @@
 import pytest
 import torch
 import torch.nn as nn
+import numpy as np
+import random
 
 from crosslearner.models.acx import MLP, _get_activation
+from crosslearner.utils import set_seed
 
 
 def test_get_activation_invalid_name():
@@ -35,3 +38,14 @@ def test_mlp_forward_matches_sequential_without_residual():
     y_seq = mlp.net(x)
     y = mlp(x)
     assert torch.allclose(y, y_seq)
+
+
+def test_set_seed_reproducibility():
+    set_seed(123)
+    r1 = random.random()
+    n1 = np.random.rand(1)
+    t1 = torch.rand(1)
+    set_seed(123)
+    assert random.random() == r1
+    assert np.allclose(np.random.rand(1), n1)
+    assert torch.allclose(torch.rand(1), t1)

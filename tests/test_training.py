@@ -1,4 +1,5 @@
 import torch
+from crosslearner.utils import set_seed
 from crosslearner import __main__ as cli
 from crosslearner.benchmarks import run_benchmarks
 from crosslearner.datasets.toy import get_toy_dataloader
@@ -11,7 +12,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 
 def test_train_acx_short():
-    torch.manual_seed(0)
+    set_seed(0)
     loader, (mu0, mu1) = get_toy_dataloader(batch_size=16, n=64, p=4)
     model = train_acx(loader, p=4, device="cpu", epochs=2)
     X = torch.cat([b[0] for b in loader])
@@ -30,7 +31,7 @@ def test_tensorboard_logging(tmp_path):
 
 
 def test_weight_clipping():
-    torch.manual_seed(0)
+    set_seed(0)
     loader, _ = get_toy_dataloader(batch_size=16, n=64, p=4)
     model = train_acx(loader, p=4, device="cpu", epochs=1, weight_clip=0.01)
     for p in model.disc.parameters():
@@ -38,7 +39,7 @@ def test_weight_clipping():
 
 
 def test_early_stopping():
-    torch.manual_seed(0)
+    set_seed(0)
     loader, (mu0, mu1) = get_toy_dataloader(batch_size=16, n=64, p=4)
     X = torch.cat([b[0] for b in loader])
     val_data = (X, mu0, mu1)
@@ -55,7 +56,7 @@ def test_early_stopping():
 
 
 def test_risk_early_stopping():
-    torch.manual_seed(0)
+    set_seed(0)
     loader, _ = get_toy_dataloader(batch_size=16, n=64, p=4)
     X = torch.cat([b[0] for b in loader])
     T_all = torch.cat([b[1] for b in loader])
@@ -108,7 +109,7 @@ def test_run_benchmarks_all(monkeypatch):
 
 
 def test_train_acx_options():
-    torch.manual_seed(0)
+    set_seed(0)
     loader, (mu0, mu1) = get_toy_dataloader(batch_size=4, n=16, p=4)
     X = torch.cat([b[0] for b in loader])
     val_data = (X, mu0, mu1)

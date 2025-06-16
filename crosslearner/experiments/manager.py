@@ -9,6 +9,8 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import KFold
 
+from ..utils import set_seed
+
 from ..training.train_acx import train_acx
 from ..evaluation.evaluate import evaluate
 
@@ -46,6 +48,7 @@ def cross_validate_acx(
         Mean validation :math:`\sqrt{\mathrm{PEHE}}` across folds.
     """
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    set_seed(seed)
     dataset: TensorDataset = loader.dataset  # type: ignore[arg-type]
     X, T, Y = dataset.tensors
     kf = KFold(n_splits=folds, shuffle=True, random_state=seed)
@@ -66,6 +69,7 @@ def cross_validate_acx(
             train_loader,
             p,
             device=device,
+            seed=seed,
             val_data=val_data,
             tensorboard_logdir=fold_dir,
             **train_kwargs,
