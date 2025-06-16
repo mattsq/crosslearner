@@ -36,10 +36,13 @@ def _estimate_nuisances(
     folds: int = 5,
     lr: float = 1e-3,
     batch: int = 256,
+    propensity_epochs: int = 500,
+    outcome_epochs: int = 3,
+    early_stop: int = 10,
     device: str,
     seed: int = 0,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Return cross-fitted nuisance predictions."""
+    """Return cross-fitted nuisance predictions with basic early stopping."""
 
     bce = nn.BCELoss()
     mse = nn.MSELoss()
@@ -54,22 +57,49 @@ def _estimate_nuisances(
         Xtr, Ttr, Ytr = X[train_idx], T[train_idx], Y[train_idx]
         Xva = X[val_idx]
 
+        # split fold again for early stopping
+        n = Xtr.shape[0]
+        split = int(0.8 * n)
+        X_train, X_val = Xtr[:split], Xtr[split:]
+        T_train, T_val = Ttr[:split], Ttr[split:]
+        Y_train, Y_val = Ytr[:split], Ytr[split:]
+
         prop = _make_propensity_net(X.shape[1]).to(device)
         opt_p = torch.optim.Adam(prop.parameters(), lr)
-        for _ in range(500):
-            pred = prop(Xtr)
-            loss = bce(pred, Ttr)
+        best_state = {k: v.detach().clone() for k, v in prop.state_dict().items()}
+        best_loss = float("inf")
+        no_improve = 0
+        for _ in range(propensity_epochs):
+            pred = prop(X_train)
+            loss = bce(pred, T_train)
             opt_p.zero_grad()
             loss.backward()
             opt_p.step()
+            val_loss = bce(prop(X_val), T_val).item()
+            if val_loss < best_loss - 1e-6:
+                best_loss = val_loss
+                best_state = {
+                    k: v.detach().clone() for k, v in prop.state_dict().items()
+                }
+                no_improve = 0
+            else:
+                no_improve += 1
+                if no_improve >= early_stop:
+                    break
+        prop.load_state_dict(best_state)
         e_hat[val_idx] = prop(Xva).detach()
 
         mu0 = _make_regressor(X.shape[1]).to(device)
         mu1 = _make_regressor(X.shape[1]).to(device)
         opt_mu = torch.optim.Adam(list(mu0.parameters()) + list(mu1.parameters()), lr)
-        ds = torch.utils.data.TensorDataset(Xtr, Ttr, Ytr)
+        ds = torch.utils.data.TensorDataset(X_train, T_train, Y_train)
+        val_ds = torch.utils.data.TensorDataset(X_val, T_val, Y_val)
         loader = torch.utils.data.DataLoader(ds, batch_size=batch, shuffle=True)
-        for _ in range(3):
+        best_mu0 = {k: v.detach().clone() for k, v in mu0.state_dict().items()}
+        best_mu1 = {k: v.detach().clone() for k, v in mu1.state_dict().items()}
+        best_val = float("inf")
+        no_improve = 0
+        for _ in range(outcome_epochs):
             for xb, tb, yb in loader:
                 pred0, pred1 = mu0(xb), mu1(xb)
                 loss = torch.tensor(0.0, device=device)
@@ -82,6 +112,36 @@ def _estimate_nuisances(
                 opt_mu.zero_grad()
                 loss.backward()
                 opt_mu.step()
+            with torch.no_grad():
+                val_loss = 0.0
+                count = 0
+                for xb, tb, yb in torch.utils.data.DataLoader(val_ds, batch_size=batch):
+                    pred0, pred1 = mu0(xb), mu1(xb)
+                    mask0 = tb == 0
+                    mask1 = tb == 1
+                    loss = torch.tensor(0.0, device=device)
+                    if mask0.any():
+                        loss = loss + mse(pred0[mask0], yb[mask0])
+                    if mask1.any():
+                        loss = loss + mse(pred1[mask1], yb[mask1])
+                    val_loss += loss.item()
+                    count += 1
+                val_loss /= max(count, 1)
+                if val_loss < best_val - 1e-6:
+                    best_val = val_loss
+                    best_mu0 = {
+                        k: v.detach().clone() for k, v in mu0.state_dict().items()
+                    }
+                    best_mu1 = {
+                        k: v.detach().clone() for k, v in mu1.state_dict().items()
+                    }
+                    no_improve = 0
+                else:
+                    no_improve += 1
+                    if no_improve >= early_stop:
+                        break
+        mu0.load_state_dict(best_mu0)
+        mu1.load_state_dict(best_mu1)
         mu0_hat[val_idx] = mu0(Xva).detach()
         mu1_hat[val_idx] = mu1(Xva).detach()
 
@@ -148,6 +208,9 @@ def train_acx(
     val_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None,
     risk_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None,
     risk_folds: int = 5,
+    nuisance_propensity_epochs: int = 500,
+    nuisance_outcome_epochs: int = 3,
+    nuisance_early_stop: int = 10,
     patience: int = 0,
     verbose: bool = True,
     return_history: bool = False,
@@ -203,6 +266,9 @@ def train_acx(
         risk_data: Optional tuple ``(X, T, Y)`` to early-stop on orthogonal risk
             when counterfactuals are unavailable.
         risk_folds: Number of cross-fitting folds for ``risk_data``.
+        nuisance_propensity_epochs: Training epochs for the propensity model.
+        nuisance_outcome_epochs: Training epochs for the outcome models.
+        nuisance_early_stop: Early-stopping patience for nuisance models.
         patience: Early-stopping patience based on validation metric.
         verbose: Print progress every 5 epochs.
         return_history: If ``True`` also return training history.
@@ -321,7 +387,14 @@ def train_acx(
     if risk_data is not None:
         Xr, Tr, Yr = (v.to(device) for v in risk_data)
         e_hat_val, mu0_val, mu1_val = _estimate_nuisances(
-            Xr, Tr, Yr, folds=risk_folds, device=device
+            Xr,
+            Tr,
+            Yr,
+            folds=risk_folds,
+            device=device,
+            propensity_epochs=nuisance_propensity_epochs,
+            outcome_epochs=nuisance_outcome_epochs,
+            early_stop=nuisance_early_stop,
         )
 
     for epoch in range(epochs):
