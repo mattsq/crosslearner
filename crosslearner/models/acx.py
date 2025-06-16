@@ -171,3 +171,11 @@ class ACX(nn.Module):
         """
 
         return self.disc(torch.cat([h, y, t], dim=1))
+
+    def disc_features(
+        self, h: torch.Tensor, y: torch.Tensor, t: torch.Tensor
+    ) -> torch.Tensor:
+        """Return discriminator features before the final linear layer."""
+
+        x = torch.cat([h, y, t], dim=1)
+        return self.disc.net[:-1](x)
