@@ -23,6 +23,7 @@ class XLearner:
         self.p = p
         self._fitted_tau_t = False
         self._fitted_tau_c = False
+        self.prop = 0.0
 
     def fit(self, X: np.ndarray, T: np.ndarray, Y: np.ndarray) -> None:
         """Fit the base learners and pseudo-outcome regressors.
