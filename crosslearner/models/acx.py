@@ -48,6 +48,8 @@ class MLP(nn.Module):
         hidden: Iterable with hidden layer sizes.
         activation: Activation function to apply between layers.
         dropout: Dropout probability applied after each hidden layer.
+        residual: If ``True`` add skip connections between blocks when the
+            dimensions match.
     """
 
     def __init__(
@@ -58,9 +60,11 @@ class MLP(nn.Module):
         *,
         activation: str | Callable[[], nn.Module] = nn.ReLU,
         dropout: float = 0.0,
+        residual: bool = False,
     ) -> None:
         super().__init__()
-        layers = []
+        self.residual = residual
+        self.blocks = nn.ModuleList()
         d = in_dim
         hidden = tuple(hidden or [])
         act_fn = _get_activation(activation)
@@ -68,12 +72,13 @@ class MLP(nn.Module):
         if not (0 <= dropout < 1):
             raise ValueError(f"Dropout must be in the range [0, 1), but got {dropout}.")
         for h in hidden:
-            layers += [nn.Linear(d, h), act_fn()]
+            block = [nn.Linear(d, h), act_fn()]
             if dropout > 0:
-                layers.append(nn.Dropout(dropout))
+                block.append(nn.Dropout(dropout))
+            self.blocks.append(nn.Sequential(*block))
             d = h
-        layers += [nn.Linear(d, out_dim)]
-        self.net = nn.Sequential(*layers)
+        self.out = nn.Linear(d, out_dim)
+        self.net = nn.Sequential(*self.blocks, self.out)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Apply the network.
@@ -85,7 +90,14 @@ class MLP(nn.Module):
             Tensor with shape ``(batch, out_dim)``.
         """
 
-        return self.net(x)
+        h = x
+        for block in self.blocks:
+            z = block(h)
+            if self.residual and z.shape == h.shape:
+                h = z + h
+            else:
+                h = z
+        return self.out(h)
 
 
 class ACX(nn.Module):
@@ -103,6 +115,7 @@ class ACX(nn.Module):
         phi_dropout: float = 0.0,
         head_dropout: float = 0.0,
         disc_dropout: float = 0.0,
+        residual: bool = False,
     ) -> None:
         """Instantiate the model.
 
@@ -116,6 +129,7 @@ class ACX(nn.Module):
             phi_dropout: Dropout probability for the representation MLP.
             head_dropout: Dropout probability for the outcome and effect heads.
             disc_dropout: Dropout probability for the discriminator.
+            residual: Enable residual connections in all MLPs.
         """
 
         super().__init__()
@@ -126,6 +140,7 @@ class ACX(nn.Module):
             hidden=phi_layers,
             activation=act_fn,
             dropout=phi_dropout,
+            residual=residual,
         )
         self.mu0 = MLP(
             rep_dim,
@@ -133,6 +148,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
+            residual=residual,
         )
         self.mu1 = MLP(
             rep_dim,
@@ -140,6 +156,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
+            residual=residual,
         )
         self.tau = MLP(
             rep_dim,
@@ -147,6 +164,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
+            residual=residual,
         )
         self.disc = MLP(
             rep_dim + 2,
@@ -154,6 +172,7 @@ class ACX(nn.Module):
             hidden=disc_layers,
             activation=act_fn,
             dropout=disc_dropout,
+            residual=residual,
         )
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, ...]:
