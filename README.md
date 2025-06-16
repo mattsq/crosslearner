@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/mattrss/crosslearner/actions/workflows/ci.yml/badge.svg)](https://github.com/mattrss/crosslearner/actions/workflows/ci.yml) [![Docs](https://github.com/mattrss/crosslearner/actions/workflows/docs.yml/badge.svg)](https://mattrss.github.io/crosslearner/)
 
-`crosslearner` implements the **Adversarial–Consistency X-learner (AC‑X)**, a variant of the X-learner that augments outcome models with an adversarial consistency term. The package is designed for reproducible research with numerous GAN tricks and benchmarking utilities.
+`crosslearner` implements the **Adversarial–Consistency X-learner (AC‑X)**. This variant of the X‑learner augments outcome models with an adversarial consistency term. The library is geared towards reproducible research and ships with many GAN tricks and benchmarking utilities.
 
 ## Background
 
@@ -31,13 +31,13 @@ Install from source:
 pip install .
 ```
 
-Run a toy training loop:
+To run a quick training loop:
 
 ```bash
 crosslearner-train
 ```
 
-The script trains an AC‑X model on a small synthetic dataset and prints the final $\sqrt{\mathrm{PEHE}}$ metric. Loss histories are optionally logged to TensorBoard for experiment tracking.
+This command trains an AC‑X model on a small synthetic dataset and prints the final $\sqrt{\mathrm{PEHE}}$ metric. Loss histories are optionally logged to TensorBoard for experiment tracking.
 
 ## Benchmarking
 
@@ -47,7 +47,7 @@ To benchmark across available datasets:
 crosslearner-benchmarks all --replicates 1 --epochs 1
 ```
 
-The command trains a small model on several built-in datasets and reports the
+This command trains a small model on several built-in datasets and reports the
 mean $\sqrt{\mathrm{PEHE}}$ for each task. In this environment the benchmark
 uses the ``toy``, ``complex``, ``iris``, ``ihdp`` and ``confounded`` datasets.
 

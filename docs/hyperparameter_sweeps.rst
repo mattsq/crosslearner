@@ -1,13 +1,12 @@
 Hyperparameter Sweeps with Optuna
 ================================
 
-`optuna <https://optuna.org/>`_ provides a convenient interface for tuning
-training parameters. The basic idea is to sample different configurations,
-train an AC-X model for each and keep the best one according to a validation
-metric.
+`optuna <https://optuna.org/>`_ is a lightweight library for automated
+hyperparameter search. It repeatedly samples configurations, trains an AC-X
+model and keeps the one with the best validation metric.
 
-Below is a minimal example that sweeps a few hyperparameters and optimises the
-validation :math:`\sqrt{\mathrm{PEHE}}`.
+The snippet below sweeps a few hyperparameters and minimises the validation
+:math:`\sqrt{\mathrm{PEHE}}`.
 
 .. code-block:: python
 
