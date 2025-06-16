@@ -230,6 +230,9 @@ def train_acx(
             if Yb.ndim == 1:
                 Yb = Yb.unsqueeze(-1)
             hb, m0, m1, tau = model(Xb)
+            hb_det = hb.detach()
+            m0_det = m0.detach()
+            m1_det = m1.detach()
 
             if warm_start > 0 and epoch < warm_start:
                 loss_y = mse(torch.where(Tb.bool(), m1, m0), Yb)
@@ -240,14 +243,14 @@ def train_acx(
 
             # ------------- discriminator update -------------------------
             with torch.no_grad():
-                Ycf = torch.where(Tb.bool(), m0, m1).detach()
+                Ycf = torch.where(Tb.bool(), m0_det, m1_det)
                 Yb_disc = Yb
                 if instance_noise:
                     noise = torch.randn_like(Ycf) * max(0.0, 0.2 * (1 - epoch / epochs))
                     Ycf = Ycf + noise
                     Yb_disc = Yb_disc + noise
-            real_logits = model.discriminator(hb, Yb_disc, Tb)
-            fake_logits = model.discriminator(hb, Ycf, Tb)
+            real_logits = model.discriminator(hb_det, Yb_disc, Tb)
+            fake_logits = model.discriminator(hb_det, Ycf, Tb)
             if use_wgan_gp:
                 wdist = fake_logits.mean() - real_logits.mean()
                 gp = 0.0
@@ -255,7 +258,7 @@ def train_acx(
                     eps = torch.rand_like(Yb_disc)
                     interpolates = eps * Yb_disc + (1 - eps) * Ycf
                     interpolates.requires_grad_(True)
-                    interp_logits = model.discriminator(hb, interpolates, Tb)
+                    interp_logits = model.discriminator(hb_det, interpolates, Tb)
                     grads = torch.autograd.grad(
                         outputs=interp_logits,
                         inputs=interpolates,
