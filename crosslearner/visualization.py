@@ -39,6 +39,11 @@ def scatter_tau(model: ACX, X: torch.Tensor, mu0: torch.Tensor, mu1: torch.Tenso
     Returns:
         Matplotlib figure with a scatter plot of true vs predicted ``tau``.
     """
+    device = next(model.parameters()).device
+    X = X.to(device)
+    mu0 = mu0.to(device)
+    mu1 = mu1.to(device)
+
     model.eval()
     with torch.no_grad():
         _, _, _, tau_hat = model(X)

@@ -1,4 +1,5 @@
 import torch
+import pytest
 
 from crosslearner.evaluation.metrics import pehe
 from crosslearner.evaluation.evaluate import evaluate, evaluate_ipw, evaluate_dr
@@ -53,3 +54,14 @@ def test_evaluate_dr_zero_error():
     propensity = torch.full((4, 1), 0.5)
     metric = evaluate_dr(model, X, T, Y, propensity)
     assert metric < 1e-6
+
+
+def test_evaluate_device_mismatch():
+    if not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+    model = ACX(p=2).cuda()
+    X = torch.zeros(2, 2)
+    mu0 = torch.zeros(2, 1)
+    mu1 = torch.ones(2, 1)
+    metric = evaluate(model, X, mu0, mu1)
+    assert isinstance(metric, float)
