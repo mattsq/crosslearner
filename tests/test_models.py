@@ -71,3 +71,14 @@ def test_xlearner_single_group():
     model.fit(X, T, Y)
     tau = model.predict_tau(X)
     assert tau.shape == (X.shape[0],)
+
+
+def test_drlearner_learns_effect():
+    rng = np.random.default_rng(0)
+    X = rng.standard_normal((100, 3))
+    T = rng.integers(0, 2, size=(100, 1))
+    Y = X[:, :1] + T  # constant treatment effect of 1
+    model = DRLearner(p=X.shape[1])
+    model.fit(X, T, Y)
+    tau = model.predict_tau(X)
+    assert abs(tau.mean().item() - 1.0) < 0.5
