@@ -172,6 +172,21 @@ def test_train_acx_custom_scheduler(monkeypatch):
     assert steps["count"] == 2
 
 
+def test_warm_start_logs_losses():
+    loader, _ = get_toy_dataloader(batch_size=8, n=32, p=4)
+    _, history = train_acx(
+        loader,
+        p=4,
+        device="cpu",
+        epochs=2,
+        warm_start=1,
+        return_history=True,
+        verbose=False,
+    )
+    assert history[0].loss_y > 0
+    assert history[0].loss_g > 0
+
+
 def test_train_acx_1d_targets():
     X = torch.randn(16, 4)
     T = torch.randint(0, 2, (16,))
