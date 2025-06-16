@@ -1,5 +1,6 @@
 import torch
 import matplotlib
+import pytest
 
 matplotlib.use("Agg")
 
@@ -32,6 +33,18 @@ def test_scatter_tau_returns_figure():
     X = torch.randn(4, 3)
     mu0 = torch.zeros(4, 1)
     mu1 = torch.ones(4, 1)
+    fig = scatter_tau(model, X, mu0, mu1)
+    assert fig is not None
+    matplotlib.pyplot.close(fig)
+
+
+def test_scatter_tau_device_mismatch():
+    if not torch.cuda.is_available():
+        pytest.skip("CUDA not available")
+    model = ACX(p=3).cuda()
+    X = torch.randn(2, 3)
+    mu0 = torch.zeros(2, 1)
+    mu1 = torch.ones(2, 1)
     fig = scatter_tau(model, X, mu0, mu1)
     assert fig is not None
     matplotlib.pyplot.close(fig)

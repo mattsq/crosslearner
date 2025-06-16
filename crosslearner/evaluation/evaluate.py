@@ -20,6 +20,11 @@ def evaluate(
         The square-root PEHE value.
     """
 
+    device = next(model.parameters()).device
+    X = X.to(device)
+    mu0 = mu0.to(device)
+    mu1 = mu1.to(device)
+
     model.eval()
     with torch.no_grad():
         _, _, _, tau_hat = model(X)
@@ -50,6 +55,12 @@ def evaluate_ipw(
     Returns:
         Estimated square-root PEHE using IPW pseudo-outcomes.
     """
+
+    device = next(model.parameters()).device
+    X = X.to(device)
+    T = T.to(device)
+    Y = Y.to(device)
+    propensity = propensity.to(device)
 
     model.eval()
     with torch.no_grad():
@@ -82,6 +93,12 @@ def evaluate_dr(
     Returns:
         Estimated square-root PEHE using the doubly robust pseudo-outcomes.
     """
+
+    device = next(model.parameters()).device
+    X = X.to(device)
+    T = T.to(device)
+    Y = Y.to(device)
+    propensity = propensity.to(device)
 
     model.eval()
     with torch.no_grad():
