@@ -415,13 +415,12 @@ def train_acx(
                 Yb = Yb.unsqueeze(-1)
             Tb = Tb.float()
             Yb = Yb.float()
-            hb, m0, m1, tau = model(Xb)
-            hb_det = hb.detach()
-            m0_det = m0.detach()
-            m1_det = m1.detach()
+            with torch.no_grad():
+                hb_det, m0_det, m1_det, _ = model(Xb)
 
             # warm start: train generator without adversary
             if warm_start > 0 and epoch < warm_start:
+                hb, m0, m1, _ = model(Xb)
                 loss_y = mse(torch.where(Tb.bool(), m1, m0), Yb)
                 opt_g.zero_grad()
                 loss_y.backward()
