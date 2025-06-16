@@ -60,6 +60,53 @@
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.evaluate.evaluate_dr">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.evaluate.</span></span><span class="sig-name descname"><span class="pre">evaluate_dr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#crosslearner.evaluation.evaluate.evaluate_dr" title="Link to this definition">¶</a></dt>
+<dd><p>Return doubly-robust tau risk for observational datasets.</p>
+<p>This estimator compares the model’s CATE predictions against a doubly robust
+pseudo-outcome constructed from outcome and propensity models. It reduces to
+PEHE when true counterfactual outcomes are available but can be applied when
+only observed outcomes are known.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – Trained <code class="docutils literal notranslate"><span class="pre">ACX</span></code> model.</p></li>
+<li><p><strong>X</strong> – Covariates <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p></li>
+<li><p><strong>T</strong> – Treatment indicators <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
+<li><p><strong>Y</strong> – Observed outcomes <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
+<li><p><strong>propensity</strong> – Propensity scores <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code> for treatment.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estimated square-root PEHE using the doubly robust pseudo-outcomes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.evaluate.evaluate_ipw">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.evaluate.</span></span><span class="sig-name descname"><span class="pre">evaluate_ipw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#crosslearner.evaluation.evaluate.evaluate_ipw" title="Link to this definition">¶</a></dt>
+<dd><p>Return IPW tau risk for a dataset without counterfactuals.</p>
+<p>The function computes an inverse-propensity weighted pseudo-outcome that is
+unbiased for the true treatment effect and measures the PEHE between the
+model predictions and this pseudo-outcome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – Trained <code class="docutils literal notranslate"><span class="pre">ACX</span></code> model.</p></li>
+<li><p><strong>X</strong> – Covariates <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p></li>
+<li><p><strong>T</strong> – Treatment indicators <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
+<li><p><strong>Y</strong> – Observed outcomes <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
+<li><p><strong>propensity</strong> – Propensity scores <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code> for receiving treatment.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estimated square-root PEHE using IPW pseudo-outcomes.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-crosslearner.evaluation.metrics">
 <span id="crosslearner-evaluation-metrics-module"></span><h2>crosslearner.evaluation.metrics module<a class="headerlink" href="#module-crosslearner.evaluation.metrics" title="Link to this heading">¶</a></h2>
@@ -111,6 +158,115 @@ against always choosing the best potential outcome.</p>
 <section id="module-crosslearner.evaluation">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-crosslearner.evaluation" title="Link to this heading">¶</a></h2>
 <p>Evaluation metrics and helpers.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.ate_error">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">ate_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#crosslearner.evaluation.ate_error" title="Link to this definition">¶</a></dt>
+<dd><p>Return estimation error for the Average Treatment Effect (ATE).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.att_error">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">att_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#crosslearner.evaluation.att_error" title="Link to this definition">¶</a></dt>
+<dd><p>Return estimation error for the ATT (Average Treatment effect on Treated).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.bootstrap_ci">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">bootstrap_ci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_boot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#crosslearner.evaluation.bootstrap_ci" title="Link to this definition">¶</a></dt>
+<dd><p>Return a bootstrap confidence interval for the mean of <code class="docutils literal notranslate"><span class="pre">values</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.evaluate">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#crosslearner.evaluation.evaluate" title="Link to this definition">¶</a></dt>
+<dd><p>Compute PEHE of a model on given data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – Trained <code class="docutils literal notranslate"><span class="pre">ACX</span></code> model.</p></li>
+<li><p><strong>X</strong> – Covariates <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p></li>
+<li><p><strong>mu0</strong> – Counterfactual outcome under control.</p></li>
+<li><p><strong>mu1</strong> – Counterfactual outcome under treatment.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The square-root PEHE value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.evaluate_dr">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">evaluate_dr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#crosslearner.evaluation.evaluate_dr" title="Link to this definition">¶</a></dt>
+<dd><p>Return doubly-robust tau risk for observational datasets.</p>
+<p>This estimator compares the model’s CATE predictions against a doubly robust
+pseudo-outcome constructed from outcome and propensity models. It reduces to
+PEHE when true counterfactual outcomes are available but can be applied when
+only observed outcomes are known.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – Trained <code class="docutils literal notranslate"><span class="pre">ACX</span></code> model.</p></li>
+<li><p><strong>X</strong> – Covariates <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p></li>
+<li><p><strong>T</strong> – Treatment indicators <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
+<li><p><strong>Y</strong> – Observed outcomes <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
+<li><p><strong>propensity</strong> – Propensity scores <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code> for treatment.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estimated square-root PEHE using the doubly robust pseudo-outcomes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.evaluate_ipw">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">evaluate_ipw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">propensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#crosslearner.evaluation.evaluate_ipw" title="Link to this definition">¶</a></dt>
+<dd><p>Return IPW tau risk for a dataset without counterfactuals.</p>
+<p>The function computes an inverse-propensity weighted pseudo-outcome that is
+unbiased for the true treatment effect and measures the PEHE between the
+model predictions and this pseudo-outcome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – Trained <code class="docutils literal notranslate"><span class="pre">ACX</span></code> model.</p></li>
+<li><p><strong>X</strong> – Covariates <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p></li>
+<li><p><strong>T</strong> – Treatment indicators <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
+<li><p><strong>Y</strong> – Observed outcomes <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
+<li><p><strong>propensity</strong> – Propensity scores <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code> for receiving treatment.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estimated square-root PEHE using IPW pseudo-outcomes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.pehe">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">pehe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#crosslearner.evaluation.pehe" title="Link to this definition">¶</a></dt>
+<dd><p>Return sqrt PEHE between predictions and ground truth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tau_hat</strong> – Predicted treatment effects.</p></li>
+<li><p><strong>tau_true</strong> – True treatment effects.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Square-root PEHE.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.policy_risk">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">policy_risk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#crosslearner.evaluation.policy_risk" title="Link to this definition">¶</a></dt>
+<dd><p>Return the policy risk of using <code class="docutils literal notranslate"><span class="pre">tau_hat</span></code> for treatment decisions.</p>
+<p>The function compares the outcome under the policy implied by <code class="docutils literal notranslate"><span class="pre">tau_hat</span></code>
+against always choosing the best potential outcome.</p>
+</dd></dl>
+
 </section>
 </section>
 
