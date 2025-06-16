@@ -1,14 +1,9 @@
-.. crosslearner documentation master file, created by
-   sphinx-quickstart on Sun Jun 15 00:09:14 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 crosslearner documentation
 ==========================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+This manual collects theoretical background, usage examples and the complete
+API reference for the AC‑X implementation. Follow the links below to learn about
+the training procedure, hyperparameter sweeps and available modules.
 
 
 .. toctree::
