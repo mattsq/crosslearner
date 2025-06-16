@@ -88,7 +88,7 @@ def train_acx(
         feature_matching: Add feature matching loss.
         label_smoothing: Use label smoothing for the adversary.
         instance_noise: Inject Gaussian noise into real and fake samples.
-        gradient_reversal: Replace adversary with gradient reversal.
+        gradient_reversal: Use gradient reversal instead of the adversary.
         ttur: Use Two-Time-Update-Rule with different learning rates.
         lambda_gp: Gradient penalty coefficient for WGAN-GP.
         eta_fm: Weight of the feature matching term.
@@ -247,48 +247,51 @@ def train_acx(
                 continue
 
             # ------------- discriminator update -------------------------
-            with torch.no_grad():
-                Ycf = torch.where(Tb.bool(), m0_det, m1_det)
-                Yb_disc = Yb
-                if instance_noise:
-                    noise = torch.randn_like(Ycf) * max(0.0, 0.2 * (1 - epoch / epochs))
-                    Ycf = Ycf + noise
-                    Yb_disc = Yb_disc + noise
-            real_logits = model.discriminator(hb_det, Yb_disc, Tb)
-            fake_logits = model.discriminator(hb_det, Ycf, Tb)
-            if use_wgan_gp:
-                wdist = fake_logits.mean() - real_logits.mean()
-                gp = 0.0
-                if lambda_gp > 0:
-                    eps = torch.rand_like(Yb_disc)
-                    interpolates = eps * Yb_disc + (1 - eps) * Ycf
-                    interpolates.requires_grad_(True)
-                    interp_logits = model.discriminator(hb_det, interpolates, Tb)
-                    grads = torch.autograd.grad(
-                        outputs=interp_logits,
-                        inputs=interpolates,
-                        grad_outputs=torch.ones_like(interp_logits),
-                        create_graph=True,
-                        retain_graph=True,
-                        only_inputs=True,
-                    )[0]
-                    gp = ((grads.norm(2, dim=1) - 1) ** 2).mean() * lambda_gp
-                loss_d = wdist + gp
-            else:
-                real_lbl = torch.ones_like(real_logits)
-                fake_lbl = torch.zeros_like(fake_logits)
-                if label_smoothing:
-                    real_lbl = real_lbl * 0.9
-                    fake_lbl = fake_lbl + 0.1
-                loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
-            if not freeze_d:
-                opt_d.zero_grad()
-                loss_d.backward()
-                opt_d.step()
-                if weight_clip is not None:
-                    for p_ in model.disc.parameters():
-                        p_.data.clamp_(-weight_clip, weight_clip)
-            loss_d_sum += loss_d.item()
+            if not gradient_reversal:
+                with torch.no_grad():
+                    Ycf = torch.where(Tb.bool(), m0_det, m1_det)
+                    Yb_disc = Yb
+                    if instance_noise:
+                        noise = torch.randn_like(Ycf) * max(
+                            0.0, 0.2 * (1 - epoch / epochs)
+                        )
+                        Ycf = Ycf + noise
+                        Yb_disc = Yb_disc + noise
+                real_logits = model.discriminator(hb_det, Yb_disc, Tb)
+                fake_logits = model.discriminator(hb_det, Ycf, Tb)
+                if use_wgan_gp:
+                    wdist = fake_logits.mean() - real_logits.mean()
+                    gp = 0.0
+                    if lambda_gp > 0:
+                        eps = torch.rand_like(Yb_disc)
+                        interpolates = eps * Yb_disc + (1 - eps) * Ycf
+                        interpolates.requires_grad_(True)
+                        interp_logits = model.discriminator(hb_det, interpolates, Tb)
+                        grads = torch.autograd.grad(
+                            outputs=interp_logits,
+                            inputs=interpolates,
+                            grad_outputs=torch.ones_like(interp_logits),
+                            create_graph=True,
+                            retain_graph=True,
+                            only_inputs=True,
+                        )[0]
+                        gp = ((grads.norm(2, dim=1) - 1) ** 2).mean() * lambda_gp
+                    loss_d = wdist + gp
+                else:
+                    real_lbl = torch.ones_like(real_logits)
+                    fake_lbl = torch.zeros_like(fake_logits)
+                    if label_smoothing:
+                        real_lbl = real_lbl * 0.9
+                        fake_lbl = fake_lbl + 0.1
+                    loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
+                if not freeze_d:
+                    opt_d.zero_grad()
+                    loss_d.backward()
+                    opt_d.step()
+                    if weight_clip is not None:
+                        for p_ in model.disc.parameters():
+                            p_.data.clamp_(-weight_clip, weight_clip)
+                loss_d_sum += loss_d.item()
 
             # ------------- generator update -----------------------------
             hb, m0, m1, tau = model(Xb)
@@ -296,14 +299,16 @@ def train_acx(
             loss_y = mse(m_obs, Yb)
             loss_cons = mse(tau, m1 - m0)
             Ycf = torch.where(Tb.bool(), m0, m1)
-            fake_logits = model.discriminator(hb, Ycf, Tb)
-            if use_wgan_gp:
-                loss_adv = -fake_logits.mean()
-            else:
-                real_lbl = torch.ones_like(fake_logits)
-                if label_smoothing:
-                    real_lbl = real_lbl * 0.9
-                loss_adv = bce(fake_logits, real_lbl)
+            loss_adv = torch.tensor(0.0, device=device)
+            if not gradient_reversal:
+                fake_logits = model.discriminator(hb, Ycf, Tb)
+                if use_wgan_gp:
+                    loss_adv = -fake_logits.mean()
+                else:
+                    real_lbl = torch.ones_like(fake_logits)
+                    if label_smoothing:
+                        real_lbl = real_lbl * 0.9
+                    loss_adv = bce(fake_logits, real_lbl)
 
             loss_g = alpha_out * loss_y + beta_cons * loss_cons + gamma_adv * loss_adv
 
