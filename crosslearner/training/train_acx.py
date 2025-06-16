@@ -231,6 +231,8 @@ def train_acx(
                 Tb = Tb.unsqueeze(-1)
             if Yb.ndim == 1:
                 Yb = Yb.unsqueeze(-1)
+            Tb = Tb.float()
+            Yb = Yb.float()
             hb, m0, m1, tau = model(Xb)
             hb_det = hb.detach()
             m0_det = m0.detach()
