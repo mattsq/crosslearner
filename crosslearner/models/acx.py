@@ -6,7 +6,14 @@ from typing import Callable, Iterable
 
 
 def _get_activation(act: str | Callable[[], nn.Module]) -> Callable[[], nn.Module]:
-    """Return an activation constructor from string or callable."""
+    """Return an activation constructor from string or callable.
+
+    The function accepts either a string identifier or a callable returning a
+    fresh ``nn.Module`` instance.  Passing an ``nn.Module`` instance is a common
+    mistake that leads to cryptic runtime errors, therefore it is explicitly
+    disallowed.
+    """
+
     if isinstance(act, str):
         name = act.lower()
         mapping = {
@@ -19,6 +26,16 @@ def _get_activation(act: str | Callable[[], nn.Module]) -> Callable[[], nn.Modul
         if name not in mapping:
             raise ValueError(f"Unknown activation '{act}'")
         return mapping[name]
+
+    if isinstance(act, nn.Module):
+        raise TypeError(
+            "activation must be a string or a callable returning a new module;"
+            f" got instance of {act.__class__.__name__}"
+        )
+
+    if not callable(act):
+        raise TypeError("activation must be a string or callable")
+
     return act
 
 
