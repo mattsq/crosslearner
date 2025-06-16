@@ -12,6 +12,7 @@ the training procedure, hyperparameter sweeps and available modules.
 
    theory
    hyperparameter_sweeps
+   usage_examples
 
 
 .. toctree::
