@@ -30,6 +30,9 @@ def train_acx(
     optimizer: str | Type[torch.optim.Optimizer] = "adam",
     opt_g_kwargs: dict | None = None,
     opt_d_kwargs: dict | None = None,
+    lr_scheduler: str | Type[torch.optim.lr_scheduler._LRScheduler] | None = None,
+    sched_g_kwargs: dict | None = None,
+    sched_d_kwargs: dict | None = None,
     grad_clip: float = 2.0,
     warm_start: int = 0,
     use_wgan_gp: bool = False,
@@ -73,6 +76,11 @@ def train_acx(
             optimiser.
         opt_d_kwargs: Optional dictionary with extra arguments for the
             discriminator optimiser.
+        lr_scheduler: Optional learning rate scheduler used for both optimisers.
+            May be a string (``"step"``, ``"multistep"``, ``"exponential``",
+            ``"cosine"`` or ``"plateau"``) or a scheduler class.
+        sched_g_kwargs: Extra keyword arguments for the generator scheduler.
+        sched_d_kwargs: Extra keyword arguments for the discriminator scheduler.
         grad_clip: Maximum gradient norm.
         warm_start: Number of epochs to train without adversary.
         use_wgan_gp: Use WGAN-GP loss for the discriminator.
@@ -168,6 +176,27 @@ def train_acx(
         **opt_g_kwargs,
     )
     opt_d = opt_cls(model.disc.parameters(), lr=lr_d, **opt_d_kwargs)
+
+    sched_g_kwargs = sched_g_kwargs or {}
+    sched_d_kwargs = sched_d_kwargs or {}
+    sched_g = sched_d = None
+    if lr_scheduler is not None:
+        if isinstance(lr_scheduler, str):
+            name = lr_scheduler.lower()
+            schedulers = {
+                "step": torch.optim.lr_scheduler.StepLR,
+                "multistep": torch.optim.lr_scheduler.MultiStepLR,
+                "exponential": torch.optim.lr_scheduler.ExponentialLR,
+                "cosine": torch.optim.lr_scheduler.CosineAnnealingLR,
+                "plateau": torch.optim.lr_scheduler.ReduceLROnPlateau,
+            }
+            if name not in schedulers:
+                raise ValueError(f"Unknown lr scheduler '{lr_scheduler}'")
+            sched_cls = schedulers[name]
+        else:
+            sched_cls = lr_scheduler
+        sched_g = sched_cls(opt_g, **sched_g_kwargs)
+        sched_d = sched_cls(opt_d, **sched_d_kwargs)
 
     bce = nn.BCEWithLogitsLoss()
     mse = nn.MSELoss()
@@ -312,6 +341,19 @@ def train_acx(
         if writer:
             writer.add_scalar("loss/discriminator", stats.loss_d, epoch)
             writer.add_scalar("loss/generator", stats.loss_g, epoch)
+
+        if sched_g:
+            if isinstance(sched_g, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                metric = stats.val_pehe if val_data is not None else stats.loss_g
+                sched_g.step(metric)
+            else:
+                sched_g.step()
+        if sched_d:
+            if isinstance(sched_d, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                metric = stats.val_pehe if val_data is not None else stats.loss_d
+                sched_d.step(metric)
+            else:
+                sched_d.step()
 
         if ttur:
             freeze_d = stats.loss_d < 0.3
