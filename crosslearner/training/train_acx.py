@@ -1,14 +1,104 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from typing import Optional, Tuple, Iterable, Callable, Type
+from typing import Callable, Iterable, Optional, Tuple, Type
 from torch.utils.tensorboard import SummaryWriter
+from sklearn.model_selection import StratifiedKFold
 
 from crosslearner.training.history import EpochStats, History
 from crosslearner.evaluation.evaluate import evaluate
 
 from crosslearner.models.acx import ACX
 from crosslearner.training.grl import grad_reverse
+
+
+def _make_regressor(inp: int, hid: Iterable[int] = (64, 64)) -> nn.Sequential:
+    layers: list[nn.Module] = []
+    d = inp
+    for h in hid:
+        layers += [nn.Linear(d, h), nn.ReLU()]
+        d = h
+    layers.append(nn.Linear(d, 1))
+    return nn.Sequential(*layers)
+
+
+def _make_propensity_net(inp: int, hid: Iterable[int] = (64, 64)) -> nn.Sequential:
+    net = _make_regressor(inp, hid)
+    net.add_module("sigmoid", nn.Sigmoid())
+    return net
+
+
+def _estimate_nuisances(
+    X: torch.Tensor,
+    T: torch.Tensor,
+    Y: torch.Tensor,
+    *,
+    folds: int = 5,
+    lr: float = 1e-3,
+    batch: int = 256,
+    device: str,
+    seed: int = 0,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Return cross-fitted nuisance predictions."""
+
+    bce = nn.BCELoss()
+    mse = nn.MSELoss()
+
+    torch.manual_seed(seed)
+    kfold = StratifiedKFold(folds, shuffle=True, random_state=seed)
+    e_hat = torch.empty_like(T, device=device)
+    mu0_hat = torch.empty_like(Y, device=device)
+    mu1_hat = torch.empty_like(Y, device=device)
+
+    for train_idx, val_idx in kfold.split(X, T.cpu()):
+        Xtr, Ttr, Ytr = X[train_idx], T[train_idx], Y[train_idx]
+        Xva = X[val_idx]
+
+        prop = _make_propensity_net(X.shape[1]).to(device)
+        opt_p = torch.optim.Adam(prop.parameters(), lr)
+        for _ in range(500):
+            pred = prop(Xtr)
+            loss = bce(pred, Ttr)
+            opt_p.zero_grad()
+            loss.backward()
+            opt_p.step()
+        e_hat[val_idx] = prop(Xva).detach()
+
+        mu0 = _make_regressor(X.shape[1]).to(device)
+        mu1 = _make_regressor(X.shape[1]).to(device)
+        opt_mu = torch.optim.Adam(list(mu0.parameters()) + list(mu1.parameters()), lr)
+        ds = torch.utils.data.TensorDataset(Xtr, Ttr, Ytr)
+        loader = torch.utils.data.DataLoader(ds, batch_size=batch, shuffle=True)
+        for _ in range(3):
+            for xb, tb, yb in loader:
+                pred0, pred1 = mu0(xb), mu1(xb)
+                loss = mse(pred0[tb == 0], yb[tb == 0]) + mse(
+                    pred1[tb == 1], yb[tb == 1]
+                )
+                opt_mu.zero_grad()
+                loss.backward()
+                opt_mu.step()
+        mu0_hat[val_idx] = mu0(Xva).detach()
+        mu1_hat[val_idx] = mu1(Xva).detach()
+
+    return e_hat, mu0_hat, mu1_hat
+
+
+@torch.no_grad()
+def _orthogonal_risk(
+    tau_hat: torch.Tensor,
+    y: torch.Tensor,
+    t: torch.Tensor,
+    e_hat: torch.Tensor,
+    mu0_hat: torch.Tensor,
+    mu1_hat: torch.Tensor,
+) -> float:
+    """Return the orthogonal risk."""
+
+    mse = nn.MSELoss()
+    y_resid = y - torch.where(t.bool(), mu1_hat, mu0_hat)
+    loss = mse(y_resid - (t - e_hat) * tau_hat, torch.zeros_like(y))
+    return loss.item()
 
 
 def train_acx(
@@ -49,6 +139,8 @@ def train_acx(
     tensorboard_logdir: Optional[str] = None,
     weight_clip: Optional[float] = None,
     val_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None,
+    risk_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None,
+    risk_folds: int = 5,
     patience: int = 0,
     verbose: bool = True,
     return_history: bool = False,
@@ -98,7 +190,10 @@ def train_acx(
         tensorboard_logdir: Directory for TensorBoard logs.
         weight_clip: Optional weight clipping for the discriminator.
         val_data: Tuple ``(X, mu0, mu1)`` for validation PEHE.
-        patience: Early-stopping patience based on validation PEHE.
+        risk_data: Optional tuple ``(X, T, Y)`` to early-stop on orthogonal risk
+            when counterfactuals are unavailable.
+        risk_folds: Number of cross-fitting folds for ``risk_data``.
+        patience: Early-stopping patience based on validation metric.
         verbose: Print progress every 5 epochs.
         return_history: If ``True`` also return training history.
 
@@ -222,6 +317,12 @@ def train_acx(
     epochs_no_improve = 0
     best_state = None
     freeze_d = False
+
+    if risk_data is not None:
+        Xr, Tr, Yr = (v.to(device) for v in risk_data)
+        e_hat_val, mu0_val, mu1_val = _estimate_nuisances(
+            Xr, Tr, Yr, folds=risk_folds, device=device
+        )
 
     for epoch in range(epochs):
         model.train()
@@ -362,14 +463,26 @@ def train_acx(
             stats.val_pehe = val_pehe
             if writer:
                 writer.add_scalar("val_pehe", val_pehe, epoch)
-            if val_pehe < best_val:
-                best_val = val_pehe
-                epochs_no_improve = 0
-                best_state = {
-                    k: v.detach().cpu().clone() for k, v in model.state_dict().items()
-                }
-            else:
-                epochs_no_improve += 1
+            metric = val_pehe
+        elif risk_data is not None:
+            Xr, Tr, Yr = (v.to(device) for v in risk_data)
+            with torch.no_grad():
+                _, _, _, tau_r = model(Xr)
+            metric = _orthogonal_risk(tau_r, Yr, Tr, e_hat_val, mu0_val, mu1_val)
+            stats.val_pehe = metric
+            if writer:
+                writer.add_scalar("val_risk", metric, epoch)
+        else:
+            metric = stats.loss_g
+
+        if metric < best_val:
+            best_val = metric
+            epochs_no_improve = 0
+            best_state = {
+                k: v.detach().cpu().clone() for k, v in model.state_dict().items()
+            }
+        else:
+            epochs_no_improve += 1
 
         history.append(stats)
         if writer:
@@ -378,14 +491,22 @@ def train_acx(
 
         if sched_g:
             if isinstance(sched_g, torch.optim.lr_scheduler.ReduceLROnPlateau):
-                metric = stats.val_pehe if val_data is not None else stats.loss_g
-                sched_g.step(metric)
+                metric_s = (
+                    stats.val_pehe
+                    if (val_data is not None or risk_data is not None)
+                    else stats.loss_g
+                )
+                sched_g.step(metric_s)
             else:
                 sched_g.step()
         if sched_d:
             if isinstance(sched_d, torch.optim.lr_scheduler.ReduceLROnPlateau):
-                metric = stats.val_pehe if val_data is not None else stats.loss_d
-                sched_d.step(metric)
+                metric_s = (
+                    stats.val_pehe
+                    if (val_data is not None or risk_data is not None)
+                    else stats.loss_d
+                )
+                sched_d.step(metric_s)
             else:
                 sched_d.step()
 
@@ -399,6 +520,8 @@ def train_acx(
             )
             if val_data is not None:
                 msg += f" val_pehe={stats.val_pehe:.3f}"
+            elif risk_data is not None:
+                msg += f" val_risk={stats.val_pehe:.3f}"
             print(msg)
 
         if patience > 0 and epochs_no_improve >= patience:
