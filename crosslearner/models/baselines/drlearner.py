@@ -34,8 +34,18 @@ class DRLearner:
         """
 
         T = T.ravel()
-        self.model_mu0.fit(X, Y.ravel())
-        self.model_mu1.fit(X, Y.ravel())
+        mask_t = T == 1
+        mask_c = ~mask_t
+
+        # fit outcome models on their respective subsets
+        if mask_c.any():
+            self.model_mu0.fit(X[mask_c], Y[mask_c].ravel())
+        else:
+            self.model_mu0.fit(X, Y.ravel())
+        if mask_t.any():
+            self.model_mu1.fit(X[mask_t], Y[mask_t].ravel())
+        else:
+            self.model_mu1.fit(X, Y.ravel())
         if np.unique(T).size < 2:
             e_hat = np.full_like(T, fill_value=T.mean(), dtype=float)
         else:
