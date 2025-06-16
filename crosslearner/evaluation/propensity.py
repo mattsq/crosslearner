@@ -23,7 +23,7 @@ def estimate_propensity(
     """
 
     X_np = X.detach().cpu().numpy()
-    T_np = T.view(-1).detach().cpu().numpy()
+    T_np = T.view(-1).detach().cpu().numpy().astype(int)
     kf = KFold(n_splits=folds, shuffle=True, random_state=seed)
     prop = torch.empty(X.shape[0], dtype=torch.float32)
     for train_idx, test_idx in kf.split(X_np):
