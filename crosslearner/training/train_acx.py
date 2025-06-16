@@ -8,7 +8,7 @@ from sklearn.model_selection import StratifiedKFold
 from crosslearner.training.history import EpochStats, History
 from crosslearner.evaluation.evaluate import evaluate
 
-from crosslearner.models.acx import ACX
+from crosslearner.models.acx import ACX, _get_activation
 from crosslearner.training.grl import grad_reverse
 
 
@@ -230,20 +230,7 @@ def train_acx(
             f"Input dimension mismatch: dataset has {feat_dim} features but p={p}"
         )
 
-    if isinstance(activation, str):
-        act_name = activation.lower()
-        activations = {
-            "relu": nn.ReLU,
-            "tanh": nn.Tanh,
-            "elu": nn.ELU,
-            "gelu": nn.GELU,
-            "leakyrelu": nn.LeakyReLU,
-        }
-        if act_name not in activations:
-            raise ValueError(f"Unknown activation '{activation}'")
-        activation_fn = activations[act_name]
-    else:
-        activation_fn = activation
+    activation_fn = _get_activation(activation)
 
     model = ACX(
         p,

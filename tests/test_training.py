@@ -250,6 +250,14 @@ def test_train_acx_invalid_activation():
         train_acx(loader, p=4, device="cpu", epochs=1, activation="bad", verbose=False)
 
 
+def test_train_acx_activation_instance():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    with pytest.raises(TypeError):
+        train_acx(
+            loader, p=4, device="cpu", epochs=1, activation=nn.ReLU(), verbose=False
+        )
+
+
 def test_train_acx_invalid_optimizer():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(ValueError):
