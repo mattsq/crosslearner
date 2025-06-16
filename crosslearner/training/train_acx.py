@@ -217,6 +217,7 @@ def train_acx(
     writer = SummaryWriter(tensorboard_logdir) if tensorboard_logdir else None
     best_val = float("inf")
     epochs_no_improve = 0
+    best_state = None
     freeze_d = False
 
     for epoch in range(epochs):
@@ -347,6 +348,9 @@ def train_acx(
             if val_pehe < best_val:
                 best_val = val_pehe
                 epochs_no_improve = 0
+                best_state = {
+                    k: v.detach().cpu().clone() for k, v in model.state_dict().items()
+                }
             else:
                 epochs_no_improve += 1
 
@@ -385,5 +389,7 @@ def train_acx(
 
     if writer:
         writer.close()
+    if best_state is not None:
+        model.load_state_dict(best_state)
     model.eval()
     return (model, history) if return_history else model
