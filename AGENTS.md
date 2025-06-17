@@ -48,6 +48,7 @@ behavior or add new features.
 - Document new functions and modules with docstrings.
 - Update `requirements.txt` and `pyproject.toml` if you add dependencies.
 - Use relative imports within the `crosslearner` package.
+- Summarize your changes in `CHANGELOG.md`.
 
 Following these guidelines will keep the codebase consistent and reduce friction
 when CI runs on your pull requests.
