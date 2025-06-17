@@ -5,6 +5,7 @@ from .training.train_acx import train_acx
 from .training.history import EpochStats, History
 from .evaluation.evaluate import evaluate
 from .experiments import ExperimentManager, cross_validate_acx
+from .utils import set_seed
 from .visualization import (
     plot_losses,
     scatter_tau,
@@ -29,4 +30,5 @@ __all__ = [
     "plot_residuals",
     "ExperimentManager",
     "cross_validate_acx",
+    "set_seed",
 ]

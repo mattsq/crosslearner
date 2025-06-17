@@ -90,14 +90,17 @@ class MLP(nn.Module):
             Tensor with shape ``(batch, out_dim)``.
         """
 
-        h = x
-        for block in self.blocks:
-            z = block(h)
-            if self.residual and z.shape == h.shape:
-                h = z + h
-            else:
-                h = z
-        return self.out(h)
+        if self.residual:
+            h = x
+            for block in self.blocks:
+                z = block(h)
+                if z.shape == h.shape:
+                    h = z + h
+                else:
+                    h = z
+            return self.out(h)
+        else:
+            return self.net(x)
 
 
 class ACX(nn.Module):
