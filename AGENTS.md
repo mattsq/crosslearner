@@ -36,7 +36,7 @@ style issues—fix them prior to committing.
 Run the test suite with:
 
 ```bash
-pytest -q
+pytest --cov=crosslearner --cov-report=xml -q
 ```
 
 All tests should pass locally. Please add or update tests whenever you modify
