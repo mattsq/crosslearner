@@ -43,6 +43,14 @@ model on the toy dataset and computes the final PEHE:
    pehe = evaluate(model, X, mu0, mu1)
    print("sqrt(PEHE)", pehe)
 
+Step-by-step notebook
+---------------------
+
+For a more interactive introduction open the ``examples/notebook.ipynb``
+Jupyter notebook which walks through data loading, model creation and
+evaluation step by step.  The notebook links back to :doc:`theory` for
+explanations of the underlying objective.
+
 Experiment manager
 ------------------
 
