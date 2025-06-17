@@ -43,6 +43,23 @@ def _orthogonal_risk(
     return loss.item()
 
 
+def _scheduler_step(
+    scheduler: Optional[
+        torch.optim.lr_scheduler._LRScheduler
+        | torch.optim.lr_scheduler.ReduceLROnPlateau
+    ],
+    metric: float,
+) -> None:
+    """Advance ``scheduler`` accounting for ``ReduceLROnPlateau``."""
+
+    if scheduler is None:
+        return
+    if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+        scheduler.step(metric)
+    else:
+        scheduler.step()
+
+
 def train_acx(
     loader: DataLoader,
     p: int,
@@ -507,26 +524,18 @@ def train_acx(
             writer.add_scalar("loss/discriminator", stats.loss_d, epoch)
             writer.add_scalar("loss/generator", stats.loss_g, epoch)
 
-        if sched_g:
-            if isinstance(sched_g, torch.optim.lr_scheduler.ReduceLROnPlateau):
-                metric_s = (
-                    stats.val_pehe
-                    if (val_data is not None or risk_data is not None)
-                    else stats.loss_g
-                )
-                sched_g.step(metric_s)
-            else:
-                sched_g.step()
-        if sched_d:
-            if isinstance(sched_d, torch.optim.lr_scheduler.ReduceLROnPlateau):
-                metric_s = (
-                    stats.val_pehe
-                    if (val_data is not None or risk_data is not None)
-                    else stats.loss_d
-                )
-                sched_d.step(metric_s)
-            else:
-                sched_d.step()
+        metric_g = (
+            stats.val_pehe
+            if (val_data is not None or risk_data is not None)
+            else stats.loss_g
+        )
+        _scheduler_step(sched_g, metric_g)
+        metric_d = (
+            stats.val_pehe
+            if (val_data is not None or risk_data is not None)
+            else stats.loss_d
+        )
+        _scheduler_step(sched_d, metric_d)
 
         if ttur:
             freeze_d = stats.loss_d < 0.3
