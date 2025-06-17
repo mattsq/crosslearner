@@ -10,5 +10,6 @@ crosslearner.benchmarks.run\_benchmarks
    
       load_external_iris
       main
+      main_baselines
       run
    

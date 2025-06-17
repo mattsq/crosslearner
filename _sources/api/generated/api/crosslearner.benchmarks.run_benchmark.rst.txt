@@ -1,6 +1,0 @@
-crosslearner.benchmarks.run\_benchmark
-======================================
-
-.. currentmodule:: crosslearner.benchmarks
-
-.. autofunction:: run_benchmark

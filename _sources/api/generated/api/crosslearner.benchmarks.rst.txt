@@ -10,5 +10,4 @@ crosslearner.benchmarks
    :toctree:
    :recursive:
 
-   run_benchmark
    run_benchmarks
