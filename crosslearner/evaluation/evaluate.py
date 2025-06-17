@@ -3,12 +3,13 @@
 import torch
 from crosslearner.evaluation.metrics import pehe
 from crosslearner.models.acx import ACX
+from crosslearner.utils import model_device
 
 
 def _model_outputs(model: ACX, X: torch.Tensor) -> tuple[torch.Tensor, ...]:
     """Run ``model`` on ``X`` placed on the correct device."""
 
-    device = next(model.parameters()).device
+    device = model_device(model)
     X = X.to(device)
     model.eval()
     with torch.no_grad():
@@ -36,7 +37,7 @@ def evaluate(
         The square-root PEHE value.
     """
 
-    device = next(model.parameters()).device
+    device = model_device(model)
     mu0 = mu0.to(device)
     mu1 = mu1.to(device)
 
@@ -69,7 +70,7 @@ def evaluate_ipw(
         Estimated square-root PEHE using IPW pseudo-outcomes.
     """
 
-    device = next(model.parameters()).device
+    device = model_device(model)
     T = T.to(device)
     Y = Y.to(device)
     propensity = propensity.to(device)
@@ -104,7 +105,7 @@ def evaluate_dr(
         Estimated square-root PEHE using the doubly robust pseudo-outcomes.
     """
 
-    device = next(model.parameters()).device
+    device = model_device(model)
     T = T.to(device)
     Y = Y.to(device)
     propensity = propensity.to(device)

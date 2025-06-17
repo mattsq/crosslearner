@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 
 from .models.acx import ACX
 from .training.history import History
+from .utils import model_device
 
 
 def plot_losses(history: History):
@@ -39,7 +40,7 @@ def scatter_tau(model: ACX, X: torch.Tensor, mu0: torch.Tensor, mu1: torch.Tenso
     Returns:
         Matplotlib figure with a scatter plot of true vs predicted ``tau``.
     """
-    device = next(model.parameters()).device
+    device = model_device(model)
     X = X.to(device)
     mu0 = mu0.to(device)
     mu1 = mu1.to(device)
