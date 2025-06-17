@@ -49,6 +49,9 @@ def _estimate_nuisances(
 
     torch.manual_seed(seed)
     kfold = StratifiedKFold(folds, shuffle=True, random_state=seed)
+    X = X.to(device)
+    T = T.to(device)
+    Y = Y.to(device)
     e_hat = torch.empty_like(T, device=device)
     mu0_hat = torch.empty_like(Y, device=device)
     mu1_hat = torch.empty_like(Y, device=device)
@@ -157,7 +160,18 @@ def _orthogonal_risk(
     mu0_hat: torch.Tensor,
     mu1_hat: torch.Tensor,
 ) -> float:
-    """Return the orthogonal risk."""
+    """Return the orthogonal risk with a device check."""
+
+    device = tau_hat.device
+    for name, tensor in {
+        "y": y,
+        "t": t,
+        "e_hat": e_hat,
+        "mu0_hat": mu0_hat,
+        "mu1_hat": mu1_hat,
+    }.items():
+        if tensor.device != device:
+            raise ValueError(f"{name} tensor is on {tensor.device}, expected {device}")
 
     mse = nn.MSELoss()
     y_resid = y - torch.where(t.bool(), mu1_hat, mu0_hat)
