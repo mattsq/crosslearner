@@ -5,7 +5,7 @@ import numpy as np
 import random
 
 from crosslearner.models.acx import MLP, _get_activation
-from crosslearner.utils import set_seed, default_device
+from crosslearner.utils import set_seed, default_device, apply_spectral_norm
 
 
 def test_get_activation_invalid_name():
@@ -55,3 +55,10 @@ def test_default_device_returns_valid_string():
     dev = default_device()
     assert dev in {"cuda", "cpu"}
     assert isinstance(dev, str)
+
+
+def test_apply_spectral_norm_applies_to_linear():
+    lin = nn.Linear(2, 2)
+    model = nn.Sequential(lin)
+    apply_spectral_norm(model)
+    assert hasattr(lin, "weight_u")

@@ -6,7 +6,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from crosslearner.training.history import EpochStats, History
 from crosslearner.evaluation.evaluate import evaluate
-from crosslearner.utils import set_seed, default_device
+from crosslearner.utils import set_seed, default_device, apply_spectral_norm
 from crosslearner.training.config import ModelConfig, TrainingConfig
 from crosslearner.training.nuisance import estimate_nuisances
 
@@ -255,9 +255,7 @@ def train_acx(
         residual=residual,
     ).to(device)
     if spectral_norm:
-        for m in model.modules():
-            if isinstance(m, nn.Linear):
-                nn.utils.spectral_norm(m)
+        apply_spectral_norm(model)
 
     if isinstance(optimizer, str):
         opt_name = optimizer.lower()
