@@ -1,11 +1,12 @@
 """Two-head T-learner baseline."""
 
 import numpy as np
-import torch
 from sklearn.neural_network import MLPRegressor
 
+from .base import BaseTauLearner
 
-class TLearner:
+
+class TLearner(BaseTauLearner):
     """Separate models for treated and control units."""
 
     def __init__(self, p: int) -> None:
@@ -45,16 +46,10 @@ class TLearner:
         else:
             self._fitted_c = False
 
-    def predict_tau(self, X: np.ndarray) -> torch.Tensor:
-        """Predict treatment effects.
+    def _predict_mu1(self, X: np.ndarray) -> np.ndarray:
+        """Predict outcomes under treatment."""
+        return self.model_t.predict(X) if self._fitted_t else np.zeros(len(X))
 
-        Args:
-            X: Covariate matrix ``(n, p)``.
-
-        Returns:
-            Predicted treatment effects.
-        """
-
-        mu1 = self.model_t.predict(X) if self._fitted_t else np.zeros(len(X))
-        mu0 = self.model_c.predict(X) if self._fitted_c else np.zeros(len(X))
-        return torch.tensor(mu1 - mu0, dtype=torch.float32)
+    def _predict_mu0(self, X: np.ndarray) -> np.ndarray:
+        """Predict outcomes under control."""
+        return self.model_c.predict(X) if self._fitted_c else np.zeros(len(X))
