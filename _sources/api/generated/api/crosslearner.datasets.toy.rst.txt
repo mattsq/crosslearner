@@ -1,0 +1,12 @@
+crosslearner.datasets.toy
+=========================
+
+.. automodule:: crosslearner.datasets.toy
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_toy_dataloader
+   

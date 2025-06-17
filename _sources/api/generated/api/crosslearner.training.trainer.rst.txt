@@ -1,0 +1,12 @@
+crosslearner.training.trainer
+=============================
+
+.. automodule:: crosslearner.training.trainer
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ACXTrainer
+   

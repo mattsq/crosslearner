@@ -1,0 +1,14 @@
+crosslearner.benchmarks
+=======================
+
+.. automodule:: crosslearner.benchmarks
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   run_benchmark
+   run_benchmarks

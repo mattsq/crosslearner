@@ -1,0 +1,16 @@
+crosslearner.evaluation.metrics
+===============================
+
+.. automodule:: crosslearner.evaluation.metrics
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      ate_error
+      att_error
+      bootstrap_ci
+      pehe
+      policy_risk
+   

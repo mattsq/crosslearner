@@ -1,0 +1,15 @@
+crosslearner.evaluation
+=======================
+
+.. automodule:: crosslearner.evaluation
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   evaluate
+   metrics
+   propensity

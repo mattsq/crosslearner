@@ -1,0 +1,12 @@
+crosslearner.datasets.synthetic
+===============================
+
+.. automodule:: crosslearner.datasets.synthetic
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_confounding_dataloader
+   

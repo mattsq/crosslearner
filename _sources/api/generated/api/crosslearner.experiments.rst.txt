@@ -1,0 +1,13 @@
+crosslearner.experiments
+========================
+
+.. automodule:: crosslearner.experiments
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   manager

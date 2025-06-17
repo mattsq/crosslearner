@@ -1,0 +1,6 @@
+﻿crosslearner.datasets.get\_acic2016\_dataloader
+===============================================
+
+.. currentmodule:: crosslearner.datasets
+
+.. autofunction:: get_acic2016_dataloader

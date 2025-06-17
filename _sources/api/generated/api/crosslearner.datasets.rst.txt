@@ -1,0 +1,34 @@
+crosslearner.datasets
+=====================
+
+.. automodule:: crosslearner.datasets
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_acic2016_dataloader
+      get_acic2018_dataloader
+      get_ihdp_dataloader
+      get_jobs_dataloader
+      get_lalonde_dataloader
+      get_twins_dataloader
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   acic2016
+   acic2018
+   aircraft
+   complex
+   ihdp
+   jobs
+   lalonde
+   synthetic
+   toy
+   twins
+   utils

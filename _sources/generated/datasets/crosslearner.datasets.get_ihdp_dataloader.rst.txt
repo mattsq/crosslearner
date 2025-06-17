@@ -1,0 +1,6 @@
+﻿crosslearner.datasets.get\_ihdp\_dataloader
+===========================================
+
+.. currentmodule:: crosslearner.datasets
+
+.. autofunction:: get_ihdp_dataloader

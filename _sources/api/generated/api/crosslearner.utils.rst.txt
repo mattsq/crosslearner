@@ -1,0 +1,15 @@
+crosslearner.utils
+==================
+
+.. automodule:: crosslearner.utils
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      apply_spectral_norm
+      default_device
+      model_device
+      set_seed
+   

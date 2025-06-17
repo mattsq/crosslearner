@@ -1,0 +1,6 @@
+﻿crosslearner.datasets.get\_lalonde\_dataloader
+==============================================
+
+.. currentmodule:: crosslearner.datasets
+
+.. autofunction:: get_lalonde_dataloader

@@ -1,0 +1,6 @@
+﻿crosslearner.datasets.get\_toy\_dataloader
+==========================================
+
+.. currentmodule:: crosslearner.datasets
+
+.. autofunction:: get_toy_dataloader

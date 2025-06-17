@@ -1,0 +1,21 @@
+﻿crosslearner
+============
+
+.. automodule:: crosslearner
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   benchmarks
+   configs
+   datasets
+   evaluation
+   experiments
+   models
+   training
+   utils
+   visualization

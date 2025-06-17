@@ -1,0 +1,12 @@
+crosslearner.evaluation.propensity
+==================================
+
+.. automodule:: crosslearner.evaluation.propensity
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      estimate_propensity
+   

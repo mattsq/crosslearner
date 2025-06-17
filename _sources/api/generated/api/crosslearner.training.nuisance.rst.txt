@@ -1,0 +1,12 @@
+crosslearner.training.nuisance
+==============================
+
+.. automodule:: crosslearner.training.nuisance
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      estimate_nuisances
+   

@@ -1,0 +1,6 @@
+﻿crosslearner.datasets.get\_aircraft\_dataloader
+===============================================
+
+.. currentmodule:: crosslearner.datasets
+
+.. autofunction:: get_aircraft_dataloader

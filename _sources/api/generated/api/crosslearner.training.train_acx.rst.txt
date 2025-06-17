@@ -1,0 +1,12 @@
+crosslearner.training.train\_acx
+================================
+
+.. automodule:: crosslearner.training.train_acx
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      train_acx
+   

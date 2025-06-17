@@ -1,0 +1,18 @@
+crosslearner.training.grl
+=========================
+
+.. automodule:: crosslearner.training.grl
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      grad_reverse
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      GradReverse
+   

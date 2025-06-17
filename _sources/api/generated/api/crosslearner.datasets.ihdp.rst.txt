@@ -1,0 +1,12 @@
+crosslearner.datasets.ihdp
+==========================
+
+.. automodule:: crosslearner.datasets.ihdp
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_ihdp_dataloader
+   

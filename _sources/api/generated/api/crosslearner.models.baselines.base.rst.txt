@@ -1,0 +1,18 @@
+crosslearner.models.baselines.base
+==================================
+
+.. automodule:: crosslearner.models.baselines.base
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      make_mlp_regressor
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BaseTauLearner
+   

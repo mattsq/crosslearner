@@ -1,0 +1,12 @@
+crosslearner.models.baselines.xlearner
+======================================
+
+.. automodule:: crosslearner.models.baselines.xlearner
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      XLearner
+   

@@ -1,0 +1,12 @@
+crosslearner.datasets.lalonde
+=============================
+
+.. automodule:: crosslearner.datasets.lalonde
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_lalonde_dataloader
+   

@@ -1,0 +1,6 @@
+crosslearner.evaluation.evaluate
+================================
+
+.. currentmodule:: crosslearner.evaluation
+
+.. autofunction:: evaluate

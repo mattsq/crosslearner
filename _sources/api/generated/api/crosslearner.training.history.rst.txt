@@ -1,0 +1,12 @@
+crosslearner.training.history
+=============================
+
+.. automodule:: crosslearner.training.history
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      EpochStats
+   

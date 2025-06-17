@@ -1,0 +1,18 @@
+crosslearner.training
+=====================
+
+.. automodule:: crosslearner.training
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   config
+   grl
+   history
+   nuisance
+   train_acx
+   trainer

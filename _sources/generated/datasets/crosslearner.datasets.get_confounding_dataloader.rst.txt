@@ -1,0 +1,6 @@
+﻿crosslearner.datasets.get\_confounding\_dataloader
+==================================================
+
+.. currentmodule:: crosslearner.datasets
+
+.. autofunction:: get_confounding_dataloader

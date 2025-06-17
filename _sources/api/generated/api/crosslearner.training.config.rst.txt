@@ -1,0 +1,13 @@
+crosslearner.training.config
+============================
+
+.. automodule:: crosslearner.training.config
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ModelConfig
+      TrainingConfig
+   

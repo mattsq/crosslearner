@@ -1,0 +1,12 @@
+crosslearner.datasets.aircraft
+==============================
+
+.. automodule:: crosslearner.datasets.aircraft
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_aircraft_dataloader
+   

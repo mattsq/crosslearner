@@ -1,0 +1,12 @@
+crosslearner.datasets.jobs
+==========================
+
+.. automodule:: crosslearner.datasets.jobs
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_jobs_dataloader
+   

@@ -1,0 +1,12 @@
+crosslearner.datasets.acic2016
+==============================
+
+.. automodule:: crosslearner.datasets.acic2016
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_acic2016_dataloader
+   

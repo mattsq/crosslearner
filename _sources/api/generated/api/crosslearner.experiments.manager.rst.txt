@@ -1,0 +1,18 @@
+crosslearner.experiments.manager
+================================
+
+.. automodule:: crosslearner.experiments.manager
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      cross_validate_acx
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ExperimentManager
+   

@@ -1,0 +1,12 @@
+crosslearner.datasets.acic2018
+==============================
+
+.. automodule:: crosslearner.datasets.acic2018
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_acic2018_dataloader
+   

@@ -1,0 +1,14 @@
+crosslearner.models
+===================
+
+.. automodule:: crosslearner.models
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   acx
+   baselines

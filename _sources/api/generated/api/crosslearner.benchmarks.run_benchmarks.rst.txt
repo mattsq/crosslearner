@@ -1,0 +1,14 @@
+crosslearner.benchmarks.run\_benchmarks
+=======================================
+
+.. automodule:: crosslearner.benchmarks.run_benchmarks
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      load_external_iris
+      main
+      run
+   

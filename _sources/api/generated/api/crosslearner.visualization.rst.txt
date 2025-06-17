@@ -1,0 +1,18 @@
+crosslearner.visualization
+==========================
+
+.. automodule:: crosslearner.visualization
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      plot_cate_calibration
+      plot_covariate_balance
+      plot_losses
+      plot_propensity_overlap
+      plot_residuals
+      plot_tau_distribution
+      scatter_tau
+   
