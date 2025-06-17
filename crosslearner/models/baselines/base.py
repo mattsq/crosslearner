@@ -4,6 +4,17 @@ from __future__ import annotations
 
 import numpy as np
 import torch
+from sklearn.neural_network import MLPRegressor
+
+
+def make_mlp_regressor(
+    *, hidden_layer_sizes: tuple[int, ...] = (64, 64), max_iter: int = 100, **kwargs
+) -> MLPRegressor:
+    """Return ``MLPRegressor`` with shared default parameters."""
+
+    return MLPRegressor(
+        hidden_layer_sizes=hidden_layer_sizes, max_iter=max_iter, **kwargs
+    )
 
 
 class BaseTauLearner:

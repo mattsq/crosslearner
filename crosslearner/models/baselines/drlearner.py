@@ -5,7 +5,8 @@ from __future__ import annotations
 import numpy as np
 import torch
 from sklearn.linear_model import LogisticRegression
-from sklearn.neural_network import MLPRegressor
+
+from .base import make_mlp_regressor
 
 
 class DRLearner:
@@ -18,9 +19,9 @@ class DRLearner:
             p: Number of covariates.
         """
 
-        self.model_mu0 = MLPRegressor(hidden_layer_sizes=(64, 64), max_iter=100)
-        self.model_mu1 = MLPRegressor(hidden_layer_sizes=(64, 64), max_iter=100)
-        self.model_tau = MLPRegressor(hidden_layer_sizes=(64, 64), max_iter=100)
+        self.model_mu0 = make_mlp_regressor()
+        self.model_mu1 = make_mlp_regressor()
+        self.model_tau = make_mlp_regressor()
         self.model_e = LogisticRegression(max_iter=100)
         self.p = p
 
