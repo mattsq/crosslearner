@@ -8,6 +8,7 @@ from sklearn.model_selection import StratifiedKFold
 from crosslearner.training.history import EpochStats, History
 from crosslearner.evaluation.evaluate import evaluate
 from crosslearner.utils import set_seed
+from crosslearner.training.config import ModelConfig, TrainingConfig
 
 from crosslearner.models.acx import ACX, _get_activation
 from crosslearner.training.grl import grad_reverse
@@ -209,6 +210,8 @@ def train_acx(
     loader: DataLoader,
     p: int,
     *,
+    model_config: ModelConfig | None = None,
+    training_config: TrainingConfig | None = None,
     rep_dim: int = 64,
     phi_layers: Iterable[int] | None = (128,),
     head_layers: Iterable[int] | None = (64,),
@@ -261,6 +264,12 @@ def train_acx(
     Args:
         loader: PyTorch dataloader yielding ``(X, T, Y)`` batches.
         p: Number of covariates.
+        model_config: Optional :class:`ModelConfig` with architecture
+            hyperparameters. When supplied, the corresponding keyword arguments
+            are ignored.
+        training_config: Optional :class:`TrainingConfig` holding optimisation
+            parameters. When given, the individual keyword arguments are
+            overridden.
         rep_dim: Dimensionality of the shared representation ``phi``.
         phi_layers: Hidden layers for the representation MLP.
         head_layers: Hidden layers for the outcome and effect heads.
@@ -323,6 +332,56 @@ def train_acx(
         function instead returns ``(model, history)`` where ``history`` is a
         list of :class:`EpochStats`.
     """
+    if model_config is not None:
+        if model_config.p != p:
+            raise ValueError("p does not match model_config.p")
+        rep_dim = model_config.rep_dim
+        phi_layers = model_config.phi_layers
+        head_layers = model_config.head_layers
+        disc_layers = model_config.disc_layers
+        activation = model_config.activation
+        phi_dropout = model_config.phi_dropout
+        head_dropout = model_config.head_dropout
+        disc_dropout = model_config.disc_dropout
+        residual = model_config.residual
+
+    if training_config is not None:
+        epochs = training_config.epochs
+        alpha_out = training_config.alpha_out
+        beta_cons = training_config.beta_cons
+        gamma_adv = training_config.gamma_adv
+        lr_g = training_config.lr_g
+        lr_d = training_config.lr_d
+        optimizer = training_config.optimizer
+        opt_g_kwargs = training_config.opt_g_kwargs
+        opt_d_kwargs = training_config.opt_d_kwargs
+        lr_scheduler = training_config.lr_scheduler
+        sched_g_kwargs = training_config.sched_g_kwargs
+        sched_d_kwargs = training_config.sched_d_kwargs
+        grad_clip = training_config.grad_clip
+        warm_start = training_config.warm_start
+        use_wgan_gp = training_config.use_wgan_gp
+        spectral_norm = training_config.spectral_norm
+        feature_matching = training_config.feature_matching
+        label_smoothing = training_config.label_smoothing
+        instance_noise = training_config.instance_noise
+        gradient_reversal = training_config.gradient_reversal
+        ttur = training_config.ttur
+        lambda_gp = training_config.lambda_gp
+        eta_fm = training_config.eta_fm
+        grl_weight = training_config.grl_weight
+        tensorboard_logdir = training_config.tensorboard_logdir
+        weight_clip = training_config.weight_clip
+        val_data = training_config.val_data
+        risk_data = training_config.risk_data
+        risk_folds = training_config.risk_folds
+        nuisance_propensity_epochs = training_config.nuisance_propensity_epochs
+        nuisance_outcome_epochs = training_config.nuisance_outcome_epochs
+        nuisance_early_stop = training_config.nuisance_early_stop
+        patience = training_config.patience
+        verbose = training_config.verbose
+        return_history = training_config.return_history
+
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     if seed is not None:
         set_seed(seed)
