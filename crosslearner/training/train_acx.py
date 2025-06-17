@@ -6,7 +6,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from crosslearner.training.history import EpochStats, History
 from crosslearner.evaluation.evaluate import evaluate
-from crosslearner.utils import set_seed
+from crosslearner.utils import set_seed, default_device
 from crosslearner.training.config import ModelConfig, TrainingConfig
 from crosslearner.training.nuisance import estimate_nuisances
 
@@ -219,7 +219,7 @@ def train_acx(
         verbose = training_config.verbose
         return_history = training_config.return_history
 
-    device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    device = device or default_device()
     if seed is not None:
         set_seed(seed)
 

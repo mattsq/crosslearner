@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from typing import Optional, Tuple
 
-import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from .config import ModelConfig, TrainingConfig
 from .history import History
 from ..models.acx import ACX, _get_activation
-from ..utils import set_seed
+from ..utils import set_seed, default_device
 
 
 class ACXTrainer:
@@ -25,7 +24,7 @@ class ACXTrainer:
     ) -> None:
         self.model_cfg = model_cfg
         self.train_cfg = train_cfg
-        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = device or default_device()
         if seed is not None:
             set_seed(seed)
         act_fn = _get_activation(model_cfg.activation)

@@ -9,7 +9,7 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import KFold
 
-from ..utils import set_seed
+from ..utils import set_seed, default_device
 
 from ..training.train_acx import train_acx
 from ..evaluation.evaluate import evaluate
@@ -47,7 +47,7 @@ def cross_validate_acx(
     Returns:
         Mean validation :math:`\sqrt{\mathrm{PEHE}}` across folds.
     """
-    device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    device = device or default_device()
     set_seed(seed)
     dataset: TensorDataset = loader.dataset  # type: ignore[arg-type]
     X, T, Y = dataset.tensors
