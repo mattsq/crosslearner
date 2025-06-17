@@ -1,9 +1,8 @@
 """Two-head T-learner baseline."""
 
 import numpy as np
-from sklearn.neural_network import MLPRegressor
 
-from .base import BaseTauLearner
+from .base import BaseTauLearner, make_mlp_regressor
 
 
 class TLearner(BaseTauLearner):
@@ -16,8 +15,8 @@ class TLearner(BaseTauLearner):
             p: Number of covariates.
         """
 
-        self.model_t = MLPRegressor(hidden_layer_sizes=(64, 64), max_iter=100)
-        self.model_c = MLPRegressor(hidden_layer_sizes=(64, 64), max_iter=100)
+        self.model_t = make_mlp_regressor()
+        self.model_c = make_mlp_regressor()
         self.p = p
         self._fitted_t = False
         self._fitted_c = False

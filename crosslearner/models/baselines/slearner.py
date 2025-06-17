@@ -1,9 +1,8 @@
 """Implementation of the single-head S-learner baseline."""
 
 import numpy as np
-from sklearn.neural_network import MLPRegressor
 
-from .base import BaseTauLearner
+from .base import BaseTauLearner, make_mlp_regressor
 
 
 class SLearner(BaseTauLearner):
@@ -16,7 +15,7 @@ class SLearner(BaseTauLearner):
             p: Number of covariates.
         """
 
-        self.model = MLPRegressor(hidden_layer_sizes=(64, 64), max_iter=100)
+        self.model = make_mlp_regressor()
         self.p = p
 
     def fit(self, X: np.ndarray, T: np.ndarray, Y: np.ndarray) -> None:

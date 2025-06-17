@@ -2,9 +2,9 @@
 
 import numpy as np
 import torch
-from sklearn.neural_network import MLPRegressor
 
 from .tlearner import TLearner
+from .base import make_mlp_regressor
 
 
 class XLearner:
@@ -18,8 +18,8 @@ class XLearner:
         """
 
         self.t = TLearner(p)
-        self.model_tau_t = MLPRegressor(hidden_layer_sizes=(64, 64), max_iter=100)
-        self.model_tau_c = MLPRegressor(hidden_layer_sizes=(64, 64), max_iter=100)
+        self.model_tau_t = make_mlp_regressor()
+        self.model_tau_c = make_mlp_regressor()
         self.p = p
         self._fitted_tau_t = False
         self._fitted_tau_c = False
