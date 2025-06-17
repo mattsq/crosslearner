@@ -208,179 +208,75 @@ def _orthogonal_risk(
 
 def train_acx(
     loader: DataLoader,
-    p: int,
+    model_cfg: ModelConfig,
+    train_cfg: TrainingConfig,
     *,
-    model_config: ModelConfig | None = None,
-    training_config: TrainingConfig | None = None,
-    rep_dim: int = 64,
-    phi_layers: Iterable[int] | None = (128,),
-    head_layers: Iterable[int] | None = (64,),
-    disc_layers: Iterable[int] | None = (64,),
-    activation: str | Callable[[], nn.Module] = "relu",
-    phi_dropout: float = 0.0,
-    head_dropout: float = 0.0,
-    disc_dropout: float = 0.0,
-    residual: bool = False,
     device: Optional[str] = None,
     seed: int | None = None,
-    epochs: int = 30,
-    alpha_out: float = 1.0,
-    beta_cons: float = 10.0,
-    gamma_adv: float = 1.0,
-    lr_g: float = 1e-3,
-    lr_d: float = 1e-3,
-    optimizer: str | Type[torch.optim.Optimizer] = "adam",
-    opt_g_kwargs: dict | None = None,
-    opt_d_kwargs: dict | None = None,
-    lr_scheduler: str | Type[torch.optim.lr_scheduler._LRScheduler] | None = None,
-    sched_g_kwargs: dict | None = None,
-    sched_d_kwargs: dict | None = None,
-    grad_clip: float = 2.0,
-    warm_start: int = 0,
-    use_wgan_gp: bool = False,
-    spectral_norm: bool = False,
-    feature_matching: bool = False,
-    label_smoothing: bool = False,
-    instance_noise: bool = False,
-    gradient_reversal: bool = False,
-    ttur: bool = False,
-    lambda_gp: float = 10.0,
-    eta_fm: float = 5.0,
-    grl_weight: float = 1.0,
-    tensorboard_logdir: Optional[str] = None,
-    weight_clip: Optional[float] = None,
-    val_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None,
-    risk_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None,
-    risk_folds: int = 5,
-    nuisance_propensity_epochs: int = 500,
-    nuisance_outcome_epochs: int = 3,
-    nuisance_early_stop: int = 10,
-    patience: int = 0,
-    verbose: bool = True,
-    return_history: bool = False,
 ) -> ACX | tuple[ACX, History]:
     """Train AC-X model with optional GAN tricks.
 
+    Parameters are read from ``model_cfg`` and ``train_cfg``. ``device`` and
+    ``seed`` override the defaults from the configuration.
+
     Args:
-        loader: PyTorch dataloader yielding ``(X, T, Y)`` batches.
-        p: Number of covariates.
-        model_config: Optional :class:`ModelConfig` with architecture
-            hyperparameters. When supplied, the corresponding keyword arguments
-            are ignored.
-        training_config: Optional :class:`TrainingConfig` holding optimisation
-            parameters. When given, the individual keyword arguments are
-            overridden.
-        rep_dim: Dimensionality of the shared representation ``phi``.
-        phi_layers: Hidden layers for the representation MLP.
-        head_layers: Hidden layers for the outcome and effect heads.
-        disc_layers: Hidden layers for the discriminator.
-        activation: Activation function used in all networks.
-        phi_dropout: Dropout probability for the representation MLP.
-        head_dropout: Dropout probability for the outcome and effect heads.
-        disc_dropout: Dropout probability for the discriminator.
-        residual: Enable residual connections in all MLPs.
-        device: Device string, defaults to CUDA if available.
+        loader: Dataloader yielding ``(X, T, Y)`` batches.
+        model_cfg: Architecture options for :class:`ACX`.
+        train_cfg: Hyperparameters controlling optimisation.
+        device: Optional device string, defaults to CUDA if available.
         seed: Optional random seed for reproducibility.
-        epochs: Number of training epochs.
-        alpha_out: Weight of the outcome loss.
-        beta_cons: Weight of the consistency term.
-        gamma_adv: Weight of the adversarial loss.
-        lr_g: Learning rate for generator parameters.
-        lr_d: Learning rate for the discriminator.
-        optimizer: Optimiser used for both generator and discriminator. Either
-            a string (``"adam"``, ``"sgd"``, ``"adamw"`` or ``"rmsprop"``) or an
-            optimiser class.
-        opt_g_kwargs: Optional dictionary with extra arguments for the generator
-            optimiser.
-        opt_d_kwargs: Optional dictionary with extra arguments for the
-            discriminator optimiser.
-        lr_scheduler: Optional learning rate scheduler used for both optimisers.
-            May be a string (``"step"``, ``"multistep"``, ``"exponential``",
-            ``"cosine"`` or ``"plateau"``) or a scheduler class.
-        sched_g_kwargs: Extra keyword arguments for the generator scheduler.
-        sched_d_kwargs: Extra keyword arguments for the discriminator scheduler.
-        grad_clip: Maximum gradient norm.
-        warm_start: Number of epochs to train without adversary.
-        use_wgan_gp: Use WGAN-GP loss for the discriminator.
-        spectral_norm: Apply spectral normalization to all linear layers.
-        feature_matching: Add feature matching loss.
-        label_smoothing: Use label smoothing for the adversary.
-        instance_noise: Inject Gaussian noise into real and fake samples.
-        gradient_reversal: Use gradient reversal instead of the adversary.
-        ttur: Enable the Two Time-Update Rule which freezes the discriminator
-            once its loss drops below a threshold, allowing the generator to
-            catch up.
-        lambda_gp: Coefficient of the gradient penalty term used in the
-            WGAN-GP objective. Only effective when ``use_wgan_gp`` is ``True``.
-        eta_fm: Weight of the feature matching term.
-        grl_weight: Scale of the gradient reversal layer.
-        tensorboard_logdir: Directory for TensorBoard logs.
-        weight_clip: Optional weight clipping for the discriminator.
-        val_data: Tuple ``(X, mu0, mu1)`` for validation PEHE.
-        risk_data: Optional tuple ``(X, T, Y)`` to early-stop on orthogonal risk
-            when counterfactuals are unavailable.
-        risk_folds: Number of cross-fitting folds for ``risk_data``.
-        nuisance_propensity_epochs: Training epochs for the propensity model.
-        nuisance_outcome_epochs: Training epochs for the outcome models.
-        nuisance_early_stop: Early-stopping patience for nuisance models.
-        patience: Early-stopping patience based on validation metric.
-        verbose: Print progress every 5 epochs.
-        return_history: If ``True`` also return training history.
 
     Returns:
         The trained ``ACX`` model. If ``return_history`` is ``True`` the
         function instead returns ``(model, history)`` where ``history`` is a
         list of :class:`EpochStats`.
     """
-    if model_config is not None:
-        if model_config.p != p:
-            raise ValueError("p does not match model_config.p")
-        rep_dim = model_config.rep_dim
-        phi_layers = model_config.phi_layers
-        head_layers = model_config.head_layers
-        disc_layers = model_config.disc_layers
-        activation = model_config.activation
-        phi_dropout = model_config.phi_dropout
-        head_dropout = model_config.head_dropout
-        disc_dropout = model_config.disc_dropout
-        residual = model_config.residual
+    p = model_cfg.p
+    rep_dim = model_cfg.rep_dim
+    phi_layers = model_cfg.phi_layers
+    head_layers = model_cfg.head_layers
+    disc_layers = model_cfg.disc_layers
+    activation = model_cfg.activation
+    phi_dropout = model_cfg.phi_dropout
+    head_dropout = model_cfg.head_dropout
+    disc_dropout = model_cfg.disc_dropout
+    residual = model_cfg.residual
 
-    if training_config is not None:
-        epochs = training_config.epochs
-        alpha_out = training_config.alpha_out
-        beta_cons = training_config.beta_cons
-        gamma_adv = training_config.gamma_adv
-        lr_g = training_config.lr_g
-        lr_d = training_config.lr_d
-        optimizer = training_config.optimizer
-        opt_g_kwargs = training_config.opt_g_kwargs
-        opt_d_kwargs = training_config.opt_d_kwargs
-        lr_scheduler = training_config.lr_scheduler
-        sched_g_kwargs = training_config.sched_g_kwargs
-        sched_d_kwargs = training_config.sched_d_kwargs
-        grad_clip = training_config.grad_clip
-        warm_start = training_config.warm_start
-        use_wgan_gp = training_config.use_wgan_gp
-        spectral_norm = training_config.spectral_norm
-        feature_matching = training_config.feature_matching
-        label_smoothing = training_config.label_smoothing
-        instance_noise = training_config.instance_noise
-        gradient_reversal = training_config.gradient_reversal
-        ttur = training_config.ttur
-        lambda_gp = training_config.lambda_gp
-        eta_fm = training_config.eta_fm
-        grl_weight = training_config.grl_weight
-        tensorboard_logdir = training_config.tensorboard_logdir
-        weight_clip = training_config.weight_clip
-        val_data = training_config.val_data
-        risk_data = training_config.risk_data
-        risk_folds = training_config.risk_folds
-        nuisance_propensity_epochs = training_config.nuisance_propensity_epochs
-        nuisance_outcome_epochs = training_config.nuisance_outcome_epochs
-        nuisance_early_stop = training_config.nuisance_early_stop
-        patience = training_config.patience
-        verbose = training_config.verbose
-        return_history = training_config.return_history
+    epochs = train_cfg.epochs
+    alpha_out = train_cfg.alpha_out
+    beta_cons = train_cfg.beta_cons
+    gamma_adv = train_cfg.gamma_adv
+    lr_g = train_cfg.lr_g
+    lr_d = train_cfg.lr_d
+    optimizer = train_cfg.optimizer
+    opt_g_kwargs = train_cfg.opt_g_kwargs
+    opt_d_kwargs = train_cfg.opt_d_kwargs
+    lr_scheduler = train_cfg.lr_scheduler
+    sched_g_kwargs = train_cfg.sched_g_kwargs
+    sched_d_kwargs = train_cfg.sched_d_kwargs
+    grad_clip = train_cfg.grad_clip
+    warm_start = train_cfg.warm_start
+    use_wgan_gp = train_cfg.use_wgan_gp
+    spectral_norm = train_cfg.spectral_norm
+    feature_matching = train_cfg.feature_matching
+    label_smoothing = train_cfg.label_smoothing
+    instance_noise = train_cfg.instance_noise
+    gradient_reversal = train_cfg.gradient_reversal
+    ttur = train_cfg.ttur
+    lambda_gp = train_cfg.lambda_gp
+    eta_fm = train_cfg.eta_fm
+    grl_weight = train_cfg.grl_weight
+    tensorboard_logdir = train_cfg.tensorboard_logdir
+    weight_clip = train_cfg.weight_clip
+    val_data = train_cfg.val_data
+    risk_data = train_cfg.risk_data
+    risk_folds = train_cfg.risk_folds
+    nuisance_propensity_epochs = train_cfg.nuisance_propensity_epochs
+    nuisance_outcome_epochs = train_cfg.nuisance_outcome_epochs
+    nuisance_early_stop = train_cfg.nuisance_early_stop
+    patience = train_cfg.patience
+    verbose = train_cfg.verbose
+    return_history = train_cfg.return_history
 
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     if seed is not None:
