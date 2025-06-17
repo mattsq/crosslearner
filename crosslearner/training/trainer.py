@@ -129,11 +129,8 @@ class ACXTrainer:
             sched_d = sched_cls(opt_d, **sched_d_kwargs)
         return sched_g, sched_d
 
-    def train(self, loader: DataLoader) -> ACX | Tuple[ACX, History]:
+    def _validate_inputs(self, loader: DataLoader) -> None:
         cfg = self.train_cfg
-        model = self.model
-        device = self.device
-
         if cfg.grad_clip is not None and cfg.grad_clip < 0:
             raise ValueError("grad_clip must be non-negative")
         if cfg.weight_clip is not None and cfg.weight_clip <= 0:
@@ -148,6 +145,176 @@ class ACXTrainer:
             raise ValueError(
                 f"Input dimension mismatch: dataset has {feat_dim} features but p={self.model_cfg.p}"
             )
+
+    def _estimate_risk(
+        self,
+    ) -> Optional[tuple[torch.Tensor, torch.Tensor, torch.Tensor]]:
+        cfg = self.train_cfg
+        device = self.device
+        if cfg.risk_data is None:
+            return None
+        Xr, Tr, Yr = (v.to(device) for v in cfg.risk_data)
+        return estimate_nuisances(
+            Xr,
+            Tr,
+            Yr,
+            folds=cfg.risk_folds,
+            device=device,
+            propensity_epochs=cfg.nuisance_propensity_epochs,
+            outcome_epochs=cfg.nuisance_outcome_epochs,
+            early_stop=cfg.nuisance_early_stop,
+        )
+
+    def _train_epoch(
+        self,
+        loader: DataLoader,
+        epoch: int,
+        opt_g: torch.optim.Optimizer,
+        opt_d: torch.optim.Optimizer,
+        bce: nn.Module,
+        mse: nn.Module,
+        *,
+        freeze_d: bool,
+    ) -> EpochStats:
+        cfg = self.train_cfg
+        model = self.model
+        device = self.device
+
+        loss_d_sum = loss_g_sum = 0.0
+        loss_y_sum = loss_cons_sum = loss_adv_sum = 0.0
+        batch_count = 0
+
+        for Xb, Tb, Yb in loader:
+            Xb, Tb, Yb = Xb.to(device), Tb.to(device), Yb.to(device)
+            if Tb.ndim == 1:
+                Tb = Tb.unsqueeze(-1)
+            if Yb.ndim == 1:
+                Yb = Yb.unsqueeze(-1)
+            Tb = Tb.float()
+            Yb = Yb.float()
+            with torch.no_grad():
+                hb_det, m0_det, m1_det, _ = model(Xb)
+
+            if cfg.warm_start > 0 and epoch < cfg.warm_start:
+                hb, m0, m1, _ = model(Xb)
+                loss_y = mse(torch.where(Tb.bool(), m1, m0), Yb)
+                opt_g.zero_grad()
+                loss_y.backward()
+                if cfg.grad_clip:
+                    nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
+                opt_g.step()
+                loss_y_sum += loss_y.item()
+                loss_g_sum += loss_y.item()
+                batch_count += 1
+                continue
+
+            if not cfg.gradient_reversal:
+                with torch.no_grad():
+                    Ycf = torch.where(Tb.bool(), m0_det, m1_det)
+                    Yb_disc = Yb
+                    if cfg.instance_noise:
+                        noise = torch.randn_like(Ycf) * max(
+                            0.0, 0.2 * (1 - epoch / cfg.epochs)
+                        )
+                        Ycf = Ycf + noise
+                        Yb_disc = Yb_disc + noise
+                real_logits = model.discriminator(hb_det, Yb_disc, Tb)
+                fake_logits = model.discriminator(hb_det, Ycf, Tb)
+                if cfg.use_wgan_gp:
+                    wdist = fake_logits.mean() - real_logits.mean()
+                    gp = 0.0
+                    if cfg.lambda_gp > 0:
+                        eps = torch.rand_like(Yb_disc)
+                        interpolates = eps * Yb_disc + (1 - eps) * Ycf
+                        interpolates.requires_grad_(True)
+                        interp_logits = model.discriminator(hb_det, interpolates, Tb)
+                        grads = torch.autograd.grad(
+                            outputs=interp_logits,
+                            inputs=interpolates,
+                            grad_outputs=torch.ones_like(interp_logits),
+                            create_graph=True,
+                            retain_graph=True,
+                            only_inputs=True,
+                        )[0]
+                        gp = ((grads.norm(2, dim=1) - 1) ** 2).mean() * cfg.lambda_gp
+                    loss_d = wdist + gp
+                else:
+                    real_lbl = torch.ones_like(real_logits)
+                    fake_lbl = torch.zeros_like(fake_logits)
+                    if cfg.label_smoothing:
+                        real_lbl = real_lbl * 0.9
+                        fake_lbl = fake_lbl + 0.1
+                    loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
+                if not freeze_d:
+                    opt_d.zero_grad()
+                    loss_d.backward()
+                    opt_d.step()
+                    if cfg.weight_clip is not None:
+                        for p_ in model.disc.parameters():
+                            p_.data.clamp_(-cfg.weight_clip, cfg.weight_clip)
+                loss_d_sum += loss_d.item()
+
+            hb, m0, m1, tau = model(Xb)
+            m_obs = torch.where(Tb.bool(), m1, m0)
+            loss_y = mse(m_obs, Yb)
+            loss_cons = mse(tau, m1 - m0)
+            Ycf = torch.where(Tb.bool(), m0, m1)
+            loss_adv = torch.tensor(0.0, device=device)
+            if not cfg.gradient_reversal:
+                fake_logits = model.discriminator(hb, Ycf, Tb)
+                if cfg.use_wgan_gp:
+                    loss_adv = -fake_logits.mean()
+                else:
+                    real_lbl = torch.ones_like(fake_logits)
+                    if cfg.label_smoothing:
+                        real_lbl = real_lbl * 0.9
+                    loss_adv = bce(fake_logits, real_lbl)
+
+            loss_g = (
+                cfg.alpha_out * loss_y
+                + cfg.beta_cons * loss_cons
+                + cfg.gamma_adv * loss_adv
+            )
+
+            if cfg.feature_matching:
+                with torch.no_grad():
+                    real_f = model.disc_features(hb.detach(), Yb, Tb)
+                fake_f = model.disc_features(hb, Ycf, Tb)
+                loss_fm = ((real_f.mean(0) - fake_f.mean(0)) ** 2).mean()
+                loss_g += cfg.eta_fm * loss_fm
+
+            if cfg.gradient_reversal:
+                t_logits = model.discriminator(grad_reverse(hb, cfg.grl_weight), Yb, Tb)
+                loss_grl = bce(t_logits, Tb)
+                loss_g += loss_grl
+
+            opt_g.zero_grad()
+            loss_g.backward()
+            if cfg.grad_clip:
+                nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
+            opt_g.step()
+            loss_g_sum += loss_g.item()
+            loss_y_sum += loss_y.item()
+            loss_cons_sum += loss_cons.item()
+            loss_adv_sum += loss_adv.item()
+            batch_count += 1
+
+        stats = EpochStats(
+            epoch=epoch,
+            loss_d=loss_d_sum / max(1, batch_count),
+            loss_g=loss_g_sum / max(1, batch_count),
+            loss_y=loss_y_sum / max(1, batch_count),
+            loss_cons=loss_cons_sum / max(1, batch_count),
+            loss_adv=loss_adv_sum / max(1, batch_count),
+        )
+        return stats
+
+    def train(self, loader: DataLoader) -> ACX | Tuple[ACX, History]:
+        cfg = self.train_cfg
+        model = self.model
+        device = self.device
+
+        self._validate_inputs(loader)
 
         opt_g, opt_d = self._make_optimizers()
         sched_g, sched_d = self._make_schedulers(opt_g, opt_d)
@@ -164,154 +331,19 @@ class ACXTrainer:
         best_state = None
         freeze_d = False
 
-        if cfg.risk_data is not None:
-            Xr, Tr, Yr = (v.to(device) for v in cfg.risk_data)
-            e_hat_val, mu0_val, mu1_val = estimate_nuisances(
-                Xr,
-                Tr,
-                Yr,
-                folds=cfg.risk_folds,
-                device=device,
-                propensity_epochs=cfg.nuisance_propensity_epochs,
-                outcome_epochs=cfg.nuisance_outcome_epochs,
-                early_stop=cfg.nuisance_early_stop,
-            )
+        risk_vals = self._estimate_risk()
+        if risk_vals is not None:
+            e_hat_val, mu0_val, mu1_val = risk_vals
 
         for epoch in range(cfg.epochs):
-            model.train()
-            loss_d_sum = loss_g_sum = 0.0
-            loss_y_sum = loss_cons_sum = loss_adv_sum = 0.0
-            batch_count = 0
-            for Xb, Tb, Yb in loader:
-                Xb, Tb, Yb = Xb.to(device), Tb.to(device), Yb.to(device)
-                if Tb.ndim == 1:
-                    Tb = Tb.unsqueeze(-1)
-                if Yb.ndim == 1:
-                    Yb = Yb.unsqueeze(-1)
-                Tb = Tb.float()
-                Yb = Yb.float()
-                with torch.no_grad():
-                    hb_det, m0_det, m1_det, _ = model(Xb)
-
-                if cfg.warm_start > 0 and epoch < cfg.warm_start:
-                    hb, m0, m1, _ = model(Xb)
-                    loss_y = mse(torch.where(Tb.bool(), m1, m0), Yb)
-                    opt_g.zero_grad()
-                    loss_y.backward()
-                    if cfg.grad_clip:
-                        nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
-                    opt_g.step()
-                    loss_y_sum += loss_y.item()
-                    loss_g_sum += loss_y.item()
-                    batch_count += 1
-                    continue
-
-                if not cfg.gradient_reversal:
-                    with torch.no_grad():
-                        Ycf = torch.where(Tb.bool(), m0_det, m1_det)
-                        Yb_disc = Yb
-                        if cfg.instance_noise:
-                            noise = torch.randn_like(Ycf) * max(
-                                0.0, 0.2 * (1 - epoch / cfg.epochs)
-                            )
-                            Ycf = Ycf + noise
-                            Yb_disc = Yb_disc + noise
-                    real_logits = model.discriminator(hb_det, Yb_disc, Tb)
-                    fake_logits = model.discriminator(hb_det, Ycf, Tb)
-                    if cfg.use_wgan_gp:
-                        wdist = fake_logits.mean() - real_logits.mean()
-                        gp = 0.0
-                        if cfg.lambda_gp > 0:
-                            eps = torch.rand_like(Yb_disc)
-                            interpolates = eps * Yb_disc + (1 - eps) * Ycf
-                            interpolates.requires_grad_(True)
-                            interp_logits = model.discriminator(
-                                hb_det, interpolates, Tb
-                            )
-                            grads = torch.autograd.grad(
-                                outputs=interp_logits,
-                                inputs=interpolates,
-                                grad_outputs=torch.ones_like(interp_logits),
-                                create_graph=True,
-                                retain_graph=True,
-                                only_inputs=True,
-                            )[0]
-                            gp = (
-                                (grads.norm(2, dim=1) - 1) ** 2
-                            ).mean() * cfg.lambda_gp
-                        loss_d = wdist + gp
-                    else:
-                        real_lbl = torch.ones_like(real_logits)
-                        fake_lbl = torch.zeros_like(fake_logits)
-                        if cfg.label_smoothing:
-                            real_lbl = real_lbl * 0.9
-                            fake_lbl = fake_lbl + 0.1
-                        loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
-                    if not freeze_d:
-                        opt_d.zero_grad()
-                        loss_d.backward()
-                        opt_d.step()
-                        if cfg.weight_clip is not None:
-                            for p_ in model.disc.parameters():
-                                p_.data.clamp_(-cfg.weight_clip, cfg.weight_clip)
-                    loss_d_sum += loss_d.item()
-
-                hb, m0, m1, tau = model(Xb)
-                m_obs = torch.where(Tb.bool(), m1, m0)
-                loss_y = mse(m_obs, Yb)
-                loss_cons = mse(tau, m1 - m0)
-                Ycf = torch.where(Tb.bool(), m0, m1)
-                loss_adv = torch.tensor(0.0, device=device)
-                if not cfg.gradient_reversal:
-                    fake_logits = model.discriminator(hb, Ycf, Tb)
-                    if cfg.use_wgan_gp:
-                        loss_adv = -fake_logits.mean()
-                    else:
-                        real_lbl = torch.ones_like(fake_logits)
-                        if cfg.label_smoothing:
-                            real_lbl = real_lbl * 0.9
-                        loss_adv = bce(fake_logits, real_lbl)
-
-                loss_g = (
-                    cfg.alpha_out * loss_y
-                    + cfg.beta_cons * loss_cons
-                    + cfg.gamma_adv * loss_adv
-                )
-
-                if cfg.feature_matching:
-                    with torch.no_grad():
-                        real_f = model.disc_features(hb.detach(), Yb, Tb)
-                    fake_f = model.disc_features(hb, Ycf, Tb)
-                    loss_fm = ((real_f.mean(0) - fake_f.mean(0)) ** 2).mean()
-                    loss_g += cfg.eta_fm * loss_fm
-
-                if cfg.gradient_reversal:
-                    t_logits = model.discriminator(
-                        grad_reverse(hb, cfg.grl_weight),
-                        Yb,
-                        Tb,
-                    )
-                    loss_grl = bce(t_logits, Tb)
-                    loss_g += loss_grl
-
-                opt_g.zero_grad()
-                loss_g.backward()
-                if cfg.grad_clip:
-                    nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
-                opt_g.step()
-                loss_g_sum += loss_g.item()
-                loss_y_sum += loss_y.item()
-                loss_cons_sum += loss_cons.item()
-                loss_adv_sum += loss_adv.item()
-                batch_count += 1
-
-            stats = EpochStats(
-                epoch=epoch,
-                loss_d=loss_d_sum / max(1, batch_count),
-                loss_g=loss_g_sum / max(1, batch_count),
-                loss_y=loss_y_sum / max(1, batch_count),
-                loss_cons=loss_cons_sum / max(1, batch_count),
-                loss_adv=loss_adv_sum / max(1, batch_count),
+            stats = self._train_epoch(
+                loader,
+                epoch,
+                opt_g,
+                opt_d,
+                bce,
+                mse,
+                freeze_d=freeze_d,
             )
             if cfg.val_data is not None:
                 Xv, mu0v, mu1v = (v.to(device) for v in cfg.val_data)
