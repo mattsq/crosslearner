@@ -51,6 +51,13 @@ This command trains a small model on several built-in datasets and reports the
 mean $\sqrt{\mathrm{PEHE}}$ for each task. In this environment the benchmark
 uses the ``toy``, ``complex``, ``iris``, ``ihdp`` and ``confounded`` datasets.
 
+To additionally compare with baseline models, pass ``--baselines`` (or use the
+``crosslearner-benchmark`` alias):
+
+```bash
+crosslearner-benchmarks toy --baselines --replicates 1 --epochs 1
+```
+
 Sample output with ``--replicates 1 --epochs 1``:
 
 | dataset    | $\sqrt{\mathrm{PEHE}}$ |
