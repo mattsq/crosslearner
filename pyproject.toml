@@ -24,6 +24,7 @@ dependencies = [
 [project.scripts]
 crosslearner-train = "crosslearner.__main__:main"
 crosslearner-benchmarks = "crosslearner.benchmarks.run_benchmarks:main"
+crosslearner-benchmark = "crosslearner.benchmarks.run_benchmark:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
