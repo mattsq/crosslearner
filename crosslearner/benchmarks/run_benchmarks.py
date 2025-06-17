@@ -18,7 +18,7 @@ from crosslearner.datasets.twins import get_twins_dataloader
 from crosslearner.datasets.lalonde import get_lalonde_dataloader
 from crosslearner.datasets.synthetic import get_confounding_dataloader
 from crosslearner.training.train_acx import train_acx
-from crosslearner.evaluation.evaluate import evaluate
+from crosslearner.evaluation.evaluate import evaluate, evaluate_dr
 from crosslearner.evaluation.metrics import (
     policy_risk,
     ate_error,
@@ -120,18 +120,33 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, f
         model = train_acx(loader, p=p, epochs=epochs, seed=seed)
         X = torch.cat([b[0] for b in loader])
         T_all = torch.cat([b[1] for b in loader])
-        mu0_all = mu0
-        mu1_all = mu1
+        Y_all = torch.cat([b[2] for b in loader])
         with torch.no_grad():
             _, _, _, tau_hat = model(X)
-        tau_true = mu1_all - mu0_all
-        pehe_val = evaluate(model, X, mu0_all, mu1_all)
-        risk_val = policy_risk(tau_hat, mu0_all, mu1_all)
-        ate_err = ate_error(tau_hat, mu0_all, mu1_all)
-        att_err = att_error(tau_hat, mu0_all, mu1_all, T_all)
-        ci_low, ci_high = bootstrap_ci(tau_hat)
-        coverage = float(ci_low <= tau_true.mean().item() <= ci_high)
-        print(f"replicate {seed}: sqrt PEHE {pehe_val:.3f} policy risk {risk_val:.3f}")
+
+        if mu0 is None or mu1 is None:
+            # Off-policy dataset without counterfactual outcomes
+            propensity = torch.full_like(T_all, T_all.float().mean().item())
+            pehe_val = evaluate_dr(model, X, T_all, Y_all, propensity)
+            risk_val = float("nan")
+            ate_err = float("nan")
+            att_err = float("nan")
+            coverage = float("nan")
+            print(f"replicate {seed}: DR sqrt PEHE {pehe_val:.3f}")
+        else:
+            mu0_all = mu0
+            mu1_all = mu1
+            tau_true = mu1_all - mu0_all
+            pehe_val = evaluate(model, X, mu0_all, mu1_all)
+            risk_val = policy_risk(tau_hat, mu0_all, mu1_all)
+            ate_err = ate_error(tau_hat, mu0_all, mu1_all)
+            att_err = att_error(tau_hat, mu0_all, mu1_all, T_all)
+            ci_low, ci_high = bootstrap_ci(tau_hat)
+            coverage = float(ci_low <= tau_true.mean().item() <= ci_high)
+            print(
+                f"replicate {seed}: sqrt PEHE {pehe_val:.3f} policy risk {risk_val:.3f}"
+            )
+
         results.append(
             {
                 "pehe": pehe_val,
