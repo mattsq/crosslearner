@@ -30,3 +30,9 @@ crosslearner-benchmark = "crosslearner.benchmarks.run_benchmark:main"
 where = ["."]
 include = ["crosslearner*", "train"]
 
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "furo",
+]
+
