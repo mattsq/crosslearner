@@ -57,10 +57,8 @@ def bootstrap_ci(
     """Return a bootstrap confidence interval for the mean of ``values``."""
 
     arr = values.view(-1).cpu().numpy()
-    means = []
-    for _ in range(n_boot):
-        sample = np.random.choice(arr, size=arr.size, replace=True)
-        means.append(sample.mean())
+    samples = np.random.choice(arr, size=(n_boot, arr.size), replace=True)
+    means = samples.mean(axis=1)
     alpha = 1.0 - level
     lower = float(np.percentile(means, 100 * alpha / 2))
     upper = float(np.percentile(means, 100 * (1 - alpha / 2)))
