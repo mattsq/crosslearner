@@ -31,3 +31,12 @@ def apply_spectral_norm(model: nn.Module) -> None:
     for module in model.modules():
         if isinstance(module, nn.Linear):
             nn.utils.spectral_norm(module)
+
+
+def model_device(model: nn.Module) -> torch.device:
+    """Return the device of ``model`` or CPU if no parameters."""
+
+    try:
+        return next(model.parameters()).device
+    except StopIteration:  # pragma: no cover - unlikely
+        return torch.device("cpu")
