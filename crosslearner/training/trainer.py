@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 from typing import Optional, Tuple
-
-import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from .config import ModelConfig, TrainingConfig
 from .history import History
 from ..models.acx import ACX, _get_activation
-from ..utils import set_seed, default_device
+from ..utils import set_seed, default_device, apply_spectral_norm
 
 
 class ACXTrainer:
@@ -41,9 +39,7 @@ class ACXTrainer:
             residual=model_cfg.residual,
         ).to(self.device)
         if train_cfg.spectral_norm:
-            for m in self.model.modules():
-                if isinstance(m, nn.Linear):
-                    nn.utils.spectral_norm(m)
+            apply_spectral_norm(self.model)
 
     def train(self, loader: DataLoader) -> ACX | Tuple[ACX, History]:
         from .train_acx import train_acx
