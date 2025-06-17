@@ -3,7 +3,7 @@
 import argparse
 import os
 import urllib.request
-from typing import Dict, List
+from typing import Callable, Dict, List
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
@@ -65,6 +65,28 @@ def load_external_iris(batch_size: int = 256, seed: int | None = None):
     return loader, (mu0, mu1)
 
 
+# Mapping from dataset name to loader callable accepting a seed and returning
+# ``(loader, (mu0, mu1))``. Datasets without a notion of seed simply ignore the
+# argument.
+DATASET_LOADERS: Dict[
+    str, Callable[[int], tuple[DataLoader, tuple[torch.Tensor, torch.Tensor]]]
+] = {
+    "toy": lambda seed: get_toy_dataloader(),
+    "complex": lambda seed: get_complex_dataloader(seed=seed),
+    "iris": lambda seed: load_external_iris(seed=seed),
+    "ihdp": lambda seed: get_ihdp_dataloader(seed=seed),
+    "jobs": lambda seed: get_jobs_dataloader(),
+    "acic2016": lambda seed: get_acic2016_dataloader(seed=seed),
+    "acic2018": lambda seed: get_acic2018_dataloader(seed=seed),
+    "twins": lambda seed: get_twins_dataloader(),
+    "lalonde": lambda seed: get_lalonde_dataloader(),
+    "confounded": lambda seed: get_confounding_dataloader(seed=seed),
+}
+
+# Subset of datasets used when requesting ``"all"``.
+ALL_DATASETS = ["toy", "complex", "iris", "ihdp", "confounded"]
+
+
 def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, float]]:
     """Run the benchmark for the given dataset and return metrics per replicate.
 
@@ -76,61 +98,25 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, f
     Returns:
         List of dictionaries with metrics for each replicate.
     """
+    if dataset == "all":
+        summary = []
+        for ds in ALL_DATASETS:
+            res = run(ds, replicates, epochs)
+            mean_pehe_ds = sum(r["pehe"] for r in res) / len(res)
+            summary.append((ds, mean_pehe_ds))
+        for ds, val in summary:
+            print(f"{ds}\t{val:.3f}")
+        return [v for _, v in summary]
+
+    if dataset not in DATASET_LOADERS:
+        raise ValueError(f"Unknown dataset {dataset}")
+
     results: List[Dict[str, float]] = []
+    loader_fn = DATASET_LOADERS[dataset]
     for seed in range(replicates):
         set_seed(seed)
-        if dataset == "toy":
-            loader, (mu0, mu1) = get_toy_dataloader()
-            p = 10
-        elif dataset == "complex":
-            loader, (mu0, mu1) = get_complex_dataloader(seed=seed)
-            p = 20
-        elif dataset == "iris":
-            loader, (mu0, mu1) = load_external_iris(seed=seed)
-            p = 4
-        elif dataset == "ihdp":
-            loader, (mu0, mu1) = get_ihdp_dataloader(seed=seed)
-            p = loader.dataset.tensors[0].size(1)
-        elif dataset == "jobs":
-            loader, (mu0, mu1) = get_jobs_dataloader()
-            p = loader.dataset.tensors[0].size(1)
-        elif dataset == "acic2016":
-            loader, (mu0, mu1) = get_acic2016_dataloader(seed=seed)
-            p = loader.dataset.tensors[0].size(1)
-        elif dataset == "acic2018":
-            loader, (mu0, mu1) = get_acic2018_dataloader(seed=seed)
-            p = loader.dataset.tensors[0].size(1)
-        elif dataset == "twins":
-            loader, (mu0, mu1) = get_twins_dataloader()
-            p = loader.dataset.tensors[0].size(1)
-        elif dataset == "lalonde":
-            loader, (mu0, mu1) = get_lalonde_dataloader()
-            p = loader.dataset.tensors[0].size(1)
-        elif dataset == "confounded":
-            loader, (mu0, mu1) = get_confounding_dataloader(seed=seed)
-            p = loader.dataset.tensors[0].size(1)
-        elif dataset == "all":
-            all_ds = [
-                "toy",
-                "complex",
-                "iris",
-                "ihdp",
-                # jobs and ACIC datasets require network downloads or lack
-                # counterfactuals. Twins and Lalonde also fail due to missing
-                # resources. The default "all" run therefore uses only
-                # fully self-contained synthetic datasets.
-                "confounded",
-            ]
-            summary = []
-            for ds in all_ds:
-                res = run(ds, replicates, epochs)
-                mean_pehe_ds = sum(r["pehe"] for r in res) / len(res)
-                summary.append((ds, mean_pehe_ds))
-            for ds, val in summary:
-                print(f"{ds}\t{val:.3f}")
-            return [v for _, v in summary]
-        else:
-            raise ValueError(f"Unknown dataset {dataset}")
+        loader, (mu0, mu1) = loader_fn(seed)
+        p = loader.dataset.tensors[0].size(1)
         model = train_acx(loader, p=p, epochs=epochs, seed=seed)
         X = torch.cat([b[0] for b in loader])
         T_all = torch.cat([b[1] for b in loader])
