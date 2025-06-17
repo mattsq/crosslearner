@@ -45,4 +45,9 @@ jobs:
             git push
           fi
       - name: Run tests
-        run: pytest -q
+        run: pytest --cov=crosslearner --cov-report=xml -q
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.python-version }}-${{ matrix.cuda }}
+          path: coverage.xml
