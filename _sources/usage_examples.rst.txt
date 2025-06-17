@@ -32,8 +32,10 @@ model on the toy dataset and computes the final PEHE:
    from crosslearner.datasets.toy import get_toy_dataloader
    from crosslearner.training.train_acx import train_acx
    from crosslearner.evaluation import evaluate
+   from crosslearner import set_seed
    import torch
 
+   set_seed(0)
    loader, (mu0, mu1) = get_toy_dataloader()
    X = torch.cat([b[0] for b in loader])
 
