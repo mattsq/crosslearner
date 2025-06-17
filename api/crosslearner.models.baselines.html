@@ -44,7 +44,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="crosslearner.models.baselines.slearner.SLearner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crosslearner.models.baselines.slearner.</span></span><span class="sig-name descname"><span class="pre">SLearner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#crosslearner.models.baselines.slearner.SLearner" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#crosslearner.models.baselines.BaseTauLearner" title="crosslearner.models.baselines.base.BaseTauLearner"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTauLearner</span></code></a></p>
 <p>Single-head learner that fits one model for both treatments.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="crosslearner.models.baselines.slearner.SLearner.fit">
@@ -61,20 +61,6 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="crosslearner.models.baselines.slearner.SLearner.predict_tau">
-<span class="sig-name descname"><span class="pre">predict_tau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#crosslearner.models.baselines.slearner.SLearner.predict_tau" title="Link to this definition">¶</a></dt>
-<dd><p>Predict treatment effects for new samples.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>X</strong> – Covariate matrix with shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Predicted treatment effects as a tensor of shape <code class="docutils literal notranslate"><span class="pre">(n,)</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
@@ -84,7 +70,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="crosslearner.models.baselines.tlearner.TLearner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crosslearner.models.baselines.tlearner.</span></span><span class="sig-name descname"><span class="pre">TLearner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#crosslearner.models.baselines.tlearner.TLearner" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#crosslearner.models.baselines.BaseTauLearner" title="crosslearner.models.baselines.base.BaseTauLearner"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTauLearner</span></code></a></p>
 <p>Separate models for treated and control units.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="crosslearner.models.baselines.tlearner.TLearner.fit">
@@ -97,20 +83,6 @@
 <li><p><strong>T</strong> – Treatment indicators <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
 <li><p><strong>Y</strong> – Outcomes <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="crosslearner.models.baselines.tlearner.TLearner.predict_tau">
-<span class="sig-name descname"><span class="pre">predict_tau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#crosslearner.models.baselines.tlearner.TLearner.predict_tau" title="Link to this definition">¶</a></dt>
-<dd><p>Predict treatment effects.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>X</strong> – Covariate matrix <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Predicted treatment effects.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -162,6 +134,32 @@
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-crosslearner.models.baselines" title="Link to this heading">¶</a></h2>
 <p>Baseline meta-learners.</p>
 <dl class="py class">
+<dt class="sig sig-object py" id="crosslearner.models.baselines.BaseTauLearner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crosslearner.models.baselines.</span></span><span class="sig-name descname"><span class="pre">BaseTauLearner</span></span><a class="headerlink" href="#crosslearner.models.baselines.BaseTauLearner" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for learners that estimate treatment effects.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="crosslearner.models.baselines.BaseTauLearner.p">
+<span class="sig-name descname"><span class="pre">p</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#crosslearner.models.baselines.BaseTauLearner.p" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="crosslearner.models.baselines.BaseTauLearner.predict_tau">
+<span class="sig-name descname"><span class="pre">predict_tau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#crosslearner.models.baselines.BaseTauLearner.predict_tau" title="Link to this definition">¶</a></dt>
+<dd><p>Predict treatment effects as <code class="docutils literal notranslate"><span class="pre">mu1</span> <span class="pre">-</span> <span class="pre">mu0</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>X</strong> – Covariate matrix <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tensor of predicted treatment effects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="crosslearner.models.baselines.DRLearner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crosslearner.models.baselines.</span></span><span class="sig-name descname"><span class="pre">DRLearner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#crosslearner.models.baselines.DRLearner" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -200,7 +198,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="crosslearner.models.baselines.SLearner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crosslearner.models.baselines.</span></span><span class="sig-name descname"><span class="pre">SLearner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#crosslearner.models.baselines.SLearner" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#crosslearner.models.baselines.BaseTauLearner" title="crosslearner.models.baselines.base.BaseTauLearner"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTauLearner</span></code></a></p>
 <p>Single-head learner that fits one model for both treatments.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="crosslearner.models.baselines.SLearner.fit">
@@ -217,26 +215,12 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="crosslearner.models.baselines.SLearner.predict_tau">
-<span class="sig-name descname"><span class="pre">predict_tau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#crosslearner.models.baselines.SLearner.predict_tau" title="Link to this definition">¶</a></dt>
-<dd><p>Predict treatment effects for new samples.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>X</strong> – Covariate matrix with shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Predicted treatment effects as a tensor of shape <code class="docutils literal notranslate"><span class="pre">(n,)</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="crosslearner.models.baselines.TLearner">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crosslearner.models.baselines.</span></span><span class="sig-name descname"><span class="pre">TLearner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#crosslearner.models.baselines.TLearner" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#crosslearner.models.baselines.BaseTauLearner" title="crosslearner.models.baselines.base.BaseTauLearner"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseTauLearner</span></code></a></p>
 <p>Separate models for treated and control units.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="crosslearner.models.baselines.TLearner.fit">
@@ -249,20 +233,6 @@
 <li><p><strong>T</strong> – Treatment indicators <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
 <li><p><strong>Y</strong> – Outcomes <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">1)</span></code>.</p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="crosslearner.models.baselines.TLearner.predict_tau">
-<span class="sig-name descname"><span class="pre">predict_tau</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#crosslearner.models.baselines.TLearner.predict_tau" title="Link to this definition">¶</a></dt>
-<dd><p>Predict treatment effects.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>X</strong> – Covariate matrix <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Predicted treatment effects.</p>
 </dd>
 </dl>
 </dd></dl>
