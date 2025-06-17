@@ -8,3 +8,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Initial creation of CHANGELOG
 - Added `crosslearner-benchmark` command comparing ACX to baseline models
+- Unified benchmark CLI and baseline comparison

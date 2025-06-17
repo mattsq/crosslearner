@@ -1,10 +1,11 @@
-"""Command-line entry points for running benchmarks."""
+"""Benchmarking utilities and command-line entry points."""
 
 import argparse
 import os
 import urllib.request
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Type
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -18,12 +19,14 @@ from crosslearner.datasets.twins import get_twins_dataloader
 from crosslearner.datasets.lalonde import get_lalonde_dataloader
 from crosslearner.datasets.synthetic import get_confounding_dataloader
 from crosslearner.training.train_acx import train_acx
+from crosslearner.models.baselines import DRLearner, SLearner, TLearner, XLearner
 from crosslearner.evaluation.evaluate import evaluate, evaluate_dr
 from crosslearner.evaluation.metrics import (
     policy_risk,
     ate_error,
     att_error,
     bootstrap_ci,
+    pehe,
 )
 from crosslearner.utils import set_seed
 
@@ -86,8 +89,72 @@ DATASET_LOADERS: Dict[
 # Subset of datasets used when requesting ``"all"``.
 ALL_DATASETS = ["toy", "complex", "iris", "ihdp", "confounded"]
 
+BASELINES: Dict[str, Type] = {
+    "slearner": SLearner,
+    "tlearner": TLearner,
+    "xlearner": XLearner,
+    "drlearner": DRLearner,
+}
 
-def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, float]]:
+
+def _baseline_mus(model, X: np.ndarray) -> tuple[torch.Tensor, torch.Tensor]:
+    if isinstance(model, SLearner) or isinstance(model, TLearner):
+        mu1 = model._predict_mu1(X)
+        mu0 = model._predict_mu0(X)
+    elif isinstance(model, XLearner):
+        mu1 = model.t.model_t.predict(X)
+        mu0 = model.t.model_c.predict(X)
+    elif isinstance(model, DRLearner):
+        mu0 = model.model_mu0.predict(X)
+        mu1 = model.model_mu1.predict(X)
+    else:  # pragma: no cover - unexpected
+        raise TypeError("Unknown model type")
+    mu0_t = torch.tensor(mu0, dtype=torch.float32).reshape(-1, 1)
+    mu1_t = torch.tensor(mu1, dtype=torch.float32).reshape(-1, 1)
+    return mu0_t, mu1_t
+
+
+def _evaluate_baseline(
+    model, X: np.ndarray, T: torch.Tensor, Y: torch.Tensor, mu0, mu1
+) -> Dict[str, float]:
+    tau_hat = model.predict_tau(X)
+    if mu0 is None or mu1 is None:
+        mu0_hat, mu1_hat = _baseline_mus(model, X)
+        propensity = torch.full_like(T, T.float().mean().item())
+        mu_hat = T * mu1_hat + (1.0 - T) * mu0_hat
+        pseudo = (
+            (T - propensity) / (propensity * (1.0 - propensity)) * (Y - mu_hat)
+            + mu1_hat
+            - mu0_hat
+        )
+        pehe_val = pehe(tau_hat, pseudo)
+        risk_val = float("nan")
+        ate_err = float("nan")
+        att_err = float("nan")
+        coverage = float("nan")
+    else:
+        tau_true = mu1 - mu0
+        pehe_val = pehe(tau_hat, tau_true)
+        risk_val = policy_risk(tau_hat, mu0, mu1)
+        ate_err = ate_error(tau_hat, mu0, mu1)
+        att_err = att_error(tau_hat, mu0, mu1, T)
+        ci_low, ci_high = bootstrap_ci(tau_hat)
+        coverage = float(ci_low <= tau_true.mean().item() <= ci_high)
+    return {
+        "pehe": pehe_val,
+        "policy_risk": risk_val,
+        "ate_error": ate_err,
+        "att_error": att_err,
+        "coverage": coverage,
+    }
+
+
+def run(
+    dataset: str,
+    replicates: int = 3,
+    epochs: int = 30,
+    baselines: bool = False,
+) -> List[Dict[str, float]] | List[Dict[str, Dict[str, float]]]:
     """Run the benchmark for the given dataset and return metrics per replicate.
 
     Args:
@@ -101,8 +168,11 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, f
     if dataset == "all":
         summary = []
         for ds in ALL_DATASETS:
-            res = run(ds, replicates, epochs)
-            mean_pehe_ds = sum(r["pehe"] for r in res) / len(res)
+            res = run(ds, replicates, epochs, baselines)
+            if baselines:
+                mean_pehe_ds = sum(r["acx"]["pehe"] for r in res) / len(res)
+            else:
+                mean_pehe_ds = sum(r["pehe"] for r in res) / len(res)
             summary.append((ds, mean_pehe_ds))
         for ds, val in summary:
             print(f"{ds}\t{val:.3f}")
@@ -111,7 +181,10 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, f
     if dataset not in DATASET_LOADERS:
         raise ValueError(f"Unknown dataset {dataset}")
 
-    results: List[Dict[str, float]] = []
+    if baselines:
+        results: List[Dict[str, Dict[str, float]]] = []
+    else:
+        results: List[Dict[str, float]] = []
     loader_fn = DATASET_LOADERS[dataset]
     for seed in range(replicates):
         set_seed(seed)
@@ -147,29 +220,54 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, f
                 f"replicate {seed}: sqrt PEHE {pehe_val:.3f} policy risk {risk_val:.3f}"
             )
 
-        results.append(
-            {
-                "pehe": pehe_val,
-                "policy_risk": risk_val,
-                "ate_error": ate_err,
-                "att_error": att_err,
-                "coverage": coverage,
-            }
+        metrics = {
+            "pehe": pehe_val,
+            "policy_risk": risk_val,
+            "ate_error": ate_err,
+            "att_error": att_err,
+            "coverage": coverage,
+        }
+
+        if baselines:
+            entry: Dict[str, Dict[str, float]] = {"acx": metrics}
+            X_np = X.numpy()
+            T_np = T_all.numpy()
+            Y_np = Y_all.numpy()
+            for name, cls in BASELINES.items():
+                baseline = cls(p=p)
+                baseline.fit(X_np, T_np, Y_np)
+                b_metrics = _evaluate_baseline(baseline, X_np, T_all, Y_all, mu0, mu1)
+                print(f"replicate {seed}: {name} sqrt PEHE {b_metrics['pehe']:.3f}")
+                entry[name] = b_metrics
+            results.append(entry)
+        else:
+            results.append(metrics)
+    if baselines:
+        models = results[0].keys()
+        for m in models:
+            mean_pehe = sum(r[m]["pehe"] for r in results) / len(results)
+            mean_risk = sum(r[m]["policy_risk"] for r in results) / len(results)
+            mean_ate_err = sum(r[m]["ate_error"] for r in results) / len(results)
+            mean_att_err = sum(r[m]["att_error"] for r in results) / len(results)
+            coverage_rate = sum(r[m]["coverage"] for r in results) / len(results)
+            print(
+                f"{m}: mean sqrt PEHE {mean_pehe:.3f} policy risk {mean_risk:.3f} ATE err {mean_ate_err:.3f} ATT err {mean_att_err:.3f} coverage {coverage_rate:.2f}"
+            )
+    else:
+        mean_pehe = sum(r["pehe"] for r in results) / len(results)
+        mean_risk = sum(r["policy_risk"] for r in results) / len(results)
+        mean_ate_err = sum(r["ate_error"] for r in results) / len(results)
+        mean_att_err = sum(r["att_error"] for r in results) / len(results)
+        coverage_rate = sum(r["coverage"] for r in results) / len(results)
+        print(
+            "mean sqrt PEHE: {:.3f} policy risk: {:.3f} ATE err: {:.3f} ATT err: {:.3f} coverage: {:.2f}".format(
+                mean_pehe, mean_risk, mean_ate_err, mean_att_err, coverage_rate
+            )
         )
-    mean_pehe = sum(r["pehe"] for r in results) / len(results)
-    mean_risk = sum(r["policy_risk"] for r in results) / len(results)
-    mean_ate_err = sum(r["ate_error"] for r in results) / len(results)
-    mean_att_err = sum(r["att_error"] for r in results) / len(results)
-    coverage_rate = sum(r["coverage"] for r in results) / len(results)
-    print(
-        "mean sqrt PEHE: {:.3f} policy risk: {:.3f} ATE err: {:.3f} ATT err: {:.3f} coverage: {:.2f}".format(
-            mean_pehe, mean_risk, mean_ate_err, mean_att_err, coverage_rate
-        )
-    )
     return results
 
 
-def main():
+def _parse_args(include_baselines_flag: bool) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run CrossLearner benchmarks")
     parser.add_argument(
         "dataset",
@@ -188,10 +286,29 @@ def main():
         ],
         help="dataset to benchmark or 'all'",
     )
+
     parser.add_argument("--replicates", type=int, default=3)
     parser.add_argument("--epochs", type=int, default=30)
-    args = parser.parse_args()
-    run(args.dataset, args.replicates, args.epochs)
+    if include_baselines_flag:
+        parser.add_argument(
+            "--baselines", action="store_true", help="compare against baseline models"
+        )
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = _parse_args(True)
+    run(
+        args.dataset,
+        args.replicates,
+        args.epochs,
+        baselines=getattr(args, "baselines", False),
+    )
+
+
+def main_baselines() -> None:
+    args = _parse_args(False)
+    run(args.dataset, args.replicates, args.epochs, baselines=True)
 
 
 if __name__ == "__main__":
