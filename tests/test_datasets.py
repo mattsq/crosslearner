@@ -50,7 +50,7 @@ def test_get_ihdp_dataloader_shapes(monkeypatch, tmp_path):
         np.savez(path, **data)
         return path
 
-    monkeypatch.setattr(ihdp, "_download", fake_download)
+    monkeypatch.setattr(ihdp, "download_if_missing", fake_download)
     loader, (mu0, mu1) = ihdp.get_ihdp_dataloader(
         seed=0, batch_size=2, data_dir=tmp_path
     )
@@ -82,7 +82,9 @@ def _fake_npz(path: str, n: int = 4, p: int = 3, replicate: bool = True) -> None
 
 def test_get_acic2016_dataloader(monkeypatch, tmp_path):
     monkeypatch.setattr(
-        acic2016, "_download", lambda url, path: _fake_npz(path, replicate=True) or path
+        acic2016,
+        "download_if_missing",
+        lambda url, path: _fake_npz(path, replicate=True) or path,
     )
     loader, (mu0, mu1) = acic2016.get_acic2016_dataloader(
         batch_size=2, data_dir=tmp_path
@@ -97,7 +99,9 @@ def test_get_acic2016_dataloader(monkeypatch, tmp_path):
 
 def test_get_acic2018_dataloader(monkeypatch, tmp_path):
     monkeypatch.setattr(
-        acic2018, "_download", lambda url, path: _fake_npz(path, replicate=True) or path
+        acic2018,
+        "download_if_missing",
+        lambda url, path: _fake_npz(path, replicate=True) or path,
     )
     loader, (mu0, mu1) = acic2018.get_acic2018_dataloader(
         batch_size=2, data_dir=tmp_path
@@ -112,7 +116,9 @@ def test_get_acic2018_dataloader(monkeypatch, tmp_path):
 
 def test_get_twins_dataloader(monkeypatch, tmp_path):
     monkeypatch.setattr(
-        twins, "_download", lambda url, path: _fake_npz(path, replicate=False) or path
+        twins,
+        "download_if_missing",
+        lambda url, path: _fake_npz(path, replicate=False) or path,
     )
     loader, (mu0, mu1) = twins.get_twins_dataloader(batch_size=2, data_dir=tmp_path)
     X, T, Y = next(iter(loader))
