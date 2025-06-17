@@ -49,7 +49,9 @@ class ACXTrainer:
     def train(self, loader: DataLoader) -> ACX | Tuple[ACX, History]:
         from .train_acx import train_acx
 
-        args = dict(vars(self.model_cfg))
-        args.update(vars(self.train_cfg))
-        args.update({"device": self.device})
-        return train_acx(loader, **args)
+        return train_acx(
+            loader,
+            self.model_cfg,
+            self.train_cfg,
+            device=self.device,
+        )

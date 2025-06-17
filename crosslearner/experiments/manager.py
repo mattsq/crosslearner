@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from dataclasses import replace
 from typing import Callable, Optional, TYPE_CHECKING
 
 import torch
@@ -12,6 +13,7 @@ from sklearn.model_selection import KFold
 from ..utils import set_seed
 
 from ..training.train_acx import train_acx
+from ..training.config import ModelConfig, TrainingConfig
 from ..evaluation.evaluate import evaluate
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -22,13 +24,13 @@ def cross_validate_acx(
     loader: DataLoader,
     mu0: torch.Tensor,
     mu1: torch.Tensor,
+    model_cfg: ModelConfig,
+    train_cfg: TrainingConfig,
     *,
-    p: int,
     folds: int = 5,
     device: Optional[str] = None,
     log_dir: Optional[str] = None,
     seed: int = 0,
-    **train_kwargs,
 ) -> float:
     """Return mean validation PEHE across ``folds`` splits.
 
@@ -36,13 +38,13 @@ def cross_validate_acx(
         loader: Data loader providing ``(X, T, Y)`` tuples.
         mu0: Potential outcomes under control.
         mu1: Potential outcomes under treatment.
-        p: Number of covariates.
+        model_cfg: Architecture options for :class:`ACX`.
+        train_cfg: Training hyperparameters.
         folds: Number of cross-validation folds.
         device: Device string passed to :func:`train_acx`.
         log_dir: Optional directory for TensorBoard logs. Each fold logs to
             ``log_dir/fold_i``.
         seed: Random seed for reproducible splits.
-        **train_kwargs: Additional arguments passed to :func:`train_acx`.
 
     Returns:
         Mean validation :math:`\sqrt{\mathrm{PEHE}}` across folds.
@@ -65,15 +67,12 @@ def cross_validate_acx(
             mu1[val_idx].to(device),
         )
         fold_dir = os.path.join(log_dir, f"fold_{i}") if log_dir else None
-        model = train_acx(
-            train_loader,
-            p,
-            device=device,
-            seed=seed,
+        cfg = replace(
+            train_cfg,
             val_data=val_data,
             tensorboard_logdir=fold_dir,
-            **train_kwargs,
         )
+        model = train_acx(train_loader, model_cfg, cfg, device=device, seed=seed)
         metric = evaluate(model, *val_data)
         metrics.append(metric)
     return float(sum(metrics) / len(metrics))
@@ -103,18 +102,24 @@ class ExperimentManager:
         self.log_dir = log_dir
         self.seed = seed
 
-    def cross_validate(self, **train_kwargs) -> float:
+    def cross_validate(
+        self,
+        model_cfg: ModelConfig | None = None,
+        train_cfg: TrainingConfig | None = None,
+    ) -> float:
         """Cross-validate ``train_acx`` with stored data."""
+        model_cfg = model_cfg or ModelConfig(p=self.p)
+        train_cfg = train_cfg or TrainingConfig()
         return cross_validate_acx(
             self.loader,
             self.mu0,
             self.mu1,
-            p=self.p,
+            model_cfg,
+            train_cfg,
             folds=self.folds,
             device=self.device,
             log_dir=self.log_dir,
             seed=self.seed,
-            **train_kwargs,
         )
 
     def optimize(
@@ -138,16 +143,28 @@ class ExperimentManager:
                 if self.log_dir
                 else None
             )
+            m_kwargs = {
+                k: params[k]
+                for k in list(params)
+                if k in ModelConfig.__dataclass_fields__
+            }
+            t_kwargs = {
+                k: params[k]
+                for k in list(params)
+                if k in TrainingConfig.__dataclass_fields__
+            }
+            model_cfg = ModelConfig(p=self.p, **m_kwargs)
+            train_cfg = TrainingConfig(**t_kwargs)
             return cross_validate_acx(
                 self.loader,
                 self.mu0,
                 self.mu1,
-                p=self.p,
+                model_cfg,
+                train_cfg,
                 folds=self.folds,
                 device=self.device,
                 log_dir=trial_dir,
                 seed=self.seed,
-                **params,
             )
 
         study = optuna.create_study(direction=direction)

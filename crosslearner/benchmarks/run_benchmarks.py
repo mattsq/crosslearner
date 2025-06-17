@@ -18,6 +18,7 @@ from crosslearner.datasets.twins import get_twins_dataloader
 from crosslearner.datasets.lalonde import get_lalonde_dataloader
 from crosslearner.datasets.synthetic import get_confounding_dataloader
 from crosslearner.training.train_acx import train_acx
+from crosslearner.training.config import ModelConfig, TrainingConfig
 from crosslearner.evaluation.evaluate import evaluate
 from crosslearner.evaluation.metrics import (
     policy_risk,
@@ -131,7 +132,9 @@ def run(dataset: str, replicates: int = 3, epochs: int = 30) -> List[Dict[str, f
             return [v for _, v in summary]
         else:
             raise ValueError(f"Unknown dataset {dataset}")
-        model = train_acx(loader, p=p, epochs=epochs, seed=seed)
+        model_cfg = ModelConfig(p=p)
+        train_cfg = TrainingConfig(epochs=epochs)
+        model = train_acx(loader, model_cfg, train_cfg, seed=seed)
         X = torch.cat([b[0] for b in loader])
         T_all = torch.cat([b[1] for b in loader])
         mu0_all = mu0
