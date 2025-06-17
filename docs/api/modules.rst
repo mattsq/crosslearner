@@ -1,7 +1,8 @@
 crosslearner
 ============
 
-.. toctree::
-   :maxdepth: 4
+.. autosummary::
+   :toctree: generated/api
+   :recursive:
 
    crosslearner

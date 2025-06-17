@@ -10,9 +10,11 @@ the training procedure, hyperparameter sweeps and available modules.
    :maxdepth: 2
    :caption: Contents:
 
+   quickstart
    theory
    hyperparameter_sweeps
    usage_examples
+   datasets
 
 
 .. toctree::
