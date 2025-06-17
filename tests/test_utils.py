@@ -5,7 +5,7 @@ import numpy as np
 import random
 
 from crosslearner.models.acx import MLP, _get_activation
-from crosslearner.utils import set_seed
+from crosslearner.utils import set_seed, default_device
 
 
 def test_get_activation_invalid_name():
@@ -49,3 +49,9 @@ def test_set_seed_reproducibility():
     assert random.random() == r1
     assert np.allclose(np.random.rand(1), n1)
     assert torch.allclose(torch.rand(1), t1)
+
+
+def test_default_device_returns_valid_string():
+    dev = default_device()
+    assert dev in {"cuda", "cpu"}
+    assert isinstance(dev, str)

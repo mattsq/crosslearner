@@ -16,3 +16,9 @@ def set_seed(seed: int, *, deterministic: bool = False) -> None:
         torch.use_deterministic_algorithms(True)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
+
+
+def default_device() -> str:
+    """Return the best available device string."""
+
+    return "cuda" if torch.cuda.is_available() else "cpu"
