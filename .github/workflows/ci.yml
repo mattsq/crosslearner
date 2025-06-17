@@ -30,7 +30,7 @@ jobs:
       - name: Lint and auto-format
         if: matrix.python-version == '3.12' && matrix.cuda == 'cpu'
         run: |
-          ruff check .
+          ruff check --fix .
           black .
       - name: Push changes back to the branch
         if: github.event_name == 'pull_request' && matrix.python-version == '3.12' && matrix.cuda == 'cpu'
@@ -41,7 +41,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           if [[ $(git status --porcelain) ]]; then
             git add .
-            git commit -m "CI: auto-format Python code with black"
+            git commit -m "CI: auto-format Python code with black and ruff"
             git push
           fi
       - name: Run tests
