@@ -48,6 +48,7 @@ class ACXTrainer:
             phi_residual=model_cfg.phi_residual,
             head_residual=model_cfg.head_residual,
             disc_residual=model_cfg.disc_residual,
+            disc_pack=model_cfg.disc_pack,
         ).to(self.device)
         if train_cfg.spectral_norm:
             apply_spectral_norm(self.model)
@@ -68,6 +69,7 @@ class ACXTrainer:
                 phi_residual=model_cfg.phi_residual,
                 head_residual=model_cfg.head_residual,
                 disc_residual=model_cfg.disc_residual,
+                disc_pack=model_cfg.disc_pack,
             ).to(self.device)
             if train_cfg.spectral_norm:
                 apply_spectral_norm(self.ema_model)
@@ -87,6 +89,18 @@ class ACXTrainer:
                 ema_param = self._ema_params[name]
                 ema_param.mul_(decay).add_(param.detach(), alpha=1 - decay)
 
+    def _pack_inputs(
+        self, h: torch.Tensor, y: torch.Tensor, t: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        pack = max(1, int(self.model_cfg.disc_pack))
+        if pack <= 1:
+            return h, y, t
+        b = (h.size(0) // pack) * pack
+        h = h[:b].reshape(b // pack, -1)
+        y = y[:b].reshape(b // pack, -1)
+        t = t[:b].reshape(b // pack, -1)
+        return h, y, t
+
     def _unrolled_logits(
         self,
         hb: torch.Tensor,
@@ -100,13 +114,16 @@ class ACXTrainer:
     ) -> tuple[torch.Tensor, torch.Tensor]:
         steps = self.train_cfg.unrolled_steps
         if steps <= 0:
-            logits = self.model.discriminator(hb, ycf, tb)
-            feats = self.model.disc_features(hb, ycf, tb)
+            hb_p, ycf_p, tb_p = self._pack_inputs(hb, ycf, tb)
+            logits = self.model.discriminator(hb_p, ycf_p, tb_p)
+            feats = self.model.disc_features(hb_p, ycf_p, tb_p)
             return logits, feats
         disc = copy.deepcopy(self.model.disc)
         for _ in range(steps):
-            real_logits = disc(torch.cat([hb.detach(), yb.detach(), tb], dim=1))
-            fake_logits = disc(torch.cat([hb.detach(), ycf.detach(), tb], dim=1))
+            hb_r, y_r, t_r = self._pack_inputs(hb.detach(), yb.detach(), tb)
+            hb_f, y_f, t_f = self._pack_inputs(hb.detach(), ycf.detach(), tb)
+            real_logits = disc(torch.cat([hb_r, y_r, t_r], dim=1))
+            fake_logits = disc(torch.cat([hb_f, y_f, t_f], dim=1))
             if use_wgan:
                 loss_step = fake_logits.mean() - real_logits.mean()
             elif use_hinge:
@@ -129,8 +146,9 @@ class ACXTrainer:
             grads = torch.autograd.grad(loss_step, disc.parameters(), create_graph=True)
             for p, g in zip(disc.parameters(), grads):
                 p.data.sub_(self.train_cfg.lr_d * g)
-        logits = disc(torch.cat([hb, ycf, tb], dim=1))
-        feats = disc.net[:-1](torch.cat([hb, ycf, tb], dim=1))
+        hb_p, ycf_p, tb_p = self._pack_inputs(hb, ycf, tb)
+        logits = disc(torch.cat([hb_p, ycf_p, tb_p], dim=1))
+        feats = disc.net[:-1](torch.cat([hb_p, ycf_p, tb_p], dim=1))
         return logits, feats
 
     def _make_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.Optimizer]:
@@ -308,8 +326,10 @@ class ACXTrainer:
                         )
                         Ycf = Ycf + noise
                         Yb_disc = Yb_disc + noise
-                real_logits = model.discriminator(hb_det, Yb_disc, Tb)
-                fake_logits = model.discriminator(hb_det, Ycf, Tb)
+                hb_r, y_r, t_r = self._pack_inputs(hb_det, Yb_disc, Tb)
+                hb_f, y_f, t_f = self._pack_inputs(hb_det, Ycf, Tb)
+                real_logits = model.discriminator(hb_r, y_r, t_r)
+                fake_logits = model.discriminator(hb_f, y_f, t_f)
                 if use_wgan:
                     wdist = fake_logits.mean() - real_logits.mean()
                     gp = 0.0
@@ -317,7 +337,8 @@ class ACXTrainer:
                         eps = torch.rand_like(Yb_disc)
                         interpolates = eps * Yb_disc + (1 - eps) * Ycf
                         interpolates.requires_grad_(True)
-                        interp_logits = model.discriminator(hb_det, interpolates, Tb)
+                        h_i, y_i, t_i = self._pack_inputs(hb_det, interpolates, Tb)
+                        interp_logits = model.discriminator(h_i, y_i, t_i)
                         grads = torch.autograd.grad(
                             outputs=interp_logits,
                             inputs=interpolates,
@@ -352,7 +373,8 @@ class ACXTrainer:
                 if cfg.r1_gamma > 0:
                     hb_r1 = hb_det.detach().requires_grad_(True)
                     y_r1 = Yb_disc.detach().requires_grad_(True)
-                    r1_logits = model.discriminator(hb_r1, y_r1, Tb)
+                    h1, y1, t1 = self._pack_inputs(hb_r1, y_r1, Tb)
+                    r1_logits = model.discriminator(h1, y1, t1)
                     grads = torch.autograd.grad(
                         r1_logits.sum(), [hb_r1, y_r1], create_graph=True
                     )
@@ -366,7 +388,8 @@ class ACXTrainer:
                 if cfg.r2_gamma > 0:
                     hb_r2 = hb_det.detach().requires_grad_(True)
                     y_r2 = Ycf.detach().requires_grad_(True)
-                    r2_logits = model.discriminator(hb_r2, y_r2, Tb)
+                    h2, y2, t2 = self._pack_inputs(hb_r2, y_r2, Tb)
+                    r2_logits = model.discriminator(h2, y2, t2)
                     grads = torch.autograd.grad(
                         r2_logits.sum(), [hb_r2, y_r2], create_graph=True
                     )
@@ -421,16 +444,20 @@ class ACXTrainer:
 
             if cfg.feature_matching:
                 with torch.no_grad():
-                    real_f = model.disc_features(hb.detach(), Yb, Tb)
+                    r_h, r_y, r_t = self._pack_inputs(hb.detach(), Yb, Tb)
+                    real_f = model.disc_features(r_h, r_y, r_t)
                 if not cfg.gradient_reversal:
                     fake_f = fake_feats
                 else:
-                    fake_f = model.disc_features(hb, Ycf, Tb)
+                    f_h, f_y, f_t = self._pack_inputs(hb, Ycf, Tb)
+                    fake_f = model.disc_features(f_h, f_y, f_t)
                 loss_fm = ((real_f.mean(0) - fake_f.mean(0)) ** 2).mean()
                 loss_g += cfg.eta_fm * loss_fm
 
             if cfg.gradient_reversal:
-                t_logits = model.discriminator(grad_reverse(hb, cfg.grl_weight), Yb, Tb)
+                gr_h = grad_reverse(hb, cfg.grl_weight)
+                h_p, y_p, t_p = self._pack_inputs(gr_h, Yb, Tb)
+                t_logits = model.discriminator(h_p, y_p, t_p)
                 loss_grl = bce(t_logits, Tb)
                 loss_g += loss_grl
 

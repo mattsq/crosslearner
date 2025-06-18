@@ -24,6 +24,9 @@ class ModelConfig:
     phi_residual: bool | None = None
     head_residual: bool | None = None
     disc_residual: bool | None = None
+    disc_pack: int = (
+        1  #: Number of samples concatenated for PacGAN-style discriminator.
+    )
 
 
 @dataclass

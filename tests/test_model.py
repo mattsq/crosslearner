@@ -48,3 +48,9 @@ def test_acx_partial_residual():
     assert model.phi.residual is True
     assert model.mu0.residual is False
     assert model.disc.residual is False
+
+
+def test_acx_disc_pack():
+    model = ACX(p=3, disc_pack=2)
+    assert model.disc_pack == 2
+    assert model.disc.net[0][0].in_features == 2 * (64 + 2)
