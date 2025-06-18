@@ -1,6 +1,6 @@
 # crosslearner
 
-[![CI](https://github.com/mattrss/crosslearner/actions/workflows/ci.yml/badge.svg)](https://github.com/mattrss/crosslearner/actions/workflows/ci.yml) [![Docs](https://github.com/mattrss/crosslearner/actions/workflows/docs.yml/badge.svg)](https://mattrss.github.io/crosslearner/)
+[![CI](https://github.com/mattsq/crosslearner/actions/workflows/ci.yml/badge.svg)](https://github.com/mattsq/crosslearner/actions/workflows/ci.yml) [![Docs](https://github.com/mattsq/crosslearner/actions/workflows/docs.yml/badge.svg)](https://mattsq.github.io/crosslearner/)
 
 `crosslearner` implements the **Adversarial–Consistency X-learner (AC‑X)**. This variant of the X‑learner augments outcome models with an adversarial consistency term. The library is geared towards reproducible research and ships with many GAN tricks and benchmarking utilities.
 
@@ -181,7 +181,7 @@ behaviour:
 
 ## Documentation
 
-Hosted documentation is available at [https://mattrss.github.io/crosslearner/](https://mattrss.github.io/crosslearner/).
+Hosted documentation is available at [https://mattsq.github.io/crosslearner/](https://mattsq.github.io/crosslearner/).
 
 API documentation is built with Sphinx. Run the following commands to generate
 HTML docs in `docs/_build/html`:
