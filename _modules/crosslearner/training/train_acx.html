@@ -312,10 +312,11 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for crosslearner.training.train_acx</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">TrainingConfig</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.trainer</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACXTrainer</span>
@@ -327,125 +328,13 @@
 <a class="viewcode-back" href="../../../api/crosslearner.training.html#crosslearner.train_acx">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">train_acx</span><span class="p">(</span>
     <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span>
-    <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">model_config</span><span class="p">:</span> <span class="n">ModelConfig</span><span class="p">,</span>
+    <span class="n">training_config</span><span class="p">:</span> <span class="n">TrainingConfig</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">model_config</span><span class="p">:</span> <span class="n">ModelConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">training_config</span><span class="p">:</span> <span class="n">TrainingConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">rep_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
-    <span class="n">phi_layers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span><span class="mi">128</span><span class="p">,),</span>
-    <span class="n">head_layers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span><span class="mi">64</span><span class="p">,),</span>
-    <span class="n">disc_layers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span><span class="mi">64</span><span class="p">,),</span>
-    <span class="n">activation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;relu&quot;</span><span class="p">,</span>
-    <span class="n">phi_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-    <span class="n">head_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-    <span class="n">disc_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-    <span class="n">residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">phi_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">head_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">disc_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
-    <span class="n">alpha_out</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">beta_cons</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
-    <span class="n">gamma_adv</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">lr_g</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span><span class="p">,</span>
-    <span class="n">lr_d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span><span class="p">,</span>
-    <span class="n">optimizer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Type</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;adam&quot;</span><span class="p">,</span>
-    <span class="n">opt_g_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">opt_d_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">lr_scheduler</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Type</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="o">.</span><span class="n">_LRScheduler</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sched_g_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sched_d_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">grad_clip</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
-    <span class="n">warm_start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">use_wgan_gp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">spectral_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">feature_matching</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">label_smoothing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">instance_noise</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">gradient_reversal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">ttur</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">lambda_gp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
-    <span class="n">eta_fm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
-    <span class="n">grl_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">tensorboard_logdir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">weight_clip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">val_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">risk_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">risk_folds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-    <span class="n">nuisance_propensity_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
-    <span class="n">nuisance_outcome_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="n">nuisance_early_stop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-    <span class="n">patience</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">return_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ACX</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ACX</span><span class="p">,</span> <span class="n">History</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Train AC-X model with optional GAN tricks.</span>
-
-<span class="sd">    This function preserves the original ``train_acx`` signature but delegates</span>
-<span class="sd">    all heavy lifting to :class:`ACXTrainer`. When ``model_config`` or</span>
-<span class="sd">    ``training_config`` are supplied, the respective keyword arguments are</span>
-<span class="sd">    ignored.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="n">model_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">model_config</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span>
-            <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
-            <span class="n">rep_dim</span><span class="o">=</span><span class="n">rep_dim</span><span class="p">,</span>
-            <span class="n">phi_layers</span><span class="o">=</span><span class="n">phi_layers</span><span class="p">,</span>
-            <span class="n">head_layers</span><span class="o">=</span><span class="n">head_layers</span><span class="p">,</span>
-            <span class="n">disc_layers</span><span class="o">=</span><span class="n">disc_layers</span><span class="p">,</span>
-            <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span>
-            <span class="n">phi_dropout</span><span class="o">=</span><span class="n">phi_dropout</span><span class="p">,</span>
-            <span class="n">head_dropout</span><span class="o">=</span><span class="n">head_dropout</span><span class="p">,</span>
-            <span class="n">disc_dropout</span><span class="o">=</span><span class="n">disc_dropout</span><span class="p">,</span>
-            <span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">,</span>
-            <span class="n">phi_residual</span><span class="o">=</span><span class="n">phi_residual</span><span class="p">,</span>
-            <span class="n">head_residual</span><span class="o">=</span><span class="n">head_residual</span><span class="p">,</span>
-            <span class="n">disc_residual</span><span class="o">=</span><span class="n">disc_residual</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">model_config</span><span class="o">.</span><span class="n">p</span> <span class="o">!=</span> <span class="n">p</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;p does not match model_config.p&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">training_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">training_config</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
-            <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
-            <span class="n">alpha_out</span><span class="o">=</span><span class="n">alpha_out</span><span class="p">,</span>
-            <span class="n">beta_cons</span><span class="o">=</span><span class="n">beta_cons</span><span class="p">,</span>
-            <span class="n">gamma_adv</span><span class="o">=</span><span class="n">gamma_adv</span><span class="p">,</span>
-            <span class="n">lr_g</span><span class="o">=</span><span class="n">lr_g</span><span class="p">,</span>
-            <span class="n">lr_d</span><span class="o">=</span><span class="n">lr_d</span><span class="p">,</span>
-            <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
-            <span class="n">opt_g_kwargs</span><span class="o">=</span><span class="n">opt_g_kwargs</span> <span class="ow">or</span> <span class="p">{},</span>
-            <span class="n">opt_d_kwargs</span><span class="o">=</span><span class="n">opt_d_kwargs</span> <span class="ow">or</span> <span class="p">{},</span>
-            <span class="n">lr_scheduler</span><span class="o">=</span><span class="n">lr_scheduler</span><span class="p">,</span>
-            <span class="n">sched_g_kwargs</span><span class="o">=</span><span class="n">sched_g_kwargs</span> <span class="ow">or</span> <span class="p">{},</span>
-            <span class="n">sched_d_kwargs</span><span class="o">=</span><span class="n">sched_d_kwargs</span> <span class="ow">or</span> <span class="p">{},</span>
-            <span class="n">grad_clip</span><span class="o">=</span><span class="n">grad_clip</span><span class="p">,</span>
-            <span class="n">warm_start</span><span class="o">=</span><span class="n">warm_start</span><span class="p">,</span>
-            <span class="n">use_wgan_gp</span><span class="o">=</span><span class="n">use_wgan_gp</span><span class="p">,</span>
-            <span class="n">spectral_norm</span><span class="o">=</span><span class="n">spectral_norm</span><span class="p">,</span>
-            <span class="n">feature_matching</span><span class="o">=</span><span class="n">feature_matching</span><span class="p">,</span>
-            <span class="n">label_smoothing</span><span class="o">=</span><span class="n">label_smoothing</span><span class="p">,</span>
-            <span class="n">instance_noise</span><span class="o">=</span><span class="n">instance_noise</span><span class="p">,</span>
-            <span class="n">gradient_reversal</span><span class="o">=</span><span class="n">gradient_reversal</span><span class="p">,</span>
-            <span class="n">ttur</span><span class="o">=</span><span class="n">ttur</span><span class="p">,</span>
-            <span class="n">lambda_gp</span><span class="o">=</span><span class="n">lambda_gp</span><span class="p">,</span>
-            <span class="n">eta_fm</span><span class="o">=</span><span class="n">eta_fm</span><span class="p">,</span>
-            <span class="n">grl_weight</span><span class="o">=</span><span class="n">grl_weight</span><span class="p">,</span>
-            <span class="n">tensorboard_logdir</span><span class="o">=</span><span class="n">tensorboard_logdir</span><span class="p">,</span>
-            <span class="n">weight_clip</span><span class="o">=</span><span class="n">weight_clip</span><span class="p">,</span>
-            <span class="n">val_data</span><span class="o">=</span><span class="n">val_data</span><span class="p">,</span>
-            <span class="n">risk_data</span><span class="o">=</span><span class="n">risk_data</span><span class="p">,</span>
-            <span class="n">risk_folds</span><span class="o">=</span><span class="n">risk_folds</span><span class="p">,</span>
-            <span class="n">nuisance_propensity_epochs</span><span class="o">=</span><span class="n">nuisance_propensity_epochs</span><span class="p">,</span>
-            <span class="n">nuisance_outcome_epochs</span><span class="o">=</span><span class="n">nuisance_outcome_epochs</span><span class="p">,</span>
-            <span class="n">nuisance_early_stop</span><span class="o">=</span><span class="n">nuisance_early_stop</span><span class="p">,</span>
-            <span class="n">patience</span><span class="o">=</span><span class="n">patience</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
-            <span class="n">return_history</span><span class="o">=</span><span class="n">return_history</span><span class="p">,</span>
-        <span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Train an ACX model using configuration objects.&quot;&quot;&quot;</span>
 
     <span class="n">trainer</span> <span class="o">=</span> <span class="n">ACXTrainer</span><span class="p">(</span><span class="n">model_config</span><span class="p">,</span> <span class="n">training_config</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">loader</span><span class="p">)</span></div>
