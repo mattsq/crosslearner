@@ -14,3 +14,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added hinge and least-squares GAN losses via `adv_loss` option
 - Added exponential moving average (`ema_decay`) for generator parameters
 - Added R1/R2 regularization and unrolled discriminator updates
+- Early stopping in `estimate_nuisances` can now be disabled by
+  passing ``early_stop=0`` or a negative value

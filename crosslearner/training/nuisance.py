@@ -41,9 +41,16 @@ def estimate_nuisances(
     device: str,
     seed: int = 0,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Return cross-fitted propensity and outcome predictions."""
+    """Return cross-fitted propensity and outcome predictions.
+
+    ``early_stop`` controls the number of epochs with no improvement
+    before training is halted. Passing a non-positive value disables
+    early stopping entirely.
+    """
     bce = nn.BCELoss()
     mse = nn.MSELoss()
+
+    patience = float("inf") if early_stop <= 0 else early_stop
 
     set_seed(seed)
     kfold = StratifiedKFold(folds, shuffle=True, random_state=seed)
@@ -82,7 +89,7 @@ def estimate_nuisances(
                 no_improve = 0
             else:
                 no_improve += 1
-                if no_improve >= early_stop:
+                if no_improve >= patience:
                     break
         prop.load_state_dict(best_state)
         e_hat[val_idx] = prop(Xva).detach()
@@ -136,7 +143,7 @@ def estimate_nuisances(
                     no_improve = 0
                 else:
                     no_improve += 1
-                    if no_improve >= early_stop:
+                    if no_improve >= patience:
                         break
         mu0.load_state_dict(best_mu0)
         mu1.load_state_dict(best_mu1)
