@@ -133,6 +133,7 @@ class ExperimentManager:
         *,
         n_trials: int = 50,
         direction: str = "minimize",
+        sampler: "optuna.samplers.BaseSampler | None" = None,
     ) -> "optuna.Study":
         """Run an Optuna search over ``n_trials`` using ``space_fn``.
 
@@ -177,6 +178,6 @@ class ExperimentManager:
                 seed=self.seed,
             )
 
-        study = optuna.create_study(direction=direction)
+        study = optuna.create_study(direction=direction, sampler=sampler)
         study.optimize(objective, n_trials=n_trials)
         return study

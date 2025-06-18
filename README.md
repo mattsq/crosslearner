@@ -149,6 +149,15 @@ cross-validated $\sqrt{\mathrm{PEHE}}$ across the built-in synthetic datasets:
 | ``confounding=0.5``| 10 | 0.5 | **0.59** |
 | ``aircraft``       | 5  | -- | **430.87** |
 
+The command-line entry ``crosslearner-sweep`` wraps this workflow. It runs a
+sweep on a built-in dataset using a YAML file describing the search space:
+
+```bash
+crosslearner-sweep toy --trials 10 --sampler random
+```
+
+Pass ``--config my_space.yaml`` to override the default ranges.
+
 ## Repository Layout
 
 - `crosslearner/models/` – model definitions including `ACX`.
