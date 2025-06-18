@@ -333,3 +333,17 @@ def test_train_acx_ema():
     train_cfg = TrainingConfig(epochs=1, ema_decay=0.5, verbose=False)
     model = train_acx(loader, model_cfg, train_cfg, device="cpu")
     assert isinstance(model, ACX)
+
+
+def test_train_acx_r1_r2_unrolled():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4)
+    cfg = TrainingConfig(epochs=1, r1_gamma=0.1, verbose=False)
+    model = train_acx(loader, model_cfg, cfg, device="cpu")
+    assert isinstance(model, ACX)
+    cfg = TrainingConfig(epochs=1, r2_gamma=0.1, verbose=False)
+    model = train_acx(loader, model_cfg, cfg, device="cpu")
+    assert isinstance(model, ACX)
+    cfg = TrainingConfig(epochs=1, unrolled_steps=1, verbose=False)
+    model = train_acx(loader, model_cfg, cfg, device="cpu")
+    assert isinstance(model, ACX)
