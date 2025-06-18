@@ -15,3 +15,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added exponential moving average (`ema_decay`) for generator parameters
 - Added R1/R2 regularization and unrolled discriminator updates
 - Fixed `set_seed` to skip `torch.cuda.manual_seed_all` when CUDA is unavailable
+- Added synthetic data generation utilities with configurable noise and missing outcomes
