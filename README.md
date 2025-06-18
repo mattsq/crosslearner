@@ -160,7 +160,7 @@ cross-validated $\sqrt{\mathrm{PEHE}}$ across the built-in synthetic datasets:
 - `crosslearner/evaluation/` – metrics such as PEHE.
 - `crosslearner/configs/` – YAML configs with hyper‑parameters.
 
-The training code exposes options for Wasserstein loss with gradient penalty, spectral normalisation, feature matching, instance noise, gradient reversal and two‑time‑scale update rule (TTUR). Early stopping on validation $\sqrt{\mathrm{PEHE}}$ is also provided. Dropout can be configured separately for the representation, head and discriminator networks.
+The training code exposes options for Wasserstein loss with gradient penalty, hinge and least‑squares objectives, spectral normalisation, feature matching, exponential moving average, instance noise, gradient reversal and two‑time‑scale update rule (TTUR). Early stopping on validation $\sqrt{\mathrm{PEHE}}$ is also provided. Dropout can be configured separately for the representation, head and discriminator networks.
 
 Use the config file as a starting point for your own experiments on IHDP, ACIC or other datasets.
 

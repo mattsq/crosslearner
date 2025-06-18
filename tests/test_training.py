@@ -122,7 +122,7 @@ def test_train_acx_options():
     train_cfg = TrainingConfig(
         epochs=2,
         warm_start=1,
-        use_wgan_gp=True,
+        adv_loss="wgan-gp",
         spectral_norm=True,
         feature_matching=True,
         label_smoothing=True,
@@ -135,6 +135,7 @@ def test_train_acx_options():
         weight_clip=0.1,
         val_data=val_data,
         patience=1,
+        ema_decay=0.5,
         verbose=False,
     )
     train_acx(loader, model_cfg, train_cfg, device="cpu")
@@ -315,3 +316,20 @@ def test_train_acx_dropout_options():
     assert any(isinstance(m, nn.Dropout) for m in model.phi.net.modules())
     assert any(isinstance(m, nn.Dropout) for m in model.mu0.net.modules())
     assert any(isinstance(m, nn.Dropout) for m in model.disc.net.modules())
+
+
+def test_alt_adv_losses():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4)
+    for loss in ("hinge", "lsgan"):
+        train_cfg = TrainingConfig(epochs=1, adv_loss=loss, verbose=False)
+        model = train_acx(loader, model_cfg, train_cfg, device="cpu")
+        assert isinstance(model, ACX)
+
+
+def test_train_acx_ema():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4)
+    train_cfg = TrainingConfig(epochs=1, ema_decay=0.5, verbose=False)
+    model = train_acx(loader, model_cfg, train_cfg, device="cpu")
+    assert isinstance(model, ACX)
