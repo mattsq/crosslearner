@@ -103,8 +103,8 @@ def _baseline_mus(model, X: np.ndarray) -> tuple[torch.Tensor, torch.Tensor]:
         mu1 = model._predict_mu1(X)
         mu0 = model._predict_mu0(X)
     elif isinstance(model, XLearner):
-        mu1 = model.t.model_t.predict(X)
-        mu0 = model.t.model_c.predict(X)
+        mu1 = model.t._predict_mu1(X)
+        mu0 = model.t._predict_mu0(X)
     elif isinstance(model, DRLearner):
         mu0 = model.model_mu0.predict(X)
         mu1 = model.model_mu1.predict(X)
