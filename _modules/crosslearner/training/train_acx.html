@@ -340,6 +340,9 @@
     <span class="n">head_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="n">disc_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="n">residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">phi_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">head_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">disc_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
@@ -398,6 +401,9 @@
             <span class="n">head_dropout</span><span class="o">=</span><span class="n">head_dropout</span><span class="p">,</span>
             <span class="n">disc_dropout</span><span class="o">=</span><span class="n">disc_dropout</span><span class="p">,</span>
             <span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">,</span>
+            <span class="n">phi_residual</span><span class="o">=</span><span class="n">phi_residual</span><span class="p">,</span>
+            <span class="n">head_residual</span><span class="o">=</span><span class="n">head_residual</span><span class="p">,</span>
+            <span class="n">disc_residual</span><span class="o">=</span><span class="n">disc_residual</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">elif</span> <span class="n">model_config</span><span class="o">.</span><span class="n">p</span> <span class="o">!=</span> <span class="n">p</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;p does not match model_config.p&quot;</span><span class="p">)</span>

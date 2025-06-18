@@ -441,6 +441,9 @@
         <span class="n">head_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
         <span class="n">disc_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
         <span class="n">residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">phi_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">head_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">disc_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the model.</span>
 
@@ -455,17 +458,26 @@
 <span class="sd">            head_dropout: Dropout probability for the outcome and effect heads.</span>
 <span class="sd">            disc_dropout: Dropout probability for the discriminator.</span>
 <span class="sd">            residual: Enable residual connections in all MLPs.</span>
+<span class="sd">            phi_residual: Override residual connections just for ``phi``.</span>
+<span class="sd">            head_residual: Override residual connections for outcome and effect</span>
+<span class="sd">                heads.</span>
+<span class="sd">            disc_residual: Override residual connections for the discriminator.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="n">act_fn</span> <span class="o">=</span> <span class="n">_get_activation</span><span class="p">(</span><span class="n">activation</span><span class="p">)</span>
+
+        <span class="n">phi_residual</span> <span class="o">=</span> <span class="n">residual</span> <span class="k">if</span> <span class="n">phi_residual</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">phi_residual</span>
+        <span class="n">head_residual</span> <span class="o">=</span> <span class="n">residual</span> <span class="k">if</span> <span class="n">head_residual</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">head_residual</span>
+        <span class="n">disc_residual</span> <span class="o">=</span> <span class="n">residual</span> <span class="k">if</span> <span class="n">disc_residual</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">disc_residual</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
             <span class="n">p</span><span class="p">,</span>
             <span class="n">rep_dim</span><span class="p">,</span>
             <span class="n">hidden</span><span class="o">=</span><span class="n">phi_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
             <span class="n">dropout</span><span class="o">=</span><span class="n">phi_dropout</span><span class="p">,</span>
-            <span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">,</span>
+            <span class="n">residual</span><span class="o">=</span><span class="n">phi_residual</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
             <span class="n">rep_dim</span><span class="p">,</span>
@@ -473,7 +485,7 @@
             <span class="n">hidden</span><span class="o">=</span><span class="n">head_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
             <span class="n">dropout</span><span class="o">=</span><span class="n">head_dropout</span><span class="p">,</span>
-            <span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">,</span>
+            <span class="n">residual</span><span class="o">=</span><span class="n">head_residual</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
             <span class="n">rep_dim</span><span class="p">,</span>
@@ -481,7 +493,7 @@
             <span class="n">hidden</span><span class="o">=</span><span class="n">head_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
             <span class="n">dropout</span><span class="o">=</span><span class="n">head_dropout</span><span class="p">,</span>
-            <span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">,</span>
+            <span class="n">residual</span><span class="o">=</span><span class="n">head_residual</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
             <span class="n">rep_dim</span><span class="p">,</span>
@@ -489,7 +501,7 @@
             <span class="n">hidden</span><span class="o">=</span><span class="n">head_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
             <span class="n">dropout</span><span class="o">=</span><span class="n">head_dropout</span><span class="p">,</span>
-            <span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">,</span>
+            <span class="n">residual</span><span class="o">=</span><span class="n">head_residual</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disc</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
             <span class="n">rep_dim</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
@@ -497,7 +509,7 @@
             <span class="n">hidden</span><span class="o">=</span><span class="n">disc_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
             <span class="n">dropout</span><span class="o">=</span><span class="n">disc_dropout</span><span class="p">,</span>
-            <span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">,</span>
+            <span class="n">residual</span><span class="o">=</span><span class="n">disc_residual</span><span class="p">,</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="ACX.forward">

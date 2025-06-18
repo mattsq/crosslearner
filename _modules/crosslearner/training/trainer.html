@@ -360,6 +360,9 @@
             <span class="n">head_dropout</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">head_dropout</span><span class="p">,</span>
             <span class="n">disc_dropout</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disc_dropout</span><span class="p">,</span>
             <span class="n">residual</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">residual</span><span class="p">,</span>
+            <span class="n">phi_residual</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">phi_residual</span><span class="p">,</span>
+            <span class="n">head_residual</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">head_residual</span><span class="p">,</span>
+            <span class="n">disc_residual</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disc_residual</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">train_cfg</span><span class="o">.</span><span class="n">spectral_norm</span><span class="p">:</span>
             <span class="n">apply_spectral_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
