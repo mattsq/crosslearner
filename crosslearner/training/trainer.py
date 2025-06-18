@@ -51,6 +51,41 @@ class ACXTrainer:
         if train_cfg.spectral_norm:
             apply_spectral_norm(self.model)
 
+        self.ema_model: ACX | None = None
+        if train_cfg.ema_decay is not None:
+            self.ema_model = ACX(
+                model_cfg.p,
+                rep_dim=model_cfg.rep_dim,
+                phi_layers=model_cfg.phi_layers,
+                head_layers=model_cfg.head_layers,
+                disc_layers=model_cfg.disc_layers,
+                activation=act_fn,
+                phi_dropout=model_cfg.phi_dropout,
+                head_dropout=model_cfg.head_dropout,
+                disc_dropout=model_cfg.disc_dropout,
+                residual=model_cfg.residual,
+                phi_residual=model_cfg.phi_residual,
+                head_residual=model_cfg.head_residual,
+                disc_residual=model_cfg.disc_residual,
+            ).to(self.device)
+            if train_cfg.spectral_norm:
+                apply_spectral_norm(self.ema_model)
+            self.ema_model.load_state_dict(self.model.state_dict())
+            for p in self.ema_model.parameters():
+                p.requires_grad_(False)
+            self._ema_params = dict(self.ema_model.named_parameters())
+
+    def _update_ema(self) -> None:
+        decay = self.train_cfg.ema_decay
+        if self.ema_model is None or decay is None:
+            return
+        with torch.no_grad():
+            for name, param in self.model.named_parameters():
+                if name.startswith("disc."):
+                    continue
+                ema_param = self._ema_params[name]
+                ema_param.mul_(decay).add_(param.detach(), alpha=1 - decay)
+
     def _make_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.Optimizer]:
         cfg = self.train_cfg
         model = self.model
@@ -182,6 +217,10 @@ class ACXTrainer:
         cfg = self.train_cfg
         model = self.model
         device = self.device
+        adv = (cfg.adv_loss or "bce").lower()
+        use_wgan = cfg.use_wgan_gp or adv == "wgan-gp"
+        use_hinge = adv == "hinge"
+        use_ls = adv == "lsgan"
 
         loss_d_sum = loss_g_sum = 0.0
         loss_y_sum = loss_cons_sum = loss_adv_sum = 0.0
@@ -206,6 +245,7 @@ class ACXTrainer:
                 if cfg.grad_clip:
                     nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
                 opt_g.step()
+                self._update_ema()
                 loss_y_sum += loss_y.item()
                 loss_g_sum += loss_y.item()
                 batch_count += 1
@@ -223,7 +263,7 @@ class ACXTrainer:
                         Yb_disc = Yb_disc + noise
                 real_logits = model.discriminator(hb_det, Yb_disc, Tb)
                 fake_logits = model.discriminator(hb_det, Ycf, Tb)
-                if cfg.use_wgan_gp:
+                if use_wgan:
                     wdist = fake_logits.mean() - real_logits.mean()
                     gp = 0.0
                     if cfg.lambda_gp > 0:
@@ -241,6 +281,19 @@ class ACXTrainer:
                         )[0]
                         gp = ((grads.norm(2, dim=1) - 1) ** 2).mean() * cfg.lambda_gp
                     loss_d = wdist + gp
+                elif use_hinge:
+                    loss_d = (
+                        torch.relu(1 - real_logits).mean()
+                        + torch.relu(1 + fake_logits).mean()
+                    )
+                elif use_ls:
+                    mse_adv = nn.MSELoss()
+                    loss_d = mse_adv(
+                        real_logits, torch.ones_like(real_logits)
+                    ) + mse_adv(
+                        fake_logits,
+                        torch.zeros_like(fake_logits),
+                    )
                 else:
                     real_lbl = torch.ones_like(real_logits)
                     fake_lbl = torch.zeros_like(fake_logits)
@@ -265,8 +318,11 @@ class ACXTrainer:
             loss_adv = torch.tensor(0.0, device=device)
             if not cfg.gradient_reversal:
                 fake_logits = model.discriminator(hb, Ycf, Tb)
-                if cfg.use_wgan_gp:
+                if use_wgan or use_hinge:
                     loss_adv = -fake_logits.mean()
+                elif use_ls:
+                    mse_adv = nn.MSELoss()
+                    loss_adv = mse_adv(fake_logits, torch.ones_like(fake_logits))
                 else:
                     real_lbl = torch.ones_like(fake_logits)
                     if cfg.label_smoothing:
@@ -296,6 +352,7 @@ class ACXTrainer:
             if cfg.grad_clip:
                 nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
             opt_g.step()
+            self._update_ema()
             loss_g_sum += loss_g.item()
             loss_y_sum += loss_y.item()
             loss_cons_sum += loss_cons.item()
@@ -315,6 +372,7 @@ class ACXTrainer:
     def train(self, loader: DataLoader) -> ACX | Tuple[ACX, History]:
         cfg = self.train_cfg
         model = self.model
+        eval_model = self.ema_model if self.ema_model is not None else self.model
         device = self.device
 
         self._validate_inputs(loader)
@@ -354,7 +412,7 @@ class ACXTrainer:
                     mu0v = mu0v.unsqueeze(-1)
                 if mu1v.ndim == 1:
                     mu1v = mu1v.unsqueeze(-1)
-                val_pehe = evaluate(model, Xv, mu0v, mu1v)
+                val_pehe = evaluate(eval_model, Xv, mu0v, mu1v)
                 stats.val_pehe = val_pehe
                 if writer:
                     writer.add_scalar("val_pehe", val_pehe, epoch)
@@ -362,7 +420,7 @@ class ACXTrainer:
             elif cfg.risk_data is not None:
                 Xr, Tr, Yr = (v.to(device) for v in cfg.risk_data)
                 with torch.no_grad():
-                    _, _, _, tau_r = model(Xr)
+                    _, _, _, tau_r = eval_model(Xr)
                 metric = _orthogonal_risk(tau_r, Yr, Tr, e_hat_val, mu0_val, mu1_val)
                 stats.val_pehe = metric
                 if writer:
@@ -374,7 +432,8 @@ class ACXTrainer:
                 best_val = metric
                 epochs_no_improve = 0
                 best_state = {
-                    k: v.detach().cpu().clone() for k, v in model.state_dict().items()
+                    k: v.detach().cpu().clone()
+                    for k, v in eval_model.state_dict().items()
                 }
             else:
                 epochs_no_improve += 1
@@ -418,6 +477,8 @@ class ACXTrainer:
             writer.close()
         if best_state is not None:
             model.load_state_dict(best_state)
+        elif self.ema_model is not None:
+            model.load_state_dict(self.ema_model.state_dict())
         model.eval()
         return (model, history) if cfg.return_history else model
 

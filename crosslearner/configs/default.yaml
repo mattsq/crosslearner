@@ -18,6 +18,8 @@ epochs: 30
 grad_clip: 2.0
 warm_start: 0
 use_wgan_gp: false
+adv_loss: bce
+ema_decay: null
 spectral_norm: false
 feature_matching: false
 label_smoothing: false

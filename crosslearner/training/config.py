@@ -45,6 +45,8 @@ class TrainingConfig:
     grad_clip: float = 2.0
     warm_start: int = 0
     use_wgan_gp: bool = False
+    adv_loss: str = "bce"
+    ema_decay: Optional[float] = None
     spectral_norm: bool = False
     feature_matching: bool = False
     label_smoothing: bool = False
