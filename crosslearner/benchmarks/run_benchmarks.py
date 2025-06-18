@@ -19,6 +19,7 @@ from crosslearner.datasets.twins import get_twins_dataloader
 from crosslearner.datasets.lalonde import get_lalonde_dataloader
 from crosslearner.datasets.synthetic import get_confounding_dataloader
 from crosslearner.training.train_acx import train_acx
+from crosslearner.training import ModelConfig, TrainingConfig
 from crosslearner.models.baselines import DRLearner, SLearner, TLearner, XLearner
 from crosslearner.evaluation.evaluate import evaluate, evaluate_dr
 from crosslearner.evaluation.metrics import (
@@ -190,7 +191,9 @@ def run(
         set_seed(seed)
         loader, (mu0, mu1) = loader_fn(seed)
         p = loader.dataset.tensors[0].size(1)
-        model = train_acx(loader, p=p, epochs=epochs, seed=seed)
+        model_cfg = ModelConfig(p=p)
+        train_cfg = TrainingConfig(epochs=epochs)
+        model = train_acx(loader, model_cfg, train_cfg, seed=seed)
         X = torch.cat([b[0] for b in loader])
         T_all = torch.cat([b[1] for b in loader])
         Y_all = torch.cat([b[2] for b in loader])

@@ -31,6 +31,7 @@ model on the toy dataset and computes the final PEHE:
 
    from crosslearner.datasets.toy import get_toy_dataloader
    from crosslearner.training.train_acx import train_acx
+   from crosslearner.training import ModelConfig, TrainingConfig
    from crosslearner.evaluation import evaluate
    from crosslearner import set_seed
    import torch
@@ -39,7 +40,9 @@ model on the toy dataset and computes the final PEHE:
    loader, (mu0, mu1) = get_toy_dataloader()
    X = torch.cat([b[0] for b in loader])
 
-   model = train_acx(loader, p=10, epochs=30)
+   model_cfg = ModelConfig(p=10)
+   train_cfg = TrainingConfig(epochs=30)
+   model = train_acx(loader, model_cfg, train_cfg)
    pehe = evaluate(model, X, mu0, mu1)
    print("sqrt(PEHE)", pehe)
 
