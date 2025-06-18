@@ -28,7 +28,7 @@ crosslearner-benchmark = "crosslearner.benchmarks.run_benchmarks:main_baselines"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["crosslearner*", "train"]
+include = ["crosslearner*", "train", "causal_consistency_nn*"]
 
 [project.optional-dependencies]
 docs = [
