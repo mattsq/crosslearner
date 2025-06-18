@@ -12,3 +12,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Baseline MLPRegressors now train until convergence
 - Added hinge and least-squares GAN losses via `adv_loss` option
 - Added exponential moving average (`ema_decay`) for generator parameters
+- Added `crosslearner-sweep` command to run Optuna hyperparameter searches

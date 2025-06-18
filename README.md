@@ -111,6 +111,16 @@ study = optuna.create_study(direction="minimize")
 study.optimize(objective, n_trials=50)
 ```
 
+The command-line entry ``crosslearner-sweep`` wraps this workflow. It runs a
+sweep on one of the built-in datasets using a YAML file that describes the
+search space:
+
+```bash
+crosslearner-sweep toy --trials 10 --sampler random
+```
+
+Pass ``--config my_space.yaml`` to override the default ranges.
+
 See :doc:`hyperparameter_sweeps` in the documentation for more details.
 
 ## Experiment Manager
