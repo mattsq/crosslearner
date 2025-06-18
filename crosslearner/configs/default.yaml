@@ -5,6 +5,7 @@ rep_dim: 64
 phi_layers: [128]
 head_layers: [64]
 disc_layers: [64]
+disc_pack: 1
 activation: relu
 phi_dropout: 0.0
 head_dropout: 0.0

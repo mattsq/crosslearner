@@ -122,6 +122,7 @@ class ACX(nn.Module):
         phi_residual: bool | None = None,
         head_residual: bool | None = None,
         disc_residual: bool | None = None,
+        disc_pack: int = 1,
     ) -> None:
         """Instantiate the model.
 
@@ -140,6 +141,7 @@ class ACX(nn.Module):
             head_residual: Override residual connections for outcome and effect
                 heads.
             disc_residual: Override residual connections for the discriminator.
+            disc_pack: Number of samples concatenated for the discriminator.
         """
 
         super().__init__()
@@ -181,8 +183,9 @@ class ACX(nn.Module):
             dropout=head_dropout,
             residual=head_residual,
         )
+        self.disc_pack = max(1, int(disc_pack))
         self.disc = MLP(
-            rep_dim + 2,
+            self.disc_pack * (rep_dim + 2),
             1,
             hidden=disc_layers,
             activation=act_fn,

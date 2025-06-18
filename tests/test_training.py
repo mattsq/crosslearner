@@ -150,6 +150,7 @@ def test_train_acx_custom_architecture():
         head_layers=[4],
         disc_layers=[4],
         activation="elu",
+        disc_pack=2,
     )
     train_cfg = TrainingConfig(epochs=1, verbose=False)
     model = train_acx(loader, model_cfg, train_cfg, device="cpu")
