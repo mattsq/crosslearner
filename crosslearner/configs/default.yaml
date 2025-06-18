@@ -27,6 +27,9 @@ instance_noise: false
 gradient_reversal: false
 ttur: false
 lambda_gp: 10.0
+r1_gamma: 0.0
+r2_gamma: 0.0
+unrolled_steps: 0
 eta_fm: 5.0
 grl_weight: 1.0
 tensorboard_logdir: null

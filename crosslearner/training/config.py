@@ -54,6 +54,9 @@ class TrainingConfig:
     gradient_reversal: bool = False
     ttur: bool = False
     lambda_gp: float = 10.0
+    r1_gamma: float = 0.0
+    r2_gamma: float = 0.0
+    unrolled_steps: int = 0
     eta_fm: float = 5.0
     grl_weight: float = 1.0
     tensorboard_logdir: Optional[str] = None

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional, Tuple
+import copy
 
 import torch
 import torch.nn as nn
@@ -85,6 +86,52 @@ class ACXTrainer:
                     continue
                 ema_param = self._ema_params[name]
                 ema_param.mul_(decay).add_(param.detach(), alpha=1 - decay)
+
+    def _unrolled_logits(
+        self,
+        hb: torch.Tensor,
+        yb: torch.Tensor,
+        ycf: torch.Tensor,
+        tb: torch.Tensor,
+        bce: nn.Module,
+        use_wgan: bool,
+        use_hinge: bool,
+        use_ls: bool,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        steps = self.train_cfg.unrolled_steps
+        if steps <= 0:
+            logits = self.model.discriminator(hb, ycf, tb)
+            feats = self.model.disc_features(hb, ycf, tb)
+            return logits, feats
+        disc = copy.deepcopy(self.model.disc)
+        for _ in range(steps):
+            real_logits = disc(torch.cat([hb.detach(), yb.detach(), tb], dim=1))
+            fake_logits = disc(torch.cat([hb.detach(), ycf.detach(), tb], dim=1))
+            if use_wgan:
+                loss_step = fake_logits.mean() - real_logits.mean()
+            elif use_hinge:
+                loss_step = (
+                    torch.relu(1 - real_logits).mean()
+                    + torch.relu(1 + fake_logits).mean()
+                )
+            elif use_ls:
+                mse_adv = nn.MSELoss()
+                loss_step = mse_adv(
+                    real_logits, torch.ones_like(real_logits)
+                ) + mse_adv(fake_logits, torch.zeros_like(fake_logits))
+            else:
+                real_lbl = torch.ones_like(real_logits)
+                fake_lbl = torch.zeros_like(fake_logits)
+                if self.train_cfg.label_smoothing:
+                    real_lbl = real_lbl * 0.9
+                    fake_lbl = fake_lbl + 0.1
+                loss_step = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
+            grads = torch.autograd.grad(loss_step, disc.parameters(), create_graph=True)
+            for p, g in zip(disc.parameters(), grads):
+                p.data.sub_(self.train_cfg.lr_d * g)
+        logits = disc(torch.cat([hb, ycf, tb], dim=1))
+        feats = disc.net[:-1](torch.cat([hb, ycf, tb], dim=1))
+        return logits, feats
 
     def _make_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.Optimizer]:
         cfg = self.train_cfg
@@ -301,6 +348,34 @@ class ACXTrainer:
                         real_lbl = real_lbl * 0.9
                         fake_lbl = fake_lbl + 0.1
                     loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
+
+                if cfg.r1_gamma > 0:
+                    hb_r1 = hb_det.detach().requires_grad_(True)
+                    y_r1 = Yb_disc.detach().requires_grad_(True)
+                    r1_logits = model.discriminator(hb_r1, y_r1, Tb)
+                    grads = torch.autograd.grad(
+                        r1_logits.sum(), [hb_r1, y_r1], create_graph=True
+                    )
+                    penalty = 0.0
+                    for g in grads:
+                        penalty = (
+                            penalty + g.pow(2).reshape(g.shape[0], -1).sum(1).mean()
+                        )
+                    loss_d = loss_d + 0.5 * cfg.r1_gamma * penalty
+
+                if cfg.r2_gamma > 0:
+                    hb_r2 = hb_det.detach().requires_grad_(True)
+                    y_r2 = Ycf.detach().requires_grad_(True)
+                    r2_logits = model.discriminator(hb_r2, y_r2, Tb)
+                    grads = torch.autograd.grad(
+                        r2_logits.sum(), [hb_r2, y_r2], create_graph=True
+                    )
+                    penalty = 0.0
+                    for g in grads:
+                        penalty = (
+                            penalty + g.pow(2).reshape(g.shape[0], -1).sum(1).mean()
+                        )
+                    loss_d = loss_d + 0.5 * cfg.r2_gamma * penalty
                 if not freeze_d:
                     opt_d.zero_grad()
                     loss_d.backward()
@@ -317,7 +392,16 @@ class ACXTrainer:
             Ycf = torch.where(Tb.bool(), m0, m1)
             loss_adv = torch.tensor(0.0, device=device)
             if not cfg.gradient_reversal:
-                fake_logits = model.discriminator(hb, Ycf, Tb)
+                fake_logits, fake_feats = self._unrolled_logits(
+                    hb,
+                    Yb,
+                    Ycf,
+                    Tb,
+                    bce,
+                    use_wgan,
+                    use_hinge,
+                    use_ls,
+                )
                 if use_wgan or use_hinge:
                     loss_adv = -fake_logits.mean()
                 elif use_ls:
@@ -338,7 +422,10 @@ class ACXTrainer:
             if cfg.feature_matching:
                 with torch.no_grad():
                     real_f = model.disc_features(hb.detach(), Yb, Tb)
-                fake_f = model.disc_features(hb, Ycf, Tb)
+                if not cfg.gradient_reversal:
+                    fake_f = fake_feats
+                else:
+                    fake_f = model.disc_features(hb, Ycf, Tb)
                 loss_fm = ((real_f.mean(0) - fake_f.mean(0)) ** 2).mean()
                 loss_g += cfg.eta_fm * loss_fm
 
