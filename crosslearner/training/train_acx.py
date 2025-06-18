@@ -24,6 +24,9 @@ def train_acx(
     head_dropout: float = 0.0,
     disc_dropout: float = 0.0,
     residual: bool = False,
+    phi_residual: bool | None = None,
+    head_residual: bool | None = None,
+    disc_residual: bool | None = None,
     device: Optional[str] = None,
     seed: int | None = None,
     epochs: int = 30,
@@ -82,6 +85,9 @@ def train_acx(
             head_dropout=head_dropout,
             disc_dropout=disc_dropout,
             residual=residual,
+            phi_residual=phi_residual,
+            head_residual=head_residual,
+            disc_residual=disc_residual,
         )
     elif model_config.p != p:
         raise ValueError("p does not match model_config.p")

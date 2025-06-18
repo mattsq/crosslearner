@@ -119,6 +119,9 @@ class ACX(nn.Module):
         head_dropout: float = 0.0,
         disc_dropout: float = 0.0,
         residual: bool = False,
+        phi_residual: bool | None = None,
+        head_residual: bool | None = None,
+        disc_residual: bool | None = None,
     ) -> None:
         """Instantiate the model.
 
@@ -133,17 +136,26 @@ class ACX(nn.Module):
             head_dropout: Dropout probability for the outcome and effect heads.
             disc_dropout: Dropout probability for the discriminator.
             residual: Enable residual connections in all MLPs.
+            phi_residual: Override residual connections just for ``phi``.
+            head_residual: Override residual connections for outcome and effect
+                heads.
+            disc_residual: Override residual connections for the discriminator.
         """
 
         super().__init__()
         act_fn = _get_activation(activation)
+
+        phi_residual = residual if phi_residual is None else phi_residual
+        head_residual = residual if head_residual is None else head_residual
+        disc_residual = residual if disc_residual is None else disc_residual
+
         self.phi = MLP(
             p,
             rep_dim,
             hidden=phi_layers,
             activation=act_fn,
             dropout=phi_dropout,
-            residual=residual,
+            residual=phi_residual,
         )
         self.mu0 = MLP(
             rep_dim,
@@ -151,7 +163,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
-            residual=residual,
+            residual=head_residual,
         )
         self.mu1 = MLP(
             rep_dim,
@@ -159,7 +171,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
-            residual=residual,
+            residual=head_residual,
         )
         self.tau = MLP(
             rep_dim,
@@ -167,7 +179,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
-            residual=residual,
+            residual=head_residual,
         )
         self.disc = MLP(
             rep_dim + 2,
@@ -175,7 +187,7 @@ class ACX(nn.Module):
             hidden=disc_layers,
             activation=act_fn,
             dropout=disc_dropout,
-            residual=residual,
+            residual=disc_residual,
         )
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, ...]:
