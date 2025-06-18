@@ -6,6 +6,7 @@ from crosslearner.datasets.toy import get_toy_dataloader
 from crosslearner.evaluation.evaluate import evaluate
 from crosslearner.models.acx import ACX
 from crosslearner.training.train_acx import train_acx
+from crosslearner.training import ModelConfig, TrainingConfig
 import torch.nn as nn
 import pytest
 from torch.utils.data import DataLoader, TensorDataset
@@ -14,7 +15,9 @@ from torch.utils.data import DataLoader, TensorDataset
 def test_train_acx_short():
     set_seed(0)
     loader, (mu0, mu1) = get_toy_dataloader(batch_size=16, n=64, p=4)
-    model = train_acx(loader, p=4, device="cpu", epochs=2)
+    model_cfg = ModelConfig(p=4)
+    train_cfg = TrainingConfig(epochs=2)
+    model = train_acx(loader, model_cfg, train_cfg, device="cpu")
     X = torch.cat([b[0] for b in loader])
     mu0_all = mu0
     mu1_all = mu1
@@ -26,14 +29,18 @@ def test_train_acx_short():
 def test_tensorboard_logging(tmp_path):
     loader, _ = get_toy_dataloader(batch_size=16, n=32, p=4)
     logdir = tmp_path / "tb"
-    train_acx(loader, p=4, device="cpu", epochs=1, tensorboard_logdir=str(logdir))
+    model_cfg = ModelConfig(p=4)
+    train_cfg = TrainingConfig(epochs=1, tensorboard_logdir=str(logdir))
+    train_acx(loader, model_cfg, train_cfg, device="cpu")
     assert any(logdir.iterdir())
 
 
 def test_weight_clipping():
     set_seed(0)
     loader, _ = get_toy_dataloader(batch_size=16, n=64, p=4)
-    model = train_acx(loader, p=4, device="cpu", epochs=1, weight_clip=0.01)
+    model_cfg = ModelConfig(p=4)
+    train_cfg = TrainingConfig(epochs=1, weight_clip=0.01)
+    model = train_acx(loader, model_cfg, train_cfg, device="cpu")
     for p in model.disc.parameters():
         assert p.data.abs().max() <= 0.011
 
@@ -43,15 +50,14 @@ def test_early_stopping():
     loader, (mu0, mu1) = get_toy_dataloader(batch_size=16, n=64, p=4)
     X = torch.cat([b[0] for b in loader])
     val_data = (X, mu0, mu1)
-    _, history = train_acx(
-        loader,
-        p=4,
-        device="cpu",
+    model_cfg = ModelConfig(p=4)
+    train_cfg = TrainingConfig(
         epochs=5,
         val_data=val_data,
         patience=1,
         return_history=True,
     )
+    _, history = train_acx(loader, model_cfg, train_cfg, device="cpu")
     assert len(history) <= 5
 
 
@@ -61,10 +67,8 @@ def test_risk_early_stopping():
     X = torch.cat([b[0] for b in loader])
     T_all = torch.cat([b[1] for b in loader])
     Y_all = torch.cat([b[2] for b in loader])
-    _, history = train_acx(
-        loader,
-        p=4,
-        device="cpu",
+    model_cfg = ModelConfig(p=4)
+    train_cfg = TrainingConfig(
         epochs=5,
         risk_data=(X, T_all, Y_all),
         risk_folds=2,
@@ -72,6 +76,7 @@ def test_risk_early_stopping():
         return_history=True,
         verbose=False,
     )
+    _, history = train_acx(loader, model_cfg, train_cfg, device="cpu")
     assert len(history) <= 5
 
 
@@ -113,10 +118,8 @@ def test_train_acx_options():
     loader, (mu0, mu1) = get_toy_dataloader(batch_size=4, n=16, p=4)
     X = torch.cat([b[0] for b in loader])
     val_data = (X, mu0, mu1)
-    train_acx(
-        loader,
-        p=4,
-        device="cpu",
+    model_cfg = ModelConfig(p=4)
+    train_cfg = TrainingConfig(
         epochs=2,
         warm_start=1,
         use_wgan_gp=True,
@@ -134,37 +137,35 @@ def test_train_acx_options():
         patience=1,
         verbose=False,
     )
+    train_acx(loader, model_cfg, train_cfg, device="cpu")
 
 
 def test_train_acx_custom_architecture():
     loader, _ = get_toy_dataloader(batch_size=8, n=32, p=3)
-    model = train_acx(
-        loader,
+    model_cfg = ModelConfig(
         p=3,
-        device="cpu",
-        epochs=1,
         rep_dim=16,
         phi_layers=[8],
         head_layers=[4],
         disc_layers=[4],
         activation="elu",
-        verbose=False,
     )
+    train_cfg = TrainingConfig(epochs=1, verbose=False)
+    model = train_acx(loader, model_cfg, train_cfg, device="cpu")
     assert isinstance(model, ACX)
 
 
 def test_train_acx_custom_optimizer():
     loader, _ = get_toy_dataloader(batch_size=8, n=32, p=3)
-    model = train_acx(
-        loader,
-        p=3,
-        device="cpu",
+    model_cfg = ModelConfig(p=3)
+    train_cfg = TrainingConfig(
         epochs=1,
         optimizer="sgd",
         opt_g_kwargs={"momentum": 0.0},
         opt_d_kwargs={"momentum": 0.0},
         verbose=False,
     )
+    model = train_acx(loader, model_cfg, train_cfg, device="cpu")
     assert isinstance(model, ACX)
 
 
@@ -182,44 +183,37 @@ def test_train_acx_custom_scheduler(monkeypatch):
 
     monkeypatch.setattr(torch.optim.lr_scheduler, "StepLR", DummyScheduler)
 
-    train_acx(
-        loader,
-        p=3,
-        device="cpu",
-        epochs=1,
-        lr_scheduler="step",
-        verbose=False,
-    )
+    model_cfg = ModelConfig(p=3)
+    train_cfg = TrainingConfig(epochs=1, lr_scheduler="step", verbose=False)
+    train_acx(loader, model_cfg, train_cfg, device="cpu")
 
     assert steps["count"] == 2
 
 
 def test_warm_start_logs_losses():
     loader, _ = get_toy_dataloader(batch_size=8, n=32, p=4)
-    _, history = train_acx(
-        loader,
-        p=4,
-        device="cpu",
+    model_cfg = ModelConfig(p=4)
+    train_cfg = TrainingConfig(
         epochs=2,
         warm_start=1,
         return_history=True,
         verbose=False,
     )
+    _, history = train_acx(loader, model_cfg, train_cfg, device="cpu")
     assert history[0].loss_y > 0
     assert history[0].loss_g > 0
 
 
 def test_warm_start_grad_clip():
     loader, _ = get_toy_dataloader(batch_size=8, n=32, p=4)
-    model = train_acx(
-        loader,
-        p=4,
-        device="cpu",
+    model_cfg = ModelConfig(p=4)
+    train_cfg = TrainingConfig(
         epochs=2,
         warm_start=1,
         grad_clip=1.0,
         verbose=False,
     )
+    model = train_acx(loader, model_cfg, train_cfg, device="cpu")
     assert isinstance(model, ACX)
 
 
@@ -230,7 +224,9 @@ def test_train_acx_1d_targets():
     mu1 = mu0 + torch.randn(16)
     Y = torch.where(T.bool(), mu1, mu0) + 0.1 * torch.randn(16)
     loader = DataLoader(TensorDataset(X, T, Y), batch_size=8)
-    model = train_acx(loader, p=4, device="cpu", epochs=1, verbose=False)
+    model_cfg = ModelConfig(p=4)
+    train_cfg = TrainingConfig(epochs=1, verbose=False)
+    model = train_acx(loader, model_cfg, train_cfg, device="cpu")
     assert isinstance(model, ACX)
 
 
@@ -248,7 +244,9 @@ def test_instance_noise_keeps_targets(monkeypatch):
     monkeypatch.setattr(torch.nn, "MSELoss", lambda: RecMSE())
     monkeypatch.setattr(torch, "randn_like", lambda t: torch.ones_like(t))
 
-    train_acx(loader, p=4, device="cpu", epochs=1, instance_noise=True, verbose=False)
+    model_cfg = ModelConfig(p=4)
+    train_cfg = TrainingConfig(epochs=1, instance_noise=True, verbose=False)
+    train_acx(loader, model_cfg, train_cfg, device="cpu")
 
     assert torch.allclose(targets[0], loader.dataset.tensors[2][:4])
 
@@ -256,61 +254,64 @@ def test_instance_noise_keeps_targets(monkeypatch):
 def test_train_acx_feature_mismatch():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(ValueError):
-        train_acx(loader, p=3, device="cpu", epochs=1, verbose=False)
+        model_cfg = ModelConfig(p=3)
+        train_cfg = TrainingConfig(epochs=1, verbose=False)
+        train_acx(loader, model_cfg, train_cfg, device="cpu")
 
 
 def test_train_acx_invalid_activation():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(ValueError):
-        train_acx(loader, p=4, device="cpu", epochs=1, activation="bad", verbose=False)
+        model_cfg = ModelConfig(p=4, activation="bad")
+        train_cfg = TrainingConfig(epochs=1, verbose=False)
+        train_acx(loader, model_cfg, train_cfg, device="cpu")
 
 
 def test_train_acx_activation_instance():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(TypeError):
-        train_acx(
-            loader, p=4, device="cpu", epochs=1, activation=nn.ReLU(), verbose=False
-        )
+        model_cfg = ModelConfig(p=4, activation=nn.ReLU())
+        train_cfg = TrainingConfig(epochs=1, verbose=False)
+        train_acx(loader, model_cfg, train_cfg, device="cpu")
 
 
 def test_train_acx_invalid_optimizer():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(ValueError):
-        train_acx(loader, p=4, device="cpu", epochs=1, optimizer="bad", verbose=False)
+        model_cfg = ModelConfig(p=4)
+        train_cfg = TrainingConfig(epochs=1, optimizer="bad", verbose=False)
+        train_acx(loader, model_cfg, train_cfg, device="cpu")
 
 
 def test_train_acx_invalid_scheduler():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(ValueError):
-        train_acx(
-            loader, p=4, device="cpu", epochs=1, lr_scheduler="bad", verbose=False
-        )
+        model_cfg = ModelConfig(p=4)
+        train_cfg = TrainingConfig(epochs=1, lr_scheduler="bad", verbose=False)
+        train_acx(loader, model_cfg, train_cfg, device="cpu")
 
 
 def test_train_acx_negative_grad_clip():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(ValueError):
-        train_acx(loader, p=4, device="cpu", epochs=1, grad_clip=-1, verbose=False)
+        model_cfg = ModelConfig(p=4)
+        train_cfg = TrainingConfig(epochs=1, grad_clip=-1, verbose=False)
+        train_acx(loader, model_cfg, train_cfg, device="cpu")
 
 
 def test_train_acx_negative_weight_clip():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     with pytest.raises(ValueError):
-        train_acx(loader, p=4, device="cpu", epochs=1, weight_clip=-0.1, verbose=False)
+        model_cfg = ModelConfig(p=4)
+        train_cfg = TrainingConfig(epochs=1, weight_clip=-0.1, verbose=False)
+        train_acx(loader, model_cfg, train_cfg, device="cpu")
 
 
 def test_train_acx_dropout_options():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
-    model = train_acx(
-        loader,
-        p=4,
-        device="cpu",
-        epochs=1,
-        phi_dropout=0.1,
-        head_dropout=0.1,
-        disc_dropout=0.1,
-        verbose=False,
-    )
+    model_cfg = ModelConfig(p=4, phi_dropout=0.1, head_dropout=0.1, disc_dropout=0.1)
+    train_cfg = TrainingConfig(epochs=1, verbose=False)
+    model = train_acx(loader, model_cfg, train_cfg, device="cpu")
     assert any(isinstance(m, nn.Dropout) for m in model.phi.net.modules())
     assert any(isinstance(m, nn.Dropout) for m in model.mu0.net.modules())
     assert any(isinstance(m, nn.Dropout) for m in model.disc.net.modules())
