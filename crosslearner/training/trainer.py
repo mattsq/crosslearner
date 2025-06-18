@@ -44,6 +44,9 @@ class ACXTrainer:
             head_dropout=model_cfg.head_dropout,
             disc_dropout=model_cfg.disc_dropout,
             residual=model_cfg.residual,
+            phi_residual=model_cfg.phi_residual,
+            head_residual=model_cfg.head_residual,
+            disc_residual=model_cfg.disc_residual,
         ).to(self.device)
         if train_cfg.spectral_norm:
             apply_spectral_norm(self.model)

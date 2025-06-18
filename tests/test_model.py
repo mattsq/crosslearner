@@ -36,6 +36,15 @@ def test_acx_dropout_layers():
 
 def test_acx_residual_option():
     model = ACX(p=3, residual=True)
+    assert model.phi.residual is True
+    assert model.mu0.residual is True
     X = torch.randn(2, 3)
     h, _, _, _ = model(X)
     assert h.shape[0] == 2
+
+
+def test_acx_partial_residual():
+    model = ACX(p=3, phi_residual=True, head_residual=False, disc_residual=False)
+    assert model.phi.residual is True
+    assert model.mu0.residual is False
+    assert model.disc.residual is False

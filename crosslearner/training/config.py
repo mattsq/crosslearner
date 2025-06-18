@@ -21,6 +21,9 @@ class ModelConfig:
     head_dropout: float = 0.0
     disc_dropout: float = 0.0
     residual: bool = False
+    phi_residual: bool | None = None
+    head_residual: bool | None = None
+    disc_residual: bool | None = None
 
 
 @dataclass
