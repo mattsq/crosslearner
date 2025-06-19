@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Datasets" href="datasets.html" /><link rel="prev" title="Hyperparameter Sweeps with Optuna" href="hyperparameter_sweeps.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="crosslearner" href="api/modules.html" /><link rel="prev" title="Uncertainty Estimation" href="uncertainty.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Usage Examples - crosslearner 0.1 documentation</title>
+        <title>Orthogonal Risk for Early Stopping - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -204,7 +204,7 @@
 <li class="toctree-l1"><a class="reference internal" href="acx_architecture.html">ACX Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theoretical Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hyperparameter_sweeps.html">Hyperparameter Sweeps with Optuna</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Usage Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="datasets.html">Datasets</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_toy_dataloader.html">crosslearner.datasets.get_toy_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_complex_dataloader.html">crosslearner.datasets.get_complex_dataloader</a></li>
@@ -219,7 +219,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="uncertainty.html">Uncertainty Estimation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="risk_early_stopping.html">Orthogonal Risk for Early Stopping</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Orthogonal Risk for Early Stopping</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
@@ -303,7 +303,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/usage_examples.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/risk_early_stopping.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -323,77 +323,56 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="usage-examples">
-<h1>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading">¶</a></h1>
-<p>This page demonstrates common ways to train and evaluate an AC-X model.</p>
-<section id="training-from-the-command-line">
-<h2>Training from the command line<a class="headerlink" href="#training-from-the-command-line" title="Link to this heading">¶</a></h2>
-<p>A quick start for experimenting is provided by the <code class="docutils literal notranslate"><span class="pre">crosslearner-train</span></code>
-entry point.  It trains a small model on a synthetic dataset and prints the
-final <span class="math notranslate nohighlight">\(\sqrt{\mathrm{PEHE}}\)</span> metric:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">crosslearner</span><span class="o">-</span><span class="n">train</span>
-</pre></div>
+          <section id="orthogonal-risk-for-early-stopping">
+<h1>Orthogonal Risk for Early Stopping<a class="headerlink" href="#orthogonal-risk-for-early-stopping" title="Link to this heading">¶</a></h1>
+<p>Training AC-X models often relies on validation PEHE computed from known potential outcomes.
+However, real datasets rarely provide counterfactual outcomes.  The <code class="docutils literal notranslate"><span class="pre">risk_data</span></code> option of
+<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a> allows early stopping without ground truth by
+minimising an <strong>orthogonal risk</strong> estimated on a held-out triplet <code class="docutils literal notranslate"><span class="pre">(X,</span> <span class="pre">T,</span> <span class="pre">Y)</span></code>.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">risk_data</span></code> is supplied the trainer first fits cross-fitted propensity and outcome
+models on the provided data using <code class="xref py py-func docutils literal notranslate"><span class="pre">estimate_nuisances()</span></code>.
+These nuisance estimates yield an orthogonal loss</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[R = \mathbb{E}\bigl[(Y - \mu_{T}(X) - (T - e(X))\,\tau(X))^2\bigr],\]</div>
 </div>
-</section>
-<section id="running-benchmarks">
-<h2>Running benchmarks<a class="headerlink" href="#running-benchmarks" title="Link to this heading">¶</a></h2>
-<p>Use <code class="docutils literal notranslate"><span class="pre">crosslearner-benchmarks</span></code> to evaluate the implementation on several
-built-in datasets.  The following command trains for a single epoch per
-dataset and reports the mean score:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">crosslearner</span><span class="o">-</span><span class="n">benchmarks</span> <span class="nb">all</span> <span class="o">--</span><span class="n">replicates</span> <span class="mi">1</span> <span class="o">--</span><span class="n">epochs</span> <span class="mi">1</span>
-</pre></div>
-</div>
-</section>
-<section id="programmatic-training">
-<h2>Programmatic training<a class="headerlink" href="#programmatic-training" title="Link to this heading">¶</a></h2>
-<p>The training loop is also accessible from Python.  The snippet below fits a
-model on the toy dataset and computes the final PEHE:</p>
+<p>where <span class="math notranslate nohighlight">\(\tau(X)\)</span> is the predicted treatment effect and <span class="math notranslate nohighlight">\(e(X)\)</span> and
+<span class="math notranslate nohighlight">\(\mu_{T}(X)\)</span> are the learned nuisances.  Lower values indicate better causal
+estimates and the training loop stops if the risk fails to improve for
+<code class="docutils literal notranslate"><span class="pre">patience</span></code> epochs.</p>
+<section id="example-usage">
+<h2>Example usage<a class="headerlink" href="#example-usage" title="Link to this heading">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.datasets.toy</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_toy_dataloader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.training.train_acx</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_acx</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.training</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">TrainingConfig</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_seed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.training.train_acx</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_acx</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 
-<span class="n">set_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">loader</span><span class="p">,</span> <span class="p">(</span><span class="n">mu0</span><span class="p">,</span> <span class="n">mu1</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_toy_dataloader</span><span class="p">()</span>
+<span class="n">loader</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_toy_dataloader</span><span class="p">()</span>
 <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">])</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">])</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">])</span>
 
 <span class="n">model_cfg</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">train_cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">train_cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">risk_data</span><span class="o">=</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Y</span><span class="p">),</span>
+    <span class="n">risk_folds</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">patience</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">model_cfg</span><span class="p">,</span> <span class="n">train_cfg</span><span class="p">)</span>
-<span class="n">pehe</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">mu1</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sqrt(PEHE)&quot;</span><span class="p">,</span> <span class="n">pehe</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
-<section id="step-by-step-notebook">
-<h2>Step-by-step notebook<a class="headerlink" href="#step-by-step-notebook" title="Link to this heading">¶</a></h2>
-<p>For a more interactive introduction open the <code class="docutils literal notranslate"><span class="pre">examples/notebook.ipynb</span></code>
-Jupyter notebook which walks through data loading, model creation and
-evaluation step by step.  The notebook links back to <a class="reference internal" href="theory.html"><span class="doc">Theoretical Background</span></a> for
-explanations of the underlying objective.</p>
-</section>
-<section id="experiment-manager">
-<h2>Experiment manager<a class="headerlink" href="#experiment-manager" title="Link to this heading">¶</a></h2>
-<p>For repeated training and hyperparameter optimisation the
-<code class="docutils literal notranslate"><span class="pre">ExperimentManager</span></code> combines cross-validation with Optuna searches and
-TensorBoard logging.  See <a class="reference internal" href="hyperparameter_sweeps.html"><span class="doc">Hyperparameter Sweeps with Optuna</span></a> for tuning strategies.</p>
-</section>
-<section id="exporting-models">
-<h2>Exporting models<a class="headerlink" href="#exporting-models" title="Link to this heading">¶</a></h2>
-<p>Trained models can be exported to TorchScript or ONNX for deployment.
-Use <code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.export.export_model()</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.models.acx</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACX</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.export</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_model</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">ACX</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<span class="n">export_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;acx.pt&quot;</span><span class="p">)</span>           <span class="c1"># TorchScript</span>
-<span class="n">export_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;acx.onnx&quot;</span><span class="p">,</span> <span class="n">onnx</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
+<section id="tips">
+<h2>Tips<a class="headerlink" href="#tips" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Increase <code class="docutils literal notranslate"><span class="pre">risk_folds</span></code> for more accurate cross-fitting on larger datasets.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nuisance_propensity_epochs</span></code> and <code class="docutils literal notranslate"><span class="pre">nuisance_outcome_epochs</span></code> control the
+training length of the nuisance models.</p></li>
+<li><p>Combine <code class="docutils literal notranslate"><span class="pre">risk_data</span></code> with <code class="docutils literal notranslate"><span class="pre">tensorboard_logdir</span></code> to plot the risk over time.</p></li>
+<li><p>If you have ground-truth potential outcomes prefer <code class="docutils literal notranslate"><span class="pre">val_data</span></code> to monitor
+PEHE directly.</p></li>
+</ul>
 </section>
 </section>
 
@@ -402,23 +381,23 @@ Use <code class="xref py py-func docutils literal notranslate"><span class="pre"
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="datasets.html">
+          <a class="next-page" href="api/modules.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Datasets</div>
+                <div class="title">crosslearner</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="hyperparameter_sweeps.html">
+          <a class="prev-page" href="uncertainty.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Hyperparameter Sweeps with Optuna</div>
+                <div class="title">Uncertainty Estimation</div>
                 
               </div>
             </a>
@@ -452,13 +431,9 @@ Use <code class="xref py py-func docutils literal notranslate"><span class="pre"
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Usage Examples</a><ul>
-<li><a class="reference internal" href="#training-from-the-command-line">Training from the command line</a></li>
-<li><a class="reference internal" href="#running-benchmarks">Running benchmarks</a></li>
-<li><a class="reference internal" href="#programmatic-training">Programmatic training</a></li>
-<li><a class="reference internal" href="#step-by-step-notebook">Step-by-step notebook</a></li>
-<li><a class="reference internal" href="#experiment-manager">Experiment manager</a></li>
-<li><a class="reference internal" href="#exporting-models">Exporting models</a></li>
+<li><a class="reference internal" href="#">Orthogonal Risk for Early Stopping</a><ul>
+<li><a class="reference internal" href="#example-usage">Example usage</a></li>
+<li><a class="reference internal" href="#tips">Tips</a></li>
 </ul>
 </li>
 </ul>
