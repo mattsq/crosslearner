@@ -61,3 +61,14 @@ The following pseudocode sketches the training loop implemented in
 
    return trained model
 
+Noise Injection and Consistency
+-------------------------------
+
+To encourage robustness AC-X can optionally enforce consistency under
+small input perturbations. During training each batch may be augmented
+with Gaussian noise ``\epsilon \sim \mathcal{N}(0, \text{noise\_std}^2)`` and
+the model predictions on ``X + \epsilon`` are required to match those on the
+original ``X``. The additional mean squared error term is weighted by
+``noise_consistency_weight`` and applied to both potential outcome heads and
+the treatment effect head.
+

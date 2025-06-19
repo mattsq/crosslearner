@@ -379,6 +379,16 @@ return trained model
 </pre></div>
 </div>
 </section>
+<section id="noise-injection-and-consistency">
+<h2>Noise Injection and Consistency<a class="headerlink" href="#noise-injection-and-consistency" title="Link to this heading">¶</a></h2>
+<p>To encourage robustness AC-X can optionally enforce consistency under
+small input perturbations. During training each batch may be augmented
+with Gaussian noise <code class="docutils literal notranslate"><span class="pre">\epsilon</span> <span class="pre">\sim</span> <span class="pre">\mathcal{N}(0,</span> <span class="pre">\text{noise\_std}^2)</span></code> and
+the model predictions on <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">+</span> <span class="pre">\epsilon</span></code> are required to match those on the
+original <code class="docutils literal notranslate"><span class="pre">X</span></code>. The additional mean squared error term is weighted by
+<code class="docutils literal notranslate"><span class="pre">noise_consistency_weight</span></code> and applied to both potential outcome heads and
+the treatment effect head.</p>
+</section>
 </section>
 
         </article>
@@ -439,6 +449,7 @@ return trained model
 <li><a class="reference internal" href="#">Theoretical Background</a><ul>
 <li><a class="reference internal" href="#benefits-of-adversarial-training">Benefits of Adversarial Training</a></li>
 <li><a class="reference internal" href="#ac-x-training-procedure">AC-X Training Procedure</a></li>
+<li><a class="reference internal" href="#noise-injection-and-consistency">Noise Injection and Consistency</a></li>
 </ul>
 </li>
 </ul>
