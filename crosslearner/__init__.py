@@ -4,6 +4,7 @@ from .datasets import get_toy_dataloader, get_complex_dataloader
 from .training.train_acx import train_acx
 from .training.history import EpochStats, History
 from .evaluation.evaluate import evaluate
+from .evaluation.uncertainty import predict_tau_mc_dropout
 from .experiments import ExperimentManager, cross_validate_acx
 from .utils import set_seed, default_device
 from .export import export_model
@@ -23,6 +24,7 @@ __all__ = [
     "EpochStats",
     "History",
     "evaluate",
+    "predict_tau_mc_dropout",
     "plot_losses",
     "scatter_tau",
     "plot_tau_distribution",
