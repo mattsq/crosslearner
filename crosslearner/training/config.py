@@ -85,6 +85,8 @@ class TrainingConfig:
     lambda_dr: float = 0.0
     noise_std: float = 0.0
     noise_consistency_weight: float = 0.0
+    rep_consistency_weight: float = 0.0
+    rep_momentum: float = 0.99
     adv_t_weight: float = 0.0
     adv_y_weight: float = 0.0
     tensorboard_logdir: Optional[str] = None
