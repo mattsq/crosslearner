@@ -52,6 +52,7 @@ class DRLearner:
         else:
             self.model_e.fit(X, T)
             e_hat = self.model_e.predict_proba(X)[:, 1]
+        e_hat = np.clip(e_hat, 1e-3, 1 - 1e-3)
         mu0_hat = self.model_mu0.predict(X)
         mu1_hat = self.model_mu1.predict(X)
         tau_tilde = (

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Initial creation of CHANGELOG
 - Added `crosslearner-benchmark` command comparing ACX to baseline models
+- Added configurable weight initialisation schemes for ACX MLPs
+- Fixed NaNs in DRLearner by clipping propensity scores
 - Added PacGAN-style discriminator packing via `disc_pack` configuration
 - Unified benchmark CLI and baseline comparison
 - Baseline MLPRegressors now train until convergence
