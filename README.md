@@ -156,6 +156,7 @@ cross-validated $\sqrt{\mathrm{PEHE}}$ across the built-in synthetic datasets:
   The ACIC loaders attempt to download `.npz` files from GitHub. If the URLs are
   unavailable, download the files manually and place them under
   `crosslearner/datasets/_data`.
+  See `docs/datasets.rst` for a description of each loader.
 - `crosslearner/training/` – training utilities and GAN tricks.
 - `crosslearner/evaluation/` – metrics such as PEHE.
 - `crosslearner/configs/` – YAML configs with hyper‑parameters.
