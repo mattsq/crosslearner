@@ -22,3 +22,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   testing guide
 - Added optional contrastive loss via `contrastive_weight` for balanced
   covariates
+- Documented feature matching GAN trick in `docs/gan_tricks.rst`
