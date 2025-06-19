@@ -68,6 +68,8 @@ class TrainingConfig:
     contrastive_noise: float = 0.0
     delta_prop: float = 0.0
     lambda_dr: float = 0.0
+    noise_std: float = 0.0
+    noise_consistency_weight: float = 0.0
     tensorboard_logdir: Optional[str] = None
     weight_clip: Optional[float] = None
     val_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None

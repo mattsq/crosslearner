@@ -384,3 +384,16 @@ def test_train_acx_doubly_robust():
     model = train_acx(loader, model_cfg, cfg, device="cpu")
     assert hasattr(model, "prop")
     assert hasattr(model, "epsilon")
+
+
+def test_train_acx_noise_consistency():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4)
+    cfg = TrainingConfig(
+        epochs=1,
+        noise_std=0.1,
+        noise_consistency_weight=0.5,
+        verbose=False,
+    )
+    model = train_acx(loader, model_cfg, cfg, device="cpu")
+    assert isinstance(model, ACX)
