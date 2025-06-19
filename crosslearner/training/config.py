@@ -69,6 +69,12 @@ class TrainingConfig:
     lambda_gp: float = 10.0
     r1_gamma: float = 0.0
     r2_gamma: float = 0.0
+    adaptive_reg: bool = False
+    d_reg_lower: float = 0.3
+    d_reg_upper: float = 0.7
+    reg_factor: float = 1.1
+    lambda_gp_min: float = 1e-3
+    lambda_gp_max: float = 100.0
     unrolled_steps: int = 0
     eta_fm: float = 5.0
     grl_weight: float = 1.0

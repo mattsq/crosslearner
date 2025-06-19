@@ -114,6 +114,18 @@ class ACXTrainer:
                 ema_param = self._ema_params[name]
                 ema_param.mul_(decay).add_(param.detach(), alpha=1 - decay)
 
+    def _adjust_regularization(self, loss_d: float) -> None:
+        cfg = self.train_cfg
+        if not cfg.adaptive_reg:
+            return
+        adv = (cfg.adv_loss or "bce").lower()
+        if adv != "bce":
+            return
+        if loss_d < cfg.d_reg_lower:
+            cfg.lambda_gp = min(cfg.lambda_gp * cfg.reg_factor, cfg.lambda_gp_max)
+        elif loss_d > cfg.d_reg_upper:
+            cfg.lambda_gp = max(cfg.lambda_gp / cfg.reg_factor, cfg.lambda_gp_min)
+
     def _pack_inputs(
         self, h: torch.Tensor, y: torch.Tensor, t: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -685,6 +697,7 @@ class ACXTrainer:
                 else stats.loss_d
             )
             _scheduler_step(sched_d, metric_d)
+            self._adjust_regularization(stats.loss_d)
 
             if cfg.ttur:
                 freeze_d = stats.loss_d < 0.3

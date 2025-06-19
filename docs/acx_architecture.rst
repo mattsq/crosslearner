@@ -62,6 +62,10 @@ contrastive representation loss can also be enabled via
 ``contrastive_weight`` to further balance covariates across treatment
 groups.
 
+An optional adaptive regularization scheme ``adaptive_reg`` can tune the
+gradient penalty strength on the fly based on the discriminator loss to
+improve adversarial stability.
+
 Representations can further be disentangled into confounder-, outcome- and
 instrument-specific parts by setting ``disentangle=True`` and providing sizes
 for ``rep_dim_c``, ``rep_dim_a`` and ``rep_dim_i``. Two auxiliary adversaries
