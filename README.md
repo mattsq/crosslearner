@@ -196,6 +196,19 @@ export_model(model, x, "acx.pt")
 export_model(model, x, "acx.onnx", onnx=True)
 ```
 
+## Uncertainty Estimation
+
+To quantify prediction confidence you can perform Monte Carlo dropout at
+inference time. The helper
+`predict_tau_mc_dropout` runs multiple forward passes with dropout enabled and
+returns the mean and standard deviation of the treatment effect:
+
+```python
+from crosslearner.evaluation import predict_tau_mc_dropout
+
+mean, std = predict_tau_mc_dropout(model, X, passes=50)
+```
+
 ## Documentation
 
 Hosted documentation is available at [https://mattsq.github.io/crosslearner/](https://mattsq.github.io/crosslearner/).

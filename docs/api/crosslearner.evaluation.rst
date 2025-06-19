@@ -28,6 +28,14 @@ crosslearner.evaluation.propensity module
    :show-inheritance:
    :undoc-members:
 
+crosslearner.evaluation.uncertainty module
+------------------------------------------
+
+.. automodule:: crosslearner.evaluation.uncertainty
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 
