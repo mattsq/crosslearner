@@ -382,6 +382,9 @@ can improve stability when training on more complex datasets. A
 contrastive representation loss can also be enabled via
 <code class="docutils literal notranslate"><span class="pre">contrastive_weight</span></code> to further balance covariates across treatment
 groups.</p>
+<p>An optional adaptive regularization scheme <code class="docutils literal notranslate"><span class="pre">adaptive_reg</span></code> can tune the
+gradient penalty strength on the fly based on the discriminator loss to
+improve adversarial stability.</p>
 <p>Representations can further be disentangled into confounder-, outcome- and
 instrument-specific parts by setting <code class="docutils literal notranslate"><span class="pre">disentangle=True</span></code> and providing sizes
 for <code class="docutils literal notranslate"><span class="pre">rep_dim_c</span></code>, <code class="docutils literal notranslate"><span class="pre">rep_dim_a</span></code> and <code class="docutils literal notranslate"><span class="pre">rep_dim_i</span></code>. Two auxiliary adversaries
