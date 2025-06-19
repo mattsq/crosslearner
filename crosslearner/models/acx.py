@@ -39,6 +39,43 @@ def _get_activation(act: str | Callable[[], nn.Module]) -> Callable[[], nn.Modul
     return act
 
 
+def _get_initializer(
+    init: str | Callable[[nn.Linear], None] | None,
+) -> Callable[[nn.Linear], None] | None:
+    """Return a weight initializer from string or callable."""
+
+    if init is None:
+        return None
+
+    if isinstance(init, str):
+        name = init.lower()
+        mapping = {
+            "xavier": nn.init.xavier_uniform_,
+            "xavier_uniform": nn.init.xavier_uniform_,
+            "xavier_normal": nn.init.xavier_normal_,
+            "kaiming": nn.init.kaiming_uniform_,
+            "kaiming_uniform": nn.init.kaiming_uniform_,
+            "kaiming_normal": nn.init.kaiming_normal_,
+            "orthogonal": nn.init.orthogonal_,
+        }
+        if name not in mapping:
+            raise ValueError(f"Unknown initializer '{init}'")
+
+        weight_init = mapping[name]
+
+        def apply(m: nn.Linear) -> None:
+            weight_init(m.weight)
+            if m.bias is not None:
+                nn.init.zeros_(m.bias)
+
+        return apply
+
+    if not callable(init):
+        raise TypeError("initializer must be a string or callable")
+
+    return init
+
+
 class MLP(nn.Module):
     """Simple multi-layer perceptron used throughout the framework.
 
@@ -50,6 +87,8 @@ class MLP(nn.Module):
         dropout: Dropout probability applied after each hidden layer.
         residual: If ``True`` add skip connections between blocks when the
             dimensions match.
+        init: Weight initialisation scheme for ``nn.Linear`` layers. Accepted
+            strings include ``"xavier"`` and ``"kaiming"``.
     """
 
     def __init__(
@@ -61,6 +100,7 @@ class MLP(nn.Module):
         activation: str | Callable[[], nn.Module] = nn.ReLU,
         dropout: float = 0.0,
         residual: bool = False,
+        init: str | Callable[[nn.Linear], None] | None = None,
     ) -> None:
         super().__init__()
         self.residual = residual
@@ -68,6 +108,7 @@ class MLP(nn.Module):
         d = in_dim
         hidden = tuple(hidden or [])
         act_fn = _get_activation(activation)
+        init_fn = _get_initializer(init)
         dropout = float(dropout)
         if not (0 <= dropout < 1):
             raise ValueError(f"Dropout must be in the range [0, 1), but got {dropout}.")
@@ -79,6 +120,11 @@ class MLP(nn.Module):
             d = h
         self.out = nn.Linear(d, out_dim)
         self.net = nn.Sequential(*self.blocks, self.out)
+
+        if init_fn is not None:
+            for module in self.modules():
+                if isinstance(module, nn.Linear):
+                    init_fn(module)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Apply the network.
@@ -123,6 +169,7 @@ class ACX(nn.Module):
         head_residual: bool | None = None,
         disc_residual: bool | None = None,
         disc_pack: int = 1,
+        init: str | Callable[[nn.Linear], None] | None = None,
     ) -> None:
         """Instantiate the model.
 
@@ -142,6 +189,7 @@ class ACX(nn.Module):
                 heads.
             disc_residual: Override residual connections for the discriminator.
             disc_pack: Number of samples concatenated for the discriminator.
+            init: Weight initialisation scheme applied to all MLPs.
         """
 
         super().__init__()
@@ -158,6 +206,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=phi_dropout,
             residual=phi_residual,
+            init=init,
         )
         self.mu0 = MLP(
             rep_dim,
@@ -166,6 +215,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
+            init=init,
         )
         self.mu1 = MLP(
             rep_dim,
@@ -174,6 +224,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
+            init=init,
         )
         self.tau = MLP(
             rep_dim,
@@ -182,6 +233,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
+            init=init,
         )
         self.disc_pack = max(1, int(disc_pack))
         self.disc = MLP(
@@ -191,6 +243,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=disc_dropout,
             residual=disc_residual,
+            init=init,
         )
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, ...]:

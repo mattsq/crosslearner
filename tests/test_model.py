@@ -54,3 +54,15 @@ def test_acx_disc_pack():
     model = ACX(p=3, disc_pack=2)
     assert model.disc_pack == 2
     assert model.disc.net[0][0].in_features == 2 * (64 + 2)
+
+
+def test_acx_init_option():
+    def init(m):
+        nn.init.constant_(m.weight, 0.25)
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
+
+    model = ACX(p=3, init=init)
+    for module in model.mu0.modules():
+        if isinstance(module, nn.Linear):
+            assert torch.allclose(module.weight, torch.full_like(module.weight, 0.25))

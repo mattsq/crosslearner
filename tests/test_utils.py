@@ -28,6 +28,8 @@ def test_mlp_dropout_range_errors():
         MLP(4, 2, dropout=-0.1)
     with pytest.raises(ValueError):
         MLP(4, 2, dropout=1.0)
+    with pytest.raises(ValueError):
+        MLP(4, 2, init="unknown")
 
 
 def test_mlp_residual_forward():
@@ -43,6 +45,19 @@ def test_mlp_forward_matches_sequential_without_residual():
     y_seq = mlp.net(x)
     y = mlp(x)
     assert torch.allclose(y, y_seq)
+
+
+def test_mlp_custom_initializer():
+    def init(m):
+        nn.init.constant_(m.weight, 0.5)
+        if m.bias is not None:
+            nn.init.ones_(m.bias)
+
+    mlp = MLP(2, 1, hidden=(3,), init=init)
+    for module in mlp.modules():
+        if isinstance(module, nn.Linear):
+            assert torch.allclose(module.weight, torch.full_like(module.weight, 0.5))
+            assert torch.allclose(module.bias, torch.ones_like(module.bias))
 
 
 def test_set_seed_reproducibility():
