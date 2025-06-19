@@ -36,3 +36,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   gradient penalty strength based on discriminator loss
 - Added optional representation drift regularization via
   `rep_consistency_weight` and `rep_momentum`
+- Documented risk-based early stopping with `risk_data` option
