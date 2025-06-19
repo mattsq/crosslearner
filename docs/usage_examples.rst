@@ -61,3 +61,20 @@ For repeated training and hyperparameter optimisation the
 ``ExperimentManager`` combines cross-validation with Optuna searches and
 TensorBoard logging.  See :doc:`hyperparameter_sweeps` for tuning strategies.
 
+Exporting models
+----------------
+
+Trained models can be exported to TorchScript or ONNX for deployment.
+Use :func:`crosslearner.export.export_model`:
+
+.. code-block:: python
+
+   from crosslearner.models.acx import ACX
+   from crosslearner.export import export_model
+   import torch
+
+   model = ACX(p=10)
+   x = torch.randn(1, 10)
+   export_model(model, x, "acx.pt")           # TorchScript
+   export_model(model, x, "acx.onnx", onnx=True)
+

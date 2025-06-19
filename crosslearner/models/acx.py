@@ -102,6 +102,23 @@ class MLP(nn.Module):
         else:
             return self.net(x)
 
+    @torch.jit.export
+    def features(self, x: torch.Tensor) -> torch.Tensor:
+        """Return hidden representations before the final linear layer."""
+        if self.residual:
+            h = x
+            for block in self.blocks:
+                z = block(h)
+                if z.shape == h.shape:
+                    h = z + h
+                else:
+                    h = z
+            return h
+        else:
+            for block in self.blocks:
+                x = block(x)
+            return x
+
 
 class ACX(nn.Module):
     """Adversarial-Consistency X-learner model."""
@@ -193,7 +210,9 @@ class ACX(nn.Module):
             residual=disc_residual,
         )
 
-    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, ...]:
+    def forward(
+        self, x: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass.
 
         Args:
@@ -210,6 +229,7 @@ class ACX(nn.Module):
         tau = self.tau(h)
         return h, m0, m1, tau
 
+    @torch.jit.export
     def discriminator(
         self, h: torch.Tensor, y: torch.Tensor, t: torch.Tensor
     ) -> torch.Tensor:
@@ -226,10 +246,11 @@ class ACX(nn.Module):
 
         return self.disc(torch.cat([h, y, t], dim=1))
 
+    @torch.jit.export
     def disc_features(
         self, h: torch.Tensor, y: torch.Tensor, t: torch.Tensor
     ) -> torch.Tensor:
         """Return discriminator features before the final linear layer."""
 
         x = torch.cat([h, y, t], dim=1)
-        return self.disc.net[:-1](x)
+        return self.disc.features(x)
