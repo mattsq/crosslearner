@@ -440,10 +440,13 @@
 <li class="toctree-l2"><a class="reference internal" href="crosslearner.models.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="crosslearner.models.html#module-crosslearner.models.acx">crosslearner.models.acx module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX"><code class="docutils literal notranslate"><span class="pre">ACX</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.adv_t_pred"><code class="docutils literal notranslate"><span class="pre">ACX.adv_t_pred()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.adv_y_pred"><code class="docutils literal notranslate"><span class="pre">ACX.adv_y_pred()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.disc_features"><code class="docutils literal notranslate"><span class="pre">ACX.disc_features()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.discriminator"><code class="docutils literal notranslate"><span class="pre">ACX.discriminator()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.forward"><code class="docutils literal notranslate"><span class="pre">ACX.forward()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.propensity"><code class="docutils literal notranslate"><span class="pre">ACX.propensity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.split"><code class="docutils literal notranslate"><span class="pre">ACX.split()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.MLP"><code class="docutils literal notranslate"><span class="pre">MLP</span></code></a><ul>
@@ -496,6 +499,7 @@
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.disc_layers"><code class="docutils literal notranslate"><span class="pre">ModelConfig.disc_layers</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.disc_pack"><code class="docutils literal notranslate"><span class="pre">ModelConfig.disc_pack</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.disc_residual"><code class="docutils literal notranslate"><span class="pre">ModelConfig.disc_residual</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.disentangle"><code class="docutils literal notranslate"><span class="pre">ModelConfig.disentangle</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.head_dropout"><code class="docutils literal notranslate"><span class="pre">ModelConfig.head_dropout</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.head_layers"><code class="docutils literal notranslate"><span class="pre">ModelConfig.head_layers</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.head_residual"><code class="docutils literal notranslate"><span class="pre">ModelConfig.head_residual</span></code></a></li>
@@ -504,11 +508,16 @@
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.phi_layers"><code class="docutils literal notranslate"><span class="pre">ModelConfig.phi_layers</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.phi_residual"><code class="docutils literal notranslate"><span class="pre">ModelConfig.phi_residual</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.rep_dim"><code class="docutils literal notranslate"><span class="pre">ModelConfig.rep_dim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.rep_dim_a"><code class="docutils literal notranslate"><span class="pre">ModelConfig.rep_dim_a</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.rep_dim_c"><code class="docutils literal notranslate"><span class="pre">ModelConfig.rep_dim_c</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.rep_dim_i"><code class="docutils literal notranslate"><span class="pre">ModelConfig.rep_dim_i</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.residual"><code class="docutils literal notranslate"><span class="pre">ModelConfig.residual</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig"><code class="docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.adv_loss"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.adv_loss</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.adv_t_weight"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.adv_t_weight</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.adv_y_weight"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.adv_y_weight</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.alpha_out"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.alpha_out</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.beta_cons"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.beta_cons</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.contrastive_margin"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.contrastive_margin</span></code></a></li>

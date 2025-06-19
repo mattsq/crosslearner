@@ -358,6 +358,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">ACX</span><span class="p">(</span>
             <span class="n">model_cfg</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>
             <span class="n">rep_dim</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">rep_dim</span><span class="p">,</span>
+            <span class="n">disentangle</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disentangle</span><span class="p">,</span>
+            <span class="n">rep_dim_c</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">rep_dim_c</span><span class="p">,</span>
+            <span class="n">rep_dim_a</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">rep_dim_a</span><span class="p">,</span>
+            <span class="n">rep_dim_i</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">rep_dim_i</span><span class="p">,</span>
             <span class="n">phi_layers</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">phi_layers</span><span class="p">,</span>
             <span class="n">head_layers</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">head_layers</span><span class="p">,</span>
             <span class="n">disc_layers</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disc_layers</span><span class="p">,</span>
@@ -380,6 +384,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ema_model</span> <span class="o">=</span> <span class="n">ACX</span><span class="p">(</span>
                 <span class="n">model_cfg</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>
                 <span class="n">rep_dim</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">rep_dim</span><span class="p">,</span>
+                <span class="n">disentangle</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disentangle</span><span class="p">,</span>
+                <span class="n">rep_dim_c</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">rep_dim_c</span><span class="p">,</span>
+                <span class="n">rep_dim_a</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">rep_dim_a</span><span class="p">,</span>
+                <span class="n">rep_dim_i</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">rep_dim_i</span><span class="p">,</span>
                 <span class="n">phi_layers</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">phi_layers</span><span class="p">,</span>
                 <span class="n">head_layers</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">head_layers</span><span class="p">,</span>
                 <span class="n">disc_layers</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disc_layers</span><span class="p">,</span>
@@ -517,7 +525,12 @@
             <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">lr_g</span><span class="p">,</span>
             <span class="o">**</span><span class="n">opt_g_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">opt_d</span> <span class="o">=</span> <span class="n">opt_cls</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">disc</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">lr_d</span><span class="p">,</span> <span class="o">**</span><span class="n">opt_d_kwargs</span><span class="p">)</span>
+        <span class="n">disc_params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">disc</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">disentangle</span><span class="p">:</span>
+            <span class="n">disc_params</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">adv_t</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">adv_y</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="n">opt_d</span> <span class="o">=</span> <span class="n">opt_cls</span><span class="p">(</span><span class="n">disc_params</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">lr_d</span><span class="p">,</span> <span class="o">**</span><span class="n">opt_d_kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">opt_g</span><span class="p">,</span> <span class="n">opt_d</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_schedulers</span><span class="p">(</span>
@@ -707,6 +720,15 @@
                         <span class="n">fake_lbl</span> <span class="o">=</span> <span class="n">fake_lbl</span> <span class="o">+</span> <span class="mf">0.1</span>
                     <span class="n">loss_d</span> <span class="o">=</span> <span class="n">bce</span><span class="p">(</span><span class="n">real_logits</span><span class="p">,</span> <span class="n">real_lbl</span><span class="p">)</span> <span class="o">+</span> <span class="n">bce</span><span class="p">(</span><span class="n">fake_logits</span><span class="p">,</span> <span class="n">fake_lbl</span><span class="p">)</span>
 
+                <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">disentangle</span> <span class="ow">and</span> <span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">adv_t_weight</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adv_y_weight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">zc_d</span><span class="p">,</span> <span class="n">za_d</span><span class="p">,</span> <span class="n">zi_d</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">hb_det</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adv_t_weight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">t_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">adv_t_pred</span><span class="p">(</span><span class="n">zc_d</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">za_d</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+                        <span class="n">loss_d</span> <span class="o">=</span> <span class="n">loss_d</span> <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adv_t_weight</span> <span class="o">*</span> <span class="n">bce</span><span class="p">(</span><span class="n">t_pred</span><span class="p">,</span> <span class="n">Tb</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adv_y_weight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">adv_y_pred</span><span class="p">(</span><span class="n">zc_d</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">zi_d</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+                        <span class="n">loss_d</span> <span class="o">=</span> <span class="n">loss_d</span> <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adv_y_weight</span> <span class="o">*</span> <span class="n">mse</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">Yb</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">r1_gamma</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">hb_r1</span> <span class="o">=</span> <span class="n">hb_det</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
                     <span class="n">y_r1</span> <span class="o">=</span> <span class="n">Yb_disc</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
@@ -784,6 +806,17 @@
                         <span class="n">real_lbl</span> <span class="o">=</span> <span class="n">real_lbl</span> <span class="o">*</span> <span class="mf">0.9</span>
                     <span class="n">loss_adv</span> <span class="o">=</span> <span class="n">bce</span><span class="p">(</span><span class="n">fake_logits</span><span class="p">,</span> <span class="n">real_lbl</span><span class="p">)</span>
 
+            <span class="n">loss_adv_t</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">loss_adv_y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">disentangle</span> <span class="ow">and</span> <span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">adv_t_weight</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adv_y_weight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">zc</span><span class="p">,</span> <span class="n">za</span><span class="p">,</span> <span class="n">zi</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">hb</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adv_t_weight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">t_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">adv_t_pred</span><span class="p">(</span><span class="n">zc</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">grad_reverse</span><span class="p">(</span><span class="n">za</span><span class="p">))</span>
+                    <span class="n">loss_adv_t</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adv_t_weight</span> <span class="o">*</span> <span class="n">bce</span><span class="p">(</span><span class="n">t_pred</span><span class="p">,</span> <span class="n">Tb</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adv_y_weight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">adv_y_pred</span><span class="p">(</span><span class="n">zc</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">grad_reverse</span><span class="p">(</span><span class="n">zi</span><span class="p">))</span>
+                    <span class="n">loss_adv_y</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adv_y_weight</span> <span class="o">*</span> <span class="n">mse</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">Yb</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">contrastive_weight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">noise</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">torch</span><span class="o">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">Xb</span><span class="p">)</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">contrastive_noise</span>
@@ -801,6 +834,8 @@
                 <span class="n">cfg</span><span class="o">.</span><span class="n">alpha_out</span> <span class="o">*</span> <span class="n">loss_y</span>
                 <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">beta_cons</span> <span class="o">*</span> <span class="n">loss_cons</span>
                 <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gamma_adv</span> <span class="o">*</span> <span class="n">loss_adv</span>
+                <span class="o">+</span> <span class="n">loss_adv_t</span>
+                <span class="o">+</span> <span class="n">loss_adv_y</span>
                 <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">contrastive_weight</span> <span class="o">*</span> <span class="n">loss_contrast</span>
                 <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">delta_prop</span> <span class="o">*</span> <span class="n">loss_prop</span>
                 <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">lambda_dr</span> <span class="o">*</span> <span class="n">loss_dr</span>
@@ -835,7 +870,7 @@
             <span class="n">loss_g_sum</span> <span class="o">+=</span> <span class="n">loss_g</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="n">loss_y_sum</span> <span class="o">+=</span> <span class="n">loss_y</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="n">loss_cons_sum</span> <span class="o">+=</span> <span class="n">loss_cons</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-            <span class="n">loss_adv_sum</span> <span class="o">+=</span> <span class="n">loss_adv</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">loss_adv_sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">loss_adv</span> <span class="o">+</span> <span class="n">loss_adv_t</span> <span class="o">+</span> <span class="n">loss_adv_y</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
             <span class="n">batch_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">stats</span> <span class="o">=</span> <span class="n">EpochStats</span><span class="p">(</span>

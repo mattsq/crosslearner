@@ -382,6 +382,11 @@ can improve stability when training on more complex datasets. A
 contrastive representation loss can also be enabled via
 <code class="docutils literal notranslate"><span class="pre">contrastive_weight</span></code> to further balance covariates across treatment
 groups.</p>
+<p>Representations can further be disentangled into confounder-, outcome- and
+instrument-specific parts by setting <code class="docutils literal notranslate"><span class="pre">disentangle=True</span></code> and providing sizes
+for <code class="docutils literal notranslate"><span class="pre">rep_dim_c</span></code>, <code class="docutils literal notranslate"><span class="pre">rep_dim_a</span></code> and <code class="docutils literal notranslate"><span class="pre">rep_dim_i</span></code>. Two auxiliary adversaries
+controlled via <code class="docutils literal notranslate"><span class="pre">adv_t_weight</span></code> and <code class="docutils literal notranslate"><span class="pre">adv_y_weight</span></code> then encourage the desired
+independence structure.</p>
 </section>
 <section id="customising-parameters">
 <h2>Customising parameters<a class="headerlink" href="#customising-parameters" title="Link to this heading">¶</a></h2>

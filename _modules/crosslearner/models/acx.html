@@ -456,13 +456,23 @@
 <div class="viewcode-block" id="ACX">
 <a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ACX</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adversarial-Consistency X-learner model.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adversarial-Consistency X-learner model.</span>
+
+<span class="sd">    Optionally decomposes the representation into confounder-, outcome- and</span>
+<span class="sd">    instrument-specific parts. When ``disentangle`` is ``True`` the encoder</span>
+<span class="sd">    outputs ``rep_dim_c + rep_dim_a + rep_dim_i`` features which are routed to</span>
+<span class="sd">    different heads and adversaries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">rep_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="n">disentangle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">rep_dim_c</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rep_dim_a</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rep_dim_i</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">phi_layers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span><span class="mi">128</span><span class="p">,),</span>
         <span class="n">head_layers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span><span class="mi">64</span><span class="p">,),</span>
         <span class="n">disc_layers</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span><span class="mi">64</span><span class="p">,),</span>
@@ -481,7 +491,13 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            p: Number of covariates.</span>
-<span class="sd">            rep_dim: Dimensionality of the shared representation ``phi``.</span>
+<span class="sd">            rep_dim: Dimensionality of the shared representation ``phi`` when</span>
+<span class="sd">                ``disentangle`` is ``False``. Ignored otherwise.</span>
+<span class="sd">            disentangle: If ``True`` split the representation into three parts</span>
+<span class="sd">                with sizes ``rep_dim_c``, ``rep_dim_a`` and ``rep_dim_i``.</span>
+<span class="sd">            rep_dim_c: Size of the confounder representation.</span>
+<span class="sd">            rep_dim_a: Size of the outcome-specific representation.</span>
+<span class="sd">            rep_dim_i: Size of the instrument representation.</span>
 <span class="sd">            phi_layers: Sizes of hidden layers for the representation MLP.</span>
 <span class="sd">            head_layers: Hidden layers for the outcome and effect heads.</span>
 <span class="sd">            disc_layers: Hidden layers for the discriminator.</span>
@@ -505,17 +521,37 @@
         <span class="n">head_residual</span> <span class="o">=</span> <span class="n">residual</span> <span class="k">if</span> <span class="n">head_residual</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">head_residual</span>
         <span class="n">disc_residual</span> <span class="o">=</span> <span class="n">residual</span> <span class="k">if</span> <span class="n">disc_residual</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">disc_residual</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">disentangle</span> <span class="o">=</span> <span class="n">disentangle</span>
+        <span class="k">if</span> <span class="n">disentangle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="p">(</span><span class="n">rep_dim_c</span><span class="p">,</span> <span class="n">rep_dim_a</span><span class="p">,</span> <span class="n">rep_dim_i</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;rep_dim_c, rep_dim_a and rep_dim_i must be specified when disentangle=True&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rep_dim_c</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_a</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rep_dim_a</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rep_dim_i</span><span class="p">)</span>
+            <span class="n">rep_dim_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_a</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_i</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rep_dim_total</span> <span class="o">=</span> <span class="n">rep_dim</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span> <span class="o">=</span> <span class="n">rep_dim_total</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_a</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_i</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim</span> <span class="o">=</span> <span class="n">rep_dim_total</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
             <span class="n">p</span><span class="p">,</span>
-            <span class="n">rep_dim</span><span class="p">,</span>
+            <span class="n">rep_dim_total</span><span class="p">,</span>
             <span class="n">hidden</span><span class="o">=</span><span class="n">phi_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
             <span class="n">dropout</span><span class="o">=</span><span class="n">phi_dropout</span><span class="p">,</span>
             <span class="n">residual</span><span class="o">=</span><span class="n">phi_residual</span><span class="p">,</span>
             <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="n">head_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_a</span> <span class="k">if</span> <span class="n">disentangle</span> <span class="k">else</span> <span class="n">rep_dim_total</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
-            <span class="n">rep_dim</span><span class="p">,</span>
+            <span class="n">head_in</span><span class="p">,</span>
             <span class="mi">1</span><span class="p">,</span>
             <span class="n">hidden</span><span class="o">=</span><span class="n">head_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
@@ -524,7 +560,7 @@
             <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
-            <span class="n">rep_dim</span><span class="p">,</span>
+            <span class="n">head_in</span><span class="p">,</span>
             <span class="mi">1</span><span class="p">,</span>
             <span class="n">hidden</span><span class="o">=</span><span class="n">head_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
@@ -532,8 +568,9 @@
             <span class="n">residual</span><span class="o">=</span><span class="n">head_residual</span><span class="p">,</span>
             <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="n">prop_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_i</span> <span class="k">if</span> <span class="n">disentangle</span> <span class="k">else</span> <span class="n">rep_dim_total</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prop</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
-            <span class="n">rep_dim</span><span class="p">,</span>
+            <span class="n">prop_in</span><span class="p">,</span>
             <span class="mi">1</span><span class="p">,</span>
             <span class="n">hidden</span><span class="o">=</span><span class="n">head_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
@@ -544,7 +581,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">prop</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">add_module</span><span class="p">(</span><span class="s2">&quot;sigmoid&quot;</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
-            <span class="n">rep_dim</span><span class="p">,</span>
+            <span class="n">head_in</span><span class="p">,</span>
             <span class="mi">1</span><span class="p">,</span>
             <span class="n">hidden</span><span class="o">=</span><span class="n">head_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
@@ -554,7 +591,7 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disc_pack</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">disc_pack</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disc</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">disc_pack</span> <span class="o">*</span> <span class="p">(</span><span class="n">rep_dim</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disc_pack</span> <span class="o">*</span> <span class="p">(</span><span class="n">rep_dim_total</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span>
             <span class="mi">1</span><span class="p">,</span>
             <span class="n">hidden</span><span class="o">=</span><span class="n">disc_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
@@ -562,6 +599,28 @@
             <span class="n">residual</span><span class="o">=</span><span class="n">disc_residual</span><span class="p">,</span>
             <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="n">disentangle</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adv_t</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_a</span><span class="p">,</span>
+                <span class="mi">1</span><span class="p">,</span>
+                <span class="n">hidden</span><span class="o">=</span><span class="n">disc_layers</span><span class="p">,</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="n">disc_dropout</span><span class="p">,</span>
+                <span class="n">residual</span><span class="o">=</span><span class="n">disc_residual</span><span class="p">,</span>
+                <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adv_y</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_i</span><span class="p">,</span>
+                <span class="mi">1</span><span class="p">,</span>
+                <span class="n">hidden</span><span class="o">=</span><span class="n">disc_layers</span><span class="p">,</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="n">disc_dropout</span><span class="p">,</span>
+                <span class="n">residual</span><span class="o">=</span><span class="n">disc_residual</span><span class="p">,</span>
+                <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adv_t</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adv_y</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="ACX.forward">
 <a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX.forward">[docs]</a>
@@ -579,9 +638,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">m0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
-        <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
-        <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">disentangle</span><span class="p">:</span>
+            <span class="n">zc</span><span class="p">,</span> <span class="n">za</span><span class="p">,</span> <span class="n">zi</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+                <span class="n">h</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_i</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">ha</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">zc</span><span class="p">,</span> <span class="n">za</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">m0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span><span class="p">(</span><span class="n">ha</span><span class="p">)</span>
+            <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span><span class="p">(</span><span class="n">ha</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">(</span><span class="n">ha</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">m0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">m0</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">tau</span></div>
 
 
@@ -611,6 +679,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">propensity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return propensity score predictions from representation ``h``.&quot;&quot;&quot;</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">disentangle</span><span class="p">:</span>
+            <span class="n">zc</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">zi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">h_prop</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">zc</span><span class="p">,</span> <span class="n">zi</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">h_prop</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">h</span><span class="p">)</span></div>
 
 
@@ -624,6 +696,45 @@
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">h</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">t</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">disc</span><span class="o">.</span><span class="n">features</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ACX.split">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX.split">[docs]</a>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">export</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Split representation into ``(z_c, z_a, z_i)``.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">disentangle</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Model was not created with disentangle=True&quot;</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">zc</span> <span class="o">=</span> <span class="n">h</span><span class="p">[:,</span> <span class="n">start</span> <span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span><span class="p">]</span>
+        <span class="n">start</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span>
+        <span class="n">za</span> <span class="o">=</span> <span class="n">h</span><span class="p">[:,</span> <span class="n">start</span> <span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_a</span><span class="p">]</span>
+        <span class="n">start</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_a</span>
+        <span class="n">zi</span> <span class="o">=</span> <span class="n">h</span><span class="p">[:,</span> <span class="n">start</span> <span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_i</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">zc</span><span class="p">,</span> <span class="n">za</span><span class="p">,</span> <span class="n">zi</span></div>
+
+
+<div class="viewcode-block" id="ACX.adv_t_pred">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX.adv_t_pred">[docs]</a>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">export</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adv_t_pred</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zc</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">za</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict treatment assignment from ``(z_c, z_a)``.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">disentangle</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">adv_t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Model was not created with disentangle=True&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adv_t</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">zc</span><span class="p">,</span> <span class="n">za</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ACX.adv_y_pred">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX.adv_y_pred">[docs]</a>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">export</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">adv_y_pred</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zc</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">zi</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict outcome from ``(z_c, z_i)``.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">disentangle</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">adv_y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Model was not created with disentangle=True&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adv_y</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">zc</span><span class="p">,</span> <span class="n">zi</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 </div>
 
 </pre></div>
