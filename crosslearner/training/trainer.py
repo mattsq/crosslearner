@@ -103,6 +103,9 @@ class ACXTrainer:
                 p.requires_grad_(False)
             self._ema_params = dict(self.ema_model.named_parameters())
 
+        self._rep_means: dict[int, torch.Tensor] | None = None
+        self._rep_vars: dict[int, torch.Tensor] | None = None
+
     def _update_ema(self) -> None:
         decay = self.train_cfg.ema_decay
         if self.ema_model is None or decay is None:
@@ -346,6 +349,15 @@ class ACXTrainer:
         loss_d_sum = loss_g_sum = 0.0
         loss_y_sum = loss_cons_sum = loss_adv_sum = 0.0
         batch_count = 0
+        rep_sums = {
+            0: torch.zeros(self.model.rep_dim, device=device),
+            1: torch.zeros(self.model.rep_dim, device=device),
+        }
+        rep_sq_sums = {
+            0: torch.zeros(self.model.rep_dim, device=device),
+            1: torch.zeros(self.model.rep_dim, device=device),
+        }
+        rep_counts = {0: 0, 1: 0}
 
         for Xb, Tb, Yb in loader:
             Xb, Tb, Yb = Xb.to(device), Tb.to(device), Yb.to(device)
@@ -357,6 +369,26 @@ class ACXTrainer:
             Yb = Yb.float()
             with torch.no_grad():
                 hb_det, m0_det, m1_det, _ = model(Xb)
+            rep_pen = torch.tensor(0.0, device=device)
+            if cfg.rep_consistency_weight > 0:
+                t_mask = Tb.view(-1) > 0.5
+                for g, mask in ((1, t_mask), (0, ~t_mask)):
+                    if mask.any():
+                        h_g = hb_det[mask]
+                        rep_sums[g] += h_g.sum(0)
+                        rep_sq_sums[g] += (h_g * h_g).sum(0)
+                        rep_counts[g] += h_g.size(0)
+                        if (
+                            self._rep_means is not None
+                            and self._rep_means.get(g) is not None
+                        ):
+                            mean_g = h_g.mean(0)
+                            var_g = h_g.var(0, unbiased=False)
+                            rep_pen = (
+                                rep_pen
+                                + F.mse_loss(mean_g, self._rep_means[g])
+                                + F.mse_loss(var_g, self._rep_vars[g])
+                            )
 
             if cfg.warm_start > 0 and epoch < cfg.warm_start:
                 hb, m0, m1, _ = model(Xb)
@@ -568,6 +600,7 @@ class ACXTrainer:
                 + cfg.delta_prop * loss_prop
                 + cfg.lambda_dr * loss_dr
                 + cfg.noise_consistency_weight * loss_noise
+                + cfg.rep_consistency_weight * rep_pen
             )
 
             if cfg.feature_matching:
@@ -600,6 +633,24 @@ class ACXTrainer:
             loss_cons_sum += loss_cons.item()
             loss_adv_sum += (loss_adv + loss_adv_t + loss_adv_y).item()
             batch_count += 1
+
+        if cfg.rep_consistency_weight > 0:
+            if self._rep_means is None:
+                self._rep_means = {0: None, 1: None}
+                self._rep_vars = {0: None, 1: None}
+            for g in (0, 1):
+                if rep_counts[g] > 0:
+                    mean_g = rep_sums[g] / rep_counts[g]
+                    var_g = rep_sq_sums[g] / rep_counts[g] - mean_g**2
+                    if self._rep_means[g] is None:
+                        self._rep_means[g] = mean_g.detach()
+                        self._rep_vars[g] = var_g.detach()
+                    else:
+                        mom = cfg.rep_momentum
+                        self._rep_means[g].mul_(mom).add_(
+                            mean_g.detach(), alpha=1 - mom
+                        )
+                        self._rep_vars[g].mul_(mom).add_(var_g.detach(), alpha=1 - mom)
 
         stats = EpochStats(
             epoch=epoch,
