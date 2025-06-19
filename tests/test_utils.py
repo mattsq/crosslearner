@@ -69,6 +69,18 @@ def test_apply_spectral_norm_applies_to_linear():
     assert hasattr(lin, "weight_u")
 
 
+def test_mlp_weight_init_zero_bias():
+    mlp = MLP(3, 2, hidden=(4,), weight_init="xavier_uniform")
+    for module in mlp.modules():
+        if isinstance(module, nn.Linear):
+            assert torch.allclose(module.bias, torch.zeros_like(module.bias))
+
+
+def test_mlp_weight_init_invalid():
+    with pytest.raises(ValueError):
+        MLP(3, 2, weight_init="invalid")
+
+
 def test_model_device_returns_correct_device():
     model = nn.Linear(1, 1)
     dev = model_device(model)
