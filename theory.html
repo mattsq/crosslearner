@@ -389,6 +389,15 @@ original <code class="docutils literal notranslate"><span class="pre">X</span></
 <code class="docutils literal notranslate"><span class="pre">noise_consistency_weight</span></code> and applied to both potential outcome heads and
 the treatment effect head.</p>
 </section>
+<section id="representation-drift-regularization">
+<h2>Representation Drift Regularization<a class="headerlink" href="#representation-drift-regularization" title="Link to this heading">¶</a></h2>
+<p>Training GANs can suffer from unstable feature representations.  AC-X includes
+an optional term to discourage large shifts in the encoder between epochs.
+For each treatment group the mean and variance of the representation are
+tracked using an exponential moving average controlled by <code class="docutils literal notranslate"><span class="pre">rep_momentum</span></code>.
+During training the current batch statistics are penalised against the stored
+averages weighted by <code class="docutils literal notranslate"><span class="pre">rep_consistency_weight</span></code>.</p>
+</section>
 </section>
 
         </article>
@@ -450,6 +459,7 @@ the treatment effect head.</p>
 <li><a class="reference internal" href="#benefits-of-adversarial-training">Benefits of Adversarial Training</a></li>
 <li><a class="reference internal" href="#ac-x-training-procedure">AC-X Training Procedure</a></li>
 <li><a class="reference internal" href="#noise-injection-and-consistency">Noise Injection and Consistency</a></li>
+<li><a class="reference internal" href="#representation-drift-regularization">Representation Drift Regularization</a></li>
 </ul>
 </li>
 </ul>

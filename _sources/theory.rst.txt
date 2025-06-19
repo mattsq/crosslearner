@@ -72,3 +72,13 @@ original ``X``. The additional mean squared error term is weighted by
 ``noise_consistency_weight`` and applied to both potential outcome heads and
 the treatment effect head.
 
+Representation Drift Regularization
+----------------------------------
+
+Training GANs can suffer from unstable feature representations.  AC-X includes
+an optional term to discourage large shifts in the encoder between epochs.
+For each treatment group the mean and variance of the representation are
+tracked using an exponential moving average controlled by ``rep_momentum``.
+During training the current batch statistics are penalised against the stored
+averages weighted by ``rep_consistency_weight``.
+
