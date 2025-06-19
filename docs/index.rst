@@ -11,6 +11,7 @@ the training procedure, hyperparameter sweeps and available modules.
    :caption: Contents:
 
    quickstart
+   acx_architecture
    theory
    hyperparameter_sweeps
    usage_examples
