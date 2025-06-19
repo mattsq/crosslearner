@@ -27,6 +27,7 @@ class ModelConfig:
     disc_pack: int = (
         1  #: Number of samples concatenated for PacGAN-style discriminator.
     )
+    init: str | Callable[[nn.Linear], None] | None = None
 
 
 @dataclass
