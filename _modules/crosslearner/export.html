@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>crosslearner.utils - crosslearner 0.1 documentation</title>
+        <title>crosslearner.export - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
@@ -312,56 +312,45 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for crosslearner.utils</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+          <h1>Source code for crosslearner.export</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
 
 
-<div class="viewcode-block" id="set_seed">
-<a class="viewcode-back" href="../../api/crosslearner.html#crosslearner.set_seed">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">deterministic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set random seed for Python, NumPy and PyTorch.&quot;&quot;&quot;</span>
-    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed_all</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PYTHONHASHSEED&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">deterministic</span><span class="p">:</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">use_deterministic_algorithms</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">deterministic</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">benchmark</span> <span class="o">=</span> <span class="kc">False</span></div>
+<div class="viewcode-block" id="export_model">
+<a class="viewcode-back" href="../../api/crosslearner.html#crosslearner.export_model">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">export_model</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+    <span class="n">example_inputs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span>
+    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">onnx</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">opset_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">17</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Export ``model`` to TorchScript or ONNX format.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        model: Neural network module to export.</span>
+<span class="sd">        example_inputs: Sample inputs used for tracing / exporting.</span>
+<span class="sd">        path: Destination file path.</span>
+<span class="sd">        onnx: If ``True`` export in ONNX format, otherwise TorchScript.</span>
+<span class="sd">        opset_version: ONNX opset to use when ``onnx`` is ``True``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">onnx</span><span class="p">:</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">onnx</span><span class="o">.</span><span class="n">export</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="n">example_inputs</span><span class="p">,</span>
+            <span class="n">path</span><span class="p">,</span>
+            <span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;input&quot;</span><span class="p">],</span>
+            <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;output&quot;</span><span class="p">],</span>
+            <span class="n">opset_version</span><span class="o">=</span><span class="n">opset_version</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">scripted</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">script</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">scripted</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="default_device">
-<a class="viewcode-back" href="../../api/crosslearner.html#crosslearner.default_device">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">default_device</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the best available device string.&quot;&quot;&quot;</span>
-
-    <span class="k">return</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span></div>
-
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">apply_spectral_norm</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply spectral normalization to all linear layers in ``model``.&quot;&quot;&quot;</span>
-
-    <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">modules</span><span class="p">():</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">):</span>
-            <span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">spectral_norm</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">model_device</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the device of ``model`` or CPU if no parameters.&quot;&quot;&quot;</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span><span class="o">.</span><span class="n">device</span>
-    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>  <span class="c1"># pragma: no cover - unlikely</span>
-        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
 </pre></div>
         </article>
       </div>

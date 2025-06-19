@@ -250,6 +250,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.experiments.manager.html">crosslearner.experiments.manager</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/api/crosslearner.export.html">crosslearner.export</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/generated/api/crosslearner.models.html">crosslearner.models</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of crosslearner.models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.models.acx.html">crosslearner.models.acx</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../../../api/generated/api/crosslearner.models.baselines.html">crosslearner.models.baselines</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of crosslearner.models.baselines</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -419,6 +420,26 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MLP.features">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.MLP.features">[docs]</a>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">export</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return hidden representations before the final linear layer.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">x</span>
+            <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+                <span class="n">z</span> <span class="o">=</span> <span class="n">block</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">h</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                    <span class="n">h</span> <span class="o">=</span> <span class="n">z</span> <span class="o">+</span> <span class="n">h</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">h</span> <span class="o">=</span> <span class="n">z</span>
+            <span class="k">return</span> <span class="n">h</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">block</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">x</span></div>
 </div>
 
 
@@ -517,7 +538,9 @@
 
 <div class="viewcode-block" id="ACX.forward">
 <a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX.forward">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward pass.</span>
 
 <span class="sd">        Args:</span>
@@ -537,6 +560,7 @@
 
 <div class="viewcode-block" id="ACX.discriminator">
 <a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX.discriminator">[docs]</a>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">export</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">discriminator</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
@@ -556,13 +580,14 @@
 
 <div class="viewcode-block" id="ACX.disc_features">
 <a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX.disc_features">[docs]</a>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">jit</span><span class="o">.</span><span class="n">export</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">disc_features</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return discriminator features before the final linear layer.&quot;&quot;&quot;</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">h</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">t</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">disc</span><span class="o">.</span><span class="n">net</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">x</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">disc</span><span class="o">.</span><span class="n">features</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

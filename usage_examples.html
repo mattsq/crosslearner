@@ -251,6 +251,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.experiments.manager.html">crosslearner.experiments.manager</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="api/generated/api/crosslearner.export.html">crosslearner.export</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="api/generated/api/crosslearner.models.html">crosslearner.models</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle navigation of crosslearner.models</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.models.acx.html">crosslearner.models.acx</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="api/generated/api/crosslearner.models.baselines.html">crosslearner.models.baselines</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle navigation of crosslearner.models.baselines</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -375,6 +376,21 @@ explanations of the underlying objective.</p>
 <code class="docutils literal notranslate"><span class="pre">ExperimentManager</span></code> combines cross-validation with Optuna searches and
 TensorBoard logging.  See <a class="reference internal" href="hyperparameter_sweeps.html"><span class="doc">Hyperparameter Sweeps with Optuna</span></a> for tuning strategies.</p>
 </section>
+<section id="exporting-models">
+<h2>Exporting models<a class="headerlink" href="#exporting-models" title="Link to this heading">¶</a></h2>
+<p>Trained models can be exported to TorchScript or ONNX for deployment.
+Use <code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.export.export_model()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.models.acx</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACX</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.export</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_model</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ACX</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">export_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;acx.pt&quot;</span><span class="p">)</span>           <span class="c1"># TorchScript</span>
+<span class="n">export_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;acx.onnx&quot;</span><span class="p">,</span> <span class="n">onnx</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 </section>
 
         </article>
@@ -438,6 +454,7 @@ TensorBoard logging.  See <a class="reference internal" href="hyperparameter_swe
 <li><a class="reference internal" href="#programmatic-training">Programmatic training</a></li>
 <li><a class="reference internal" href="#step-by-step-notebook">Step-by-step notebook</a></li>
 <li><a class="reference internal" href="#experiment-manager">Experiment manager</a></li>
+<li><a class="reference internal" href="#exporting-models">Exporting models</a></li>
 </ul>
 </li>
 </ul>
