@@ -34,6 +34,12 @@ def test_acx_dropout_layers():
     assert any(isinstance(m, nn.Dropout) for m in model.disc.net.modules())
 
 
+def test_acx_batch_norm_layers():
+    model = ACX(p=2, batch_norm=True)
+    assert any(isinstance(m, nn.BatchNorm1d) for m in model.phi.net.modules())
+    assert any(isinstance(m, nn.BatchNorm1d) for m in model.mu0.net.modules())
+
+
 def test_acx_residual_option():
     model = ACX(p=3, residual=True)
     assert model.phi.residual is True

@@ -37,6 +37,11 @@ def test_mlp_residual_forward():
     assert y.shape == (2, 4)
 
 
+def test_mlp_batch_norm():
+    mlp = MLP(3, 2, hidden=(4,), batch_norm=True)
+    assert any(isinstance(m, nn.BatchNorm1d) for m in mlp.net.modules())
+
+
 def test_mlp_forward_matches_sequential_without_residual():
     mlp = MLP(3, 2, hidden=(5,), residual=False)
     x = torch.randn(4, 3)
