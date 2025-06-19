@@ -61,9 +61,11 @@ class MLP(nn.Module):
         activation: str | Callable[[], nn.Module] = nn.ReLU,
         dropout: float = 0.0,
         residual: bool = False,
+        batch_norm: bool = False,
     ) -> None:
         super().__init__()
         self.residual = residual
+        self.batch_norm = batch_norm
         self.blocks = nn.ModuleList()
         d = in_dim
         hidden = tuple(hidden or [])
@@ -72,13 +74,20 @@ class MLP(nn.Module):
         if not (0 <= dropout < 1):
             raise ValueError(f"Dropout must be in the range [0, 1), but got {dropout}.")
         for h in hidden:
-            block = [nn.Linear(d, h), act_fn()]
+            block = [nn.Linear(d, h)]
+            if batch_norm:
+                block.append(nn.BatchNorm1d(h))
+            block.append(act_fn())
             if dropout > 0:
                 block.append(nn.Dropout(dropout))
             self.blocks.append(nn.Sequential(*block))
             d = h
         self.out = nn.Linear(d, out_dim)
-        self.net = nn.Sequential(*self.blocks, self.out)
+        self.out_bn = nn.BatchNorm1d(out_dim) if batch_norm else None
+        out_layers = [self.out]
+        if self.out_bn is not None:
+            out_layers.append(self.out_bn)
+        self.net = nn.Sequential(*self.blocks, *out_layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Apply the network.
@@ -98,7 +107,10 @@ class MLP(nn.Module):
                     h = z + h
                 else:
                     h = z
-            return self.out(h)
+            h = self.out(h)
+            if self.out_bn is not None:
+                h = self.out_bn(h)
+            return h
         else:
             return self.net(x)
 
@@ -118,6 +130,7 @@ class ACX(nn.Module):
         phi_dropout: float = 0.0,
         head_dropout: float = 0.0,
         disc_dropout: float = 0.0,
+        batch_norm: bool = False,
         residual: bool = False,
         phi_residual: bool | None = None,
         head_residual: bool | None = None,
@@ -136,6 +149,7 @@ class ACX(nn.Module):
             phi_dropout: Dropout probability for the representation MLP.
             head_dropout: Dropout probability for the outcome and effect heads.
             disc_dropout: Dropout probability for the discriminator.
+            batch_norm: Insert ``BatchNorm1d`` layers after linear layers.
             residual: Enable residual connections in all MLPs.
             phi_residual: Override residual connections just for ``phi``.
             head_residual: Override residual connections for outcome and effect
@@ -157,6 +171,7 @@ class ACX(nn.Module):
             hidden=phi_layers,
             activation=act_fn,
             dropout=phi_dropout,
+            batch_norm=batch_norm,
             residual=phi_residual,
         )
         self.mu0 = MLP(
@@ -165,6 +180,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
+            batch_norm=batch_norm,
             residual=head_residual,
         )
         self.mu1 = MLP(
@@ -173,6 +189,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
+            batch_norm=batch_norm,
             residual=head_residual,
         )
         self.tau = MLP(
@@ -181,6 +198,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
+            batch_norm=batch_norm,
             residual=head_residual,
         )
         self.disc_pack = max(1, int(disc_pack))
@@ -190,6 +208,7 @@ class ACX(nn.Module):
             hidden=disc_layers,
             activation=act_fn,
             dropout=disc_dropout,
+            batch_norm=batch_norm,
             residual=disc_residual,
         )
 
