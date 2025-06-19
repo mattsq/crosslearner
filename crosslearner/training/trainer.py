@@ -49,6 +49,7 @@ class ACXTrainer:
             head_residual=model_cfg.head_residual,
             disc_residual=model_cfg.disc_residual,
             disc_pack=model_cfg.disc_pack,
+            batch_norm=model_cfg.batch_norm,
         ).to(self.device)
         if train_cfg.spectral_norm:
             apply_spectral_norm(self.model)
@@ -70,6 +71,7 @@ class ACXTrainer:
                 head_residual=model_cfg.head_residual,
                 disc_residual=model_cfg.disc_residual,
                 disc_pack=model_cfg.disc_pack,
+                batch_norm=model_cfg.batch_norm,
             ).to(self.device)
             if train_cfg.spectral_norm:
                 apply_spectral_norm(self.ema_model)

@@ -17,3 +17,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed `set_seed` to skip `torch.cuda.manual_seed_all` when CUDA is unavailable
 - Added synthetic data generation utilities with configurable noise and missing outcomes
 - MLP and ACX are now TorchScript and ONNX exportable via `export_model`
+- Added optional batch normalization through `batch_norm` flag in `ModelConfig`

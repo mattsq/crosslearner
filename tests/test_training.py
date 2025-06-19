@@ -319,6 +319,14 @@ def test_train_acx_dropout_options():
     assert any(isinstance(m, nn.Dropout) for m in model.disc.net.modules())
 
 
+def test_train_acx_batch_norm_option():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4, batch_norm=True)
+    train_cfg = TrainingConfig(epochs=1, verbose=False)
+    model = train_acx(loader, model_cfg, train_cfg, device="cpu")
+    assert any(isinstance(m, nn.BatchNorm1d) for m in model.phi.net.modules())
+
+
 def test_alt_adv_losses():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     model_cfg = ModelConfig(p=4)
