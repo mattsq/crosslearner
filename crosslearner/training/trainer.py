@@ -434,6 +434,11 @@ class ACXTrainer:
             eps = model.epsilon
             q_tilde = m_obs + eps * (Tb - prop) / (prop * (1 - prop) + 1e-8)
             loss_dr = mse(Yb, q_tilde)
+            loss_noise = torch.tensor(0.0, device=device)
+            if cfg.noise_consistency_weight > 0 and cfg.noise_std > 0:
+                Xn = Xb + torch.randn_like(Xb) * cfg.noise_std
+                _, m0_n, m1_n, tau_n = model(Xn)
+                loss_noise = mse(m0_n, m0) + mse(m1_n, m1) + mse(tau_n, tau)
             Ycf = torch.where(Tb.bool(), m0, m1)
             loss_adv = torch.tensor(0.0, device=device)
             loss_contrast = torch.tensor(0.0, device=device)
@@ -479,6 +484,7 @@ class ACXTrainer:
                 + cfg.contrastive_weight * loss_contrast
                 + cfg.delta_prop * loss_prop
                 + cfg.lambda_dr * loss_dr
+                + cfg.noise_consistency_weight * loss_noise
             )
 
             if cfg.feature_matching:

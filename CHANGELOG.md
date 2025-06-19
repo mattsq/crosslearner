@@ -26,3 +26,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   estimation
 - Added propensity head and doubly robust training objective via `delta_prop`
   and `lambda_dr` weights
+- Added optional noise injection and input consistency regularization via
+  `noise_std` and `noise_consistency_weight`
