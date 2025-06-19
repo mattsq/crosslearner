@@ -45,6 +45,12 @@ def test_mlp_forward_matches_sequential_without_residual():
     assert torch.allclose(y, y_seq)
 
 
+def test_mlp_batch_norm_layers():
+    mlp = MLP(4, 2, hidden=(3, 3), batch_norm=True)
+    bn_layers = [m for m in mlp.net.modules() if isinstance(m, nn.BatchNorm1d)]
+    assert len(bn_layers) == 2
+
+
 def test_set_seed_reproducibility():
     set_seed(123)
     r1 = random.random()

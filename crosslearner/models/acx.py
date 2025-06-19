@@ -50,6 +50,8 @@ class MLP(nn.Module):
         dropout: Dropout probability applied after each hidden layer.
         residual: If ``True`` add skip connections between blocks when the
             dimensions match.
+        batch_norm: If ``True`` add ``BatchNorm1d`` after each hidden linear
+            layer.
     """
 
     def __init__(
@@ -61,6 +63,7 @@ class MLP(nn.Module):
         activation: str | Callable[[], nn.Module] = nn.ReLU,
         dropout: float = 0.0,
         residual: bool = False,
+        batch_norm: bool = False,
     ) -> None:
         super().__init__()
         self.residual = residual
@@ -72,7 +75,10 @@ class MLP(nn.Module):
         if not (0 <= dropout < 1):
             raise ValueError(f"Dropout must be in the range [0, 1), but got {dropout}.")
         for h in hidden:
-            block = [nn.Linear(d, h), act_fn()]
+            block = [nn.Linear(d, h)]
+            if batch_norm:
+                block.append(nn.BatchNorm1d(h))
+            block.append(act_fn())
             if dropout > 0:
                 block.append(nn.Dropout(dropout))
             self.blocks.append(nn.Sequential(*block))
@@ -140,6 +146,7 @@ class ACX(nn.Module):
         head_residual: bool | None = None,
         disc_residual: bool | None = None,
         disc_pack: int = 1,
+        batch_norm: bool = False,
     ) -> None:
         """Instantiate the model.
 
@@ -159,6 +166,7 @@ class ACX(nn.Module):
                 heads.
             disc_residual: Override residual connections for the discriminator.
             disc_pack: Number of samples concatenated for the discriminator.
+            batch_norm: Insert ``BatchNorm1d`` layers in all MLPs.
         """
 
         super().__init__()
@@ -175,6 +183,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=phi_dropout,
             residual=phi_residual,
+            batch_norm=batch_norm,
         )
         self.mu0 = MLP(
             rep_dim,
@@ -183,6 +192,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
+            batch_norm=batch_norm,
         )
         self.mu1 = MLP(
             rep_dim,
@@ -191,6 +201,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
+            batch_norm=batch_norm,
         )
         self.tau = MLP(
             rep_dim,
@@ -199,6 +210,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
+            batch_norm=batch_norm,
         )
         self.disc_pack = max(1, int(disc_pack))
         self.disc = MLP(
@@ -208,6 +220,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=disc_dropout,
             residual=disc_residual,
+            batch_norm=batch_norm,
         )
 
     def forward(
