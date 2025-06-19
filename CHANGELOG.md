@@ -20,3 +20,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added optional batch normalization through `batch_norm` flag in `ModelConfig`
 - Expanded documentation: added setup instructions, dataset descriptions and
   testing guide
+- Added optional contrastive loss via `contrastive_weight` for balanced
+  covariates

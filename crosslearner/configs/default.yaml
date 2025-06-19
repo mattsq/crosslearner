@@ -33,6 +33,9 @@ r2_gamma: 0.0
 unrolled_steps: 0
 eta_fm: 5.0
 grl_weight: 1.0
+contrastive_weight: 0.0
+contrastive_margin: 1.0
+contrastive_noise: 0.0
 tensorboard_logdir: null
 weight_clip: null
 patience: 0

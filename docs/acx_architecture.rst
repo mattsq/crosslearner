@@ -57,7 +57,10 @@ New features
 Recent versions add optional weight initialisation and batch
 normalisation. When enabled, every linear layer is initialised according
 to the chosen scheme and followed by a batch-normalisation layer. This
-can improve stability when training on more complex datasets.
+can improve stability when training on more complex datasets. A
+contrastive representation loss can also be enabled via
+``contrastive_weight`` to further balance covariates across treatment
+groups.
 
 Customising parameters
 ----------------------
