@@ -368,6 +368,8 @@
 <span class="sd">        dropout: Dropout probability applied after each hidden layer.</span>
 <span class="sd">        residual: If ``True`` add skip connections between blocks when the</span>
 <span class="sd">            dimensions match.</span>
+<span class="sd">        batch_norm: If ``True`` add ``BatchNorm1d`` after each hidden linear</span>
+<span class="sd">            layer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -379,6 +381,7 @@
         <span class="n">activation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
         <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
         <span class="n">residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">batch_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">residual</span> <span class="o">=</span> <span class="n">residual</span>
@@ -390,7 +393,10 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">dropout</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dropout must be in the range [0, 1), but got </span><span class="si">{</span><span class="n">dropout</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hidden</span><span class="p">:</span>
-            <span class="n">block</span> <span class="o">=</span> <span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">h</span><span class="p">),</span> <span class="n">act_fn</span><span class="p">()]</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">h</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">batch_norm</span><span class="p">:</span>
+                <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>
+            <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">act_fn</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">dropout</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">block</span><span class="p">))</span>
@@ -467,6 +473,7 @@
         <span class="n">head_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">disc_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">disc_pack</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">batch_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the model.</span>
 
@@ -486,6 +493,7 @@
 <span class="sd">                heads.</span>
 <span class="sd">            disc_residual: Override residual connections for the discriminator.</span>
 <span class="sd">            disc_pack: Number of samples concatenated for the discriminator.</span>
+<span class="sd">            batch_norm: Insert ``BatchNorm1d`` layers in all MLPs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -502,6 +510,7 @@
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
             <span class="n">dropout</span><span class="o">=</span><span class="n">phi_dropout</span><span class="p">,</span>
             <span class="n">residual</span><span class="o">=</span><span class="n">phi_residual</span><span class="p">,</span>
+            <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
             <span class="n">rep_dim</span><span class="p">,</span>
@@ -510,6 +519,7 @@
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
             <span class="n">dropout</span><span class="o">=</span><span class="n">head_dropout</span><span class="p">,</span>
             <span class="n">residual</span><span class="o">=</span><span class="n">head_residual</span><span class="p">,</span>
+            <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
             <span class="n">rep_dim</span><span class="p">,</span>
@@ -518,6 +528,7 @@
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
             <span class="n">dropout</span><span class="o">=</span><span class="n">head_dropout</span><span class="p">,</span>
             <span class="n">residual</span><span class="o">=</span><span class="n">head_residual</span><span class="p">,</span>
+            <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
             <span class="n">rep_dim</span><span class="p">,</span>
@@ -526,6 +537,7 @@
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
             <span class="n">dropout</span><span class="o">=</span><span class="n">head_dropout</span><span class="p">,</span>
             <span class="n">residual</span><span class="o">=</span><span class="n">head_residual</span><span class="p">,</span>
+            <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disc_pack</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">disc_pack</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disc</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
@@ -535,6 +547,7 @@
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
             <span class="n">dropout</span><span class="o">=</span><span class="n">disc_dropout</span><span class="p">,</span>
             <span class="n">residual</span><span class="o">=</span><span class="n">disc_residual</span><span class="p">,</span>
+            <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="ACX.forward">
