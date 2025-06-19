@@ -17,6 +17,7 @@ the training procedure, hyperparameter sweeps and available modules.
    usage_examples
    datasets
    uncertainty
+   risk_early_stopping
 
 
 .. toctree::
