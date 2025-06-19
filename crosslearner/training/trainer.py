@@ -38,6 +38,10 @@ class ACXTrainer:
         self.model = ACX(
             model_cfg.p,
             rep_dim=model_cfg.rep_dim,
+            disentangle=model_cfg.disentangle,
+            rep_dim_c=model_cfg.rep_dim_c,
+            rep_dim_a=model_cfg.rep_dim_a,
+            rep_dim_i=model_cfg.rep_dim_i,
             phi_layers=model_cfg.phi_layers,
             head_layers=model_cfg.head_layers,
             disc_layers=model_cfg.disc_layers,
@@ -60,6 +64,10 @@ class ACXTrainer:
             self.ema_model = ACX(
                 model_cfg.p,
                 rep_dim=model_cfg.rep_dim,
+                disentangle=model_cfg.disentangle,
+                rep_dim_c=model_cfg.rep_dim_c,
+                rep_dim_a=model_cfg.rep_dim_a,
+                rep_dim_i=model_cfg.rep_dim_i,
                 phi_layers=model_cfg.phi_layers,
                 head_layers=model_cfg.head_layers,
                 disc_layers=model_cfg.disc_layers,
@@ -197,7 +205,12 @@ class ACXTrainer:
             lr=cfg.lr_g,
             **opt_g_kwargs,
         )
-        opt_d = opt_cls(model.disc.parameters(), lr=cfg.lr_d, **opt_d_kwargs)
+        disc_params = list(model.disc.parameters())
+        if model.disentangle:
+            disc_params += list(model.adv_t.parameters()) + list(
+                model.adv_y.parameters()
+            )
+        opt_d = opt_cls(disc_params, lr=cfg.lr_d, **opt_d_kwargs)
         return opt_g, opt_d
 
     def _make_schedulers(
@@ -387,6 +400,15 @@ class ACXTrainer:
                         fake_lbl = fake_lbl + 0.1
                     loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
 
+                if model.disentangle and (cfg.adv_t_weight > 0 or cfg.adv_y_weight > 0):
+                    zc_d, za_d, zi_d = model.split(hb_det)
+                    if cfg.adv_t_weight > 0:
+                        t_pred = model.adv_t_pred(zc_d.detach(), za_d.detach())
+                        loss_d = loss_d + cfg.adv_t_weight * bce(t_pred, Tb)
+                    if cfg.adv_y_weight > 0:
+                        y_pred = model.adv_y_pred(zc_d.detach(), zi_d.detach())
+                        loss_d = loss_d + cfg.adv_y_weight * mse(y_pred, Yb)
+
                 if cfg.r1_gamma > 0:
                     hb_r1 = hb_det.detach().requires_grad_(True)
                     y_r1 = Yb_disc.detach().requires_grad_(True)
@@ -464,6 +486,17 @@ class ACXTrainer:
                         real_lbl = real_lbl * 0.9
                     loss_adv = bce(fake_logits, real_lbl)
 
+            loss_adv_t = torch.tensor(0.0, device=device)
+            loss_adv_y = torch.tensor(0.0, device=device)
+            if model.disentangle and (cfg.adv_t_weight > 0 or cfg.adv_y_weight > 0):
+                zc, za, zi = model.split(hb)
+                if cfg.adv_t_weight > 0:
+                    t_pred = model.adv_t_pred(zc.detach(), grad_reverse(za))
+                    loss_adv_t = cfg.adv_t_weight * bce(t_pred, Tb)
+                if cfg.adv_y_weight > 0:
+                    y_pred = model.adv_y_pred(zc.detach(), grad_reverse(zi))
+                    loss_adv_y = cfg.adv_y_weight * mse(y_pred, Yb)
+
             if cfg.contrastive_weight > 0:
                 noise = (
                     torch.randn_like(Xb) * cfg.contrastive_noise
@@ -481,6 +514,8 @@ class ACXTrainer:
                 cfg.alpha_out * loss_y
                 + cfg.beta_cons * loss_cons
                 + cfg.gamma_adv * loss_adv
+                + loss_adv_t
+                + loss_adv_y
                 + cfg.contrastive_weight * loss_contrast
                 + cfg.delta_prop * loss_prop
                 + cfg.lambda_dr * loss_dr
@@ -515,7 +550,7 @@ class ACXTrainer:
             loss_g_sum += loss_g.item()
             loss_y_sum += loss_y.item()
             loss_cons_sum += loss_cons.item()
-            loss_adv_sum += loss_adv.item()
+            loss_adv_sum += (loss_adv + loss_adv_t + loss_adv_y).item()
             batch_count += 1
 
         stats = EpochStats(

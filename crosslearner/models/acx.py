@@ -127,13 +127,23 @@ class MLP(nn.Module):
 
 
 class ACX(nn.Module):
-    """Adversarial-Consistency X-learner model."""
+    """Adversarial-Consistency X-learner model.
+
+    Optionally decomposes the representation into confounder-, outcome- and
+    instrument-specific parts. When ``disentangle`` is ``True`` the encoder
+    outputs ``rep_dim_c + rep_dim_a + rep_dim_i`` features which are routed to
+    different heads and adversaries.
+    """
 
     def __init__(
         self,
         p: int,
         *,
         rep_dim: int = 64,
+        disentangle: bool = False,
+        rep_dim_c: int | None = None,
+        rep_dim_a: int | None = None,
+        rep_dim_i: int | None = None,
         phi_layers: Iterable[int] | None = (128,),
         head_layers: Iterable[int] | None = (64,),
         disc_layers: Iterable[int] | None = (64,),
@@ -152,7 +162,13 @@ class ACX(nn.Module):
 
         Args:
             p: Number of covariates.
-            rep_dim: Dimensionality of the shared representation ``phi``.
+            rep_dim: Dimensionality of the shared representation ``phi`` when
+                ``disentangle`` is ``False``. Ignored otherwise.
+            disentangle: If ``True`` split the representation into three parts
+                with sizes ``rep_dim_c``, ``rep_dim_a`` and ``rep_dim_i``.
+            rep_dim_c: Size of the confounder representation.
+            rep_dim_a: Size of the outcome-specific representation.
+            rep_dim_i: Size of the instrument representation.
             phi_layers: Sizes of hidden layers for the representation MLP.
             head_layers: Hidden layers for the outcome and effect heads.
             disc_layers: Hidden layers for the discriminator.
@@ -176,17 +192,37 @@ class ACX(nn.Module):
         head_residual = residual if head_residual is None else head_residual
         disc_residual = residual if disc_residual is None else disc_residual
 
+        self.disentangle = disentangle
+        if disentangle:
+            if None in (rep_dim_c, rep_dim_a, rep_dim_i):
+                raise ValueError(
+                    "rep_dim_c, rep_dim_a and rep_dim_i must be specified when disentangle=True"
+                )
+            self.rep_dim_c = int(rep_dim_c)
+            self.rep_dim_a = int(rep_dim_a)
+            self.rep_dim_i = int(rep_dim_i)
+            rep_dim_total = self.rep_dim_c + self.rep_dim_a + self.rep_dim_i
+        else:
+            rep_dim_total = rep_dim
+            self.rep_dim_c = rep_dim_total
+            self.rep_dim_a = 0
+            self.rep_dim_i = 0
+
+        self.rep_dim = rep_dim_total
+
         self.phi = MLP(
             p,
-            rep_dim,
+            rep_dim_total,
             hidden=phi_layers,
             activation=act_fn,
             dropout=phi_dropout,
             residual=phi_residual,
             batch_norm=batch_norm,
         )
+        head_in = self.rep_dim_c + self.rep_dim_a if disentangle else rep_dim_total
+
         self.mu0 = MLP(
-            rep_dim,
+            head_in,
             1,
             hidden=head_layers,
             activation=act_fn,
@@ -195,7 +231,7 @@ class ACX(nn.Module):
             batch_norm=batch_norm,
         )
         self.mu1 = MLP(
-            rep_dim,
+            head_in,
             1,
             hidden=head_layers,
             activation=act_fn,
@@ -203,8 +239,9 @@ class ACX(nn.Module):
             residual=head_residual,
             batch_norm=batch_norm,
         )
+        prop_in = self.rep_dim_c + self.rep_dim_i if disentangle else rep_dim_total
         self.prop = MLP(
-            rep_dim,
+            prop_in,
             1,
             hidden=head_layers,
             activation=act_fn,
@@ -215,7 +252,7 @@ class ACX(nn.Module):
         self.prop.net.add_module("sigmoid", nn.Sigmoid())
         self.epsilon = nn.Parameter(torch.tensor(0.0))
         self.tau = MLP(
-            rep_dim,
+            head_in,
             1,
             hidden=head_layers,
             activation=act_fn,
@@ -225,7 +262,7 @@ class ACX(nn.Module):
         )
         self.disc_pack = max(1, int(disc_pack))
         self.disc = MLP(
-            self.disc_pack * (rep_dim + 2),
+            self.disc_pack * (rep_dim_total + 2),
             1,
             hidden=disc_layers,
             activation=act_fn,
@@ -233,6 +270,28 @@ class ACX(nn.Module):
             residual=disc_residual,
             batch_norm=batch_norm,
         )
+        if disentangle:
+            self.adv_t = MLP(
+                self.rep_dim_c + self.rep_dim_a,
+                1,
+                hidden=disc_layers,
+                activation=act_fn,
+                dropout=disc_dropout,
+                residual=disc_residual,
+                batch_norm=batch_norm,
+            )
+            self.adv_y = MLP(
+                self.rep_dim_c + self.rep_dim_i,
+                1,
+                hidden=disc_layers,
+                activation=act_fn,
+                dropout=disc_dropout,
+                residual=disc_residual,
+                batch_norm=batch_norm,
+            )
+        else:
+            self.adv_t = None
+            self.adv_y = None
 
     def forward(
         self, x: torch.Tensor
@@ -248,9 +307,18 @@ class ACX(nn.Module):
         """
 
         h = self.phi(x)
-        m0 = self.mu0(h)
-        m1 = self.mu1(h)
-        tau = self.tau(h)
+        if self.disentangle:
+            zc, za, zi = torch.split(
+                h, [self.rep_dim_c, self.rep_dim_a, self.rep_dim_i], dim=1
+            )
+            ha = torch.cat([zc, za], dim=1)
+            m0 = self.mu0(ha)
+            m1 = self.mu1(ha)
+            tau = self.tau(ha)
+        else:
+            m0 = self.mu0(h)
+            m1 = self.mu1(h)
+            tau = self.tau(h)
         return h, m0, m1, tau
 
     @torch.jit.export
@@ -274,6 +342,10 @@ class ACX(nn.Module):
     def propensity(self, h: torch.Tensor) -> torch.Tensor:
         """Return propensity score predictions from representation ``h``."""
 
+        if self.disentangle:
+            zc, _, zi = self.split(h)
+            h_prop = torch.cat([zc, zi], dim=1)
+            return self.prop(h_prop)
         return self.prop(h)
 
     @torch.jit.export
@@ -284,3 +356,33 @@ class ACX(nn.Module):
 
         x = torch.cat([h, y, t], dim=1)
         return self.disc.features(x)
+
+    @torch.jit.export
+    def split(self, h: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Split representation into ``(z_c, z_a, z_i)``."""
+
+        if not self.disentangle:
+            raise RuntimeError("Model was not created with disentangle=True")
+        start = 0
+        zc = h[:, start : start + self.rep_dim_c]
+        start += self.rep_dim_c
+        za = h[:, start : start + self.rep_dim_a]
+        start += self.rep_dim_a
+        zi = h[:, start : start + self.rep_dim_i]
+        return zc, za, zi
+
+    @torch.jit.export
+    def adv_t_pred(self, zc: torch.Tensor, za: torch.Tensor) -> torch.Tensor:
+        """Predict treatment assignment from ``(z_c, z_a)``."""
+
+        if not self.disentangle or self.adv_t is None:
+            raise RuntimeError("Model was not created with disentangle=True")
+        return self.adv_t(torch.cat([zc, za], dim=1))
+
+    @torch.jit.export
+    def adv_y_pred(self, zc: torch.Tensor, zi: torch.Tensor) -> torch.Tensor:
+        """Predict outcome from ``(z_c, z_i)``."""
+
+        if not self.disentangle or self.adv_y is None:
+            raise RuntimeError("Model was not created with disentangle=True")
+        return self.adv_y(torch.cat([zc, zi], dim=1))
