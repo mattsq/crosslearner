@@ -8,4 +8,6 @@ scikit-learn
 causaldata
 tensorboard
 optuna
+onnx
+onnxruntime
 furo

@@ -179,6 +179,22 @@ behaviour:
 - `plot_propensity_overlap` plots propensity score overlap.
 - `plot_residuals` displays residuals against predictions.
 
+## Model Export
+
+Models can be scripted or exported to ONNX with
+`crosslearner.export.export_model`:
+
+```python
+from crosslearner.models.acx import ACX
+from crosslearner.export import export_model
+import torch
+
+model = ACX(p=10)
+x = torch.randn(1, 10)
+export_model(model, x, "acx.pt")
+export_model(model, x, "acx.onnx", onnx=True)
+```
+
 ## Documentation
 
 Hosted documentation is available at [https://mattsq.github.io/crosslearner/](https://mattsq.github.io/crosslearner/).

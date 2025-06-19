@@ -19,6 +19,8 @@ dependencies = [
     "causaldata",
     "tensorboard",
     "optuna",
+    "onnx",
+    "onnxruntime",
 ]
 
 [project.scripts]
