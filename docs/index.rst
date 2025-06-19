@@ -14,6 +14,7 @@ the training procedure, hyperparameter sweeps and available modules.
    acx_architecture
    theory
    hyperparameter_sweeps
+   gan_tricks
    usage_examples
    datasets
 
