@@ -18,6 +18,20 @@ from ..utils import set_seed, default_device, apply_spectral_norm
 from .grl import grad_reverse
 
 
+def _mmd_rbf(x: torch.Tensor, y: torch.Tensor, sigma: float = 1.0) -> torch.Tensor:
+    """Return the RBF Maximum Mean Discrepancy between two samples."""
+
+    if x.numel() == 0 or y.numel() == 0:
+        return torch.tensor(0.0, device=x.device)
+    diff_x = x.unsqueeze(1) - x.unsqueeze(0)
+    diff_y = y.unsqueeze(1) - y.unsqueeze(0)
+    diff_xy = x.unsqueeze(1) - y.unsqueeze(0)
+    k_xx = torch.exp(-diff_x.pow(2).sum(2) / (2 * sigma**2))
+    k_yy = torch.exp(-diff_y.pow(2).sum(2) / (2 * sigma**2))
+    k_xy = torch.exp(-diff_xy.pow(2).sum(2) / (2 * sigma**2))
+    return k_xx.mean() + k_yy.mean() - 2 * k_xy.mean()
+
+
 class ACXTrainer:
     """Trainer class encapsulating the ACX training loop."""
 
@@ -348,104 +362,119 @@ class ACXTrainer:
 
             if not cfg.gradient_reversal:
                 with torch.no_grad():
-                    Ycf = torch.where(Tb.bool(), m0_det, m1_det)
-                    Yb_disc = Yb
+                    Ycf_base = torch.where(Tb.bool(), m0_det, m1_det)
+                    Yb_disc_base = Yb
                     if cfg.instance_noise:
-                        noise = torch.randn_like(Ycf) * max(
+                        noise = torch.randn_like(Ycf_base) * max(
                             0.0, 0.2 * (1 - epoch / cfg.epochs)
                         )
-                        Ycf = Ycf + noise
-                        Yb_disc = Yb_disc + noise
-                hb_r, y_r, t_r = self._pack_inputs(hb_det, Yb_disc, Tb)
-                hb_f, y_f, t_f = self._pack_inputs(hb_det, Ycf, Tb)
-                real_logits = model.discriminator(hb_r, y_r, t_r)
-                fake_logits = model.discriminator(hb_f, y_f, t_f)
-                if use_wgan:
-                    wdist = fake_logits.mean() - real_logits.mean()
-                    gp = 0.0
-                    if cfg.lambda_gp > 0:
-                        eps = torch.rand_like(Yb_disc)
-                        interpolates = eps * Yb_disc + (1 - eps) * Ycf
-                        interpolates.requires_grad_(True)
-                        h_i, y_i, t_i = self._pack_inputs(hb_det, interpolates, Tb)
-                        interp_logits = model.discriminator(h_i, y_i, t_i)
+                        Ycf_base = Ycf_base + noise
+                        Yb_disc_base = Yb_disc_base + noise
+
+                for _ in range(max(1, int(cfg.disc_steps))):
+                    hb_aug = hb_det
+                    if cfg.disc_aug_prob > 0:
+                        hb_aug = F.dropout(hb_aug, p=cfg.disc_aug_prob, training=True)
+                    if cfg.disc_aug_noise > 0:
+                        hb_aug = hb_aug + torch.randn_like(hb_aug) * cfg.disc_aug_noise
+                    Ycf = Ycf_base
+                    Yb_disc = Yb_disc_base
+                    hb_r, y_r, t_r = self._pack_inputs(hb_aug, Yb_disc, Tb)
+                    hb_f, y_f, t_f = self._pack_inputs(hb_aug, Ycf, Tb)
+                    real_logits = model.discriminator(hb_r, y_r, t_r)
+                    fake_logits = model.discriminator(hb_f, y_f, t_f)
+
+                    if use_wgan:
+                        wdist = fake_logits.mean() - real_logits.mean()
+                        gp = 0.0
+                        if cfg.lambda_gp > 0:
+                            eps = torch.rand_like(Yb_disc)
+                            interpolates = eps * Yb_disc + (1 - eps) * Ycf
+                            interpolates.requires_grad_(True)
+                            h_i, y_i, t_i = self._pack_inputs(hb_aug, interpolates, Tb)
+                            interp_logits = model.discriminator(h_i, y_i, t_i)
+                            grads = torch.autograd.grad(
+                                outputs=interp_logits,
+                                inputs=interpolates,
+                                grad_outputs=torch.ones_like(interp_logits),
+                                create_graph=True,
+                                retain_graph=True,
+                                only_inputs=True,
+                            )[0]
+                            gp = (
+                                (grads.norm(2, dim=1) - 1) ** 2
+                            ).mean() * cfg.lambda_gp
+                        loss_d = wdist + gp
+                    elif use_hinge:
+                        loss_d = (
+                            torch.relu(1 - real_logits).mean()
+                            + torch.relu(1 + fake_logits).mean()
+                        )
+                    elif use_ls:
+                        mse_adv = nn.MSELoss()
+                        loss_d = mse_adv(
+                            real_logits, torch.ones_like(real_logits)
+                        ) + mse_adv(
+                            fake_logits,
+                            torch.zeros_like(fake_logits),
+                        )
+                    else:
+                        real_lbl = torch.ones_like(real_logits)
+                        fake_lbl = torch.zeros_like(fake_logits)
+                        if cfg.label_smoothing:
+                            real_lbl = real_lbl * 0.9
+                            fake_lbl = fake_lbl + 0.1
+                        loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
+
+                    if model.disentangle and (
+                        cfg.adv_t_weight > 0 or cfg.adv_y_weight > 0
+                    ):
+                        zc_d, za_d, zi_d = model.split(hb_aug)
+                        if cfg.adv_t_weight > 0:
+                            t_pred = model.adv_t_pred(zc_d.detach(), za_d.detach())
+                            loss_d = loss_d + cfg.adv_t_weight * bce(t_pred, Tb)
+                        if cfg.adv_y_weight > 0:
+                            y_pred = model.adv_y_pred(zc_d.detach(), zi_d.detach())
+                            loss_d = loss_d + cfg.adv_y_weight * mse(y_pred, Yb)
+
+                    if cfg.r1_gamma > 0:
+                        hb_r1 = hb_aug.detach().requires_grad_(True)
+                        y_r1 = Yb_disc.detach().requires_grad_(True)
+                        h1, y1, t1 = self._pack_inputs(hb_r1, y_r1, Tb)
+                        r1_logits = model.discriminator(h1, y1, t1)
                         grads = torch.autograd.grad(
-                            outputs=interp_logits,
-                            inputs=interpolates,
-                            grad_outputs=torch.ones_like(interp_logits),
-                            create_graph=True,
-                            retain_graph=True,
-                            only_inputs=True,
-                        )[0]
-                        gp = ((grads.norm(2, dim=1) - 1) ** 2).mean() * cfg.lambda_gp
-                    loss_d = wdist + gp
-                elif use_hinge:
-                    loss_d = (
-                        torch.relu(1 - real_logits).mean()
-                        + torch.relu(1 + fake_logits).mean()
-                    )
-                elif use_ls:
-                    mse_adv = nn.MSELoss()
-                    loss_d = mse_adv(
-                        real_logits, torch.ones_like(real_logits)
-                    ) + mse_adv(
-                        fake_logits,
-                        torch.zeros_like(fake_logits),
-                    )
-                else:
-                    real_lbl = torch.ones_like(real_logits)
-                    fake_lbl = torch.zeros_like(fake_logits)
-                    if cfg.label_smoothing:
-                        real_lbl = real_lbl * 0.9
-                        fake_lbl = fake_lbl + 0.1
-                    loss_d = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
-
-                if model.disentangle and (cfg.adv_t_weight > 0 or cfg.adv_y_weight > 0):
-                    zc_d, za_d, zi_d = model.split(hb_det)
-                    if cfg.adv_t_weight > 0:
-                        t_pred = model.adv_t_pred(zc_d.detach(), za_d.detach())
-                        loss_d = loss_d + cfg.adv_t_weight * bce(t_pred, Tb)
-                    if cfg.adv_y_weight > 0:
-                        y_pred = model.adv_y_pred(zc_d.detach(), zi_d.detach())
-                        loss_d = loss_d + cfg.adv_y_weight * mse(y_pred, Yb)
-
-                if cfg.r1_gamma > 0:
-                    hb_r1 = hb_det.detach().requires_grad_(True)
-                    y_r1 = Yb_disc.detach().requires_grad_(True)
-                    h1, y1, t1 = self._pack_inputs(hb_r1, y_r1, Tb)
-                    r1_logits = model.discriminator(h1, y1, t1)
-                    grads = torch.autograd.grad(
-                        r1_logits.sum(), [hb_r1, y_r1], create_graph=True
-                    )
-                    penalty = 0.0
-                    for g in grads:
-                        penalty = (
-                            penalty + g.pow(2).reshape(g.shape[0], -1).sum(1).mean()
+                            r1_logits.sum(), [hb_r1, y_r1], create_graph=True
                         )
-                    loss_d = loss_d + 0.5 * cfg.r1_gamma * penalty
+                        penalty = 0.0
+                        for g in grads:
+                            penalty = (
+                                penalty + g.pow(2).reshape(g.shape[0], -1).sum(1).mean()
+                            )
+                        loss_d = loss_d + 0.5 * cfg.r1_gamma * penalty
 
-                if cfg.r2_gamma > 0:
-                    hb_r2 = hb_det.detach().requires_grad_(True)
-                    y_r2 = Ycf.detach().requires_grad_(True)
-                    h2, y2, t2 = self._pack_inputs(hb_r2, y_r2, Tb)
-                    r2_logits = model.discriminator(h2, y2, t2)
-                    grads = torch.autograd.grad(
-                        r2_logits.sum(), [hb_r2, y_r2], create_graph=True
-                    )
-                    penalty = 0.0
-                    for g in grads:
-                        penalty = (
-                            penalty + g.pow(2).reshape(g.shape[0], -1).sum(1).mean()
+                    if cfg.r2_gamma > 0:
+                        hb_r2 = hb_aug.detach().requires_grad_(True)
+                        y_r2 = Ycf.detach().requires_grad_(True)
+                        h2, y2, t2 = self._pack_inputs(hb_r2, y_r2, Tb)
+                        r2_logits = model.discriminator(h2, y2, t2)
+                        grads = torch.autograd.grad(
+                            r2_logits.sum(), [hb_r2, y_r2], create_graph=True
                         )
-                    loss_d = loss_d + 0.5 * cfg.r2_gamma * penalty
-                if not freeze_d:
-                    opt_d.zero_grad()
-                    loss_d.backward()
-                    opt_d.step()
-                    if cfg.weight_clip is not None:
-                        for p_ in model.disc.parameters():
-                            p_.data.clamp_(-cfg.weight_clip, cfg.weight_clip)
-                loss_d_sum += loss_d.item()
+                        penalty = 0.0
+                        for g in grads:
+                            penalty = (
+                                penalty + g.pow(2).reshape(g.shape[0], -1).sum(1).mean()
+                            )
+                        loss_d = loss_d + 0.5 * cfg.r2_gamma * penalty
+
+                    if not freeze_d:
+                        opt_d.zero_grad()
+                        loss_d.backward()
+                        opt_d.step()
+                        if cfg.weight_clip is not None:
+                            for p_ in model.disc.parameters():
+                                p_.data.clamp_(-cfg.weight_clip, cfg.weight_clip)
+                    loss_d_sum += loss_d.item()
 
             hb, m0, m1, tau = model(Xb)
             prop = model.propensity(hb)
@@ -497,6 +526,12 @@ class ACXTrainer:
                     y_pred = model.adv_y_pred(zc.detach(), grad_reverse(zi))
                     loss_adv_y = cfg.adv_y_weight * mse(y_pred, Yb)
 
+            loss_mmd = torch.tensor(0.0, device=device)
+            if cfg.mmd_weight > 0:
+                h_t = hb[Tb.view(-1) > 0.5]
+                h_c = hb[Tb.view(-1) <= 0.5]
+                loss_mmd = _mmd_rbf(h_t, h_c, sigma=cfg.mmd_sigma)
+
             if cfg.contrastive_weight > 0:
                 noise = (
                     torch.randn_like(Xb) * cfg.contrastive_noise
@@ -517,6 +552,7 @@ class ACXTrainer:
                 + loss_adv_t
                 + loss_adv_y
                 + cfg.contrastive_weight * loss_contrast
+                + cfg.mmd_weight * loss_mmd
                 + cfg.delta_prop * loss_prop
                 + cfg.lambda_dr * loss_dr
                 + cfg.noise_consistency_weight * loss_noise

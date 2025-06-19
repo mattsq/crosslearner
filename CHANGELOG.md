@@ -30,3 +30,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `noise_std` and `noise_consistency_weight`
 - Added optional representation disentanglement with adversarial training
   through `disentangle` and `adv_t_weight`/`adv_y_weight` options
+- Added optional discriminator data augmentation, MMD penalty and multiple
+  discriminator update steps for improved GAN stability

@@ -61,6 +61,11 @@ class TrainingConfig:
     instance_noise: bool = False
     gradient_reversal: bool = False
     ttur: bool = False
+    disc_steps: int = 1
+    disc_aug_prob: float = 0.0
+    disc_aug_noise: float = 0.0
+    mmd_weight: float = 0.0
+    mmd_sigma: float = 1.0
     lambda_gp: float = 10.0
     r1_gamma: float = 0.0
     r2_gamma: float = 0.0
