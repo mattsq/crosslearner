@@ -22,3 +22,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   testing guide
 - Added optional contrastive loss via `contrastive_weight` for balanced
   covariates
+- Added propensity head and doubly robust training objective via `delta_prop`
+  and `lambda_dr` weights

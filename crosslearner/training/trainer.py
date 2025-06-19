@@ -191,7 +191,9 @@ class ACXTrainer:
             list(model.phi.parameters())
             + list(model.mu0.parameters())
             + list(model.mu1.parameters())
-            + list(model.tau.parameters()),
+            + list(model.tau.parameters())
+            + list(model.prop.parameters())
+            + [model.epsilon],
             lr=cfg.lr_g,
             **opt_g_kwargs,
         )
@@ -424,9 +426,14 @@ class ACXTrainer:
                 loss_d_sum += loss_d.item()
 
             hb, m0, m1, tau = model(Xb)
+            prop = model.propensity(hb)
             m_obs = torch.where(Tb.bool(), m1, m0)
             loss_y = mse(m_obs, Yb)
             loss_cons = mse(tau, m1 - m0)
+            loss_prop = bce(prop, Tb)
+            eps = model.epsilon
+            q_tilde = m_obs + eps * (Tb - prop) / (prop * (1 - prop) + 1e-8)
+            loss_dr = mse(Yb, q_tilde)
             Ycf = torch.where(Tb.bool(), m0, m1)
             loss_adv = torch.tensor(0.0, device=device)
             loss_contrast = torch.tensor(0.0, device=device)
@@ -470,6 +477,8 @@ class ACXTrainer:
                 + cfg.beta_cons * loss_cons
                 + cfg.gamma_adv * loss_adv
                 + cfg.contrastive_weight * loss_contrast
+                + cfg.delta_prop * loss_prop
+                + cfg.lambda_dr * loss_dr
             )
 
             if cfg.feature_matching:

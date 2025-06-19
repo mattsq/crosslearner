@@ -203,6 +203,17 @@ class ACX(nn.Module):
             residual=head_residual,
             batch_norm=batch_norm,
         )
+        self.prop = MLP(
+            rep_dim,
+            1,
+            hidden=head_layers,
+            activation=act_fn,
+            dropout=head_dropout,
+            residual=head_residual,
+            batch_norm=batch_norm,
+        )
+        self.prop.net.add_module("sigmoid", nn.Sigmoid())
+        self.epsilon = nn.Parameter(torch.tensor(0.0))
         self.tau = MLP(
             rep_dim,
             1,
@@ -258,6 +269,12 @@ class ACX(nn.Module):
         """
 
         return self.disc(torch.cat([h, y, t], dim=1))
+
+    @torch.jit.export
+    def propensity(self, h: torch.Tensor) -> torch.Tensor:
+        """Return propensity score predictions from representation ``h``."""
+
+        return self.prop(h)
 
     @torch.jit.export
     def disc_features(
