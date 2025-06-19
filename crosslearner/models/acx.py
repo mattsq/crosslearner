@@ -39,6 +39,26 @@ def _get_activation(act: str | Callable[[], nn.Module]) -> Callable[[], nn.Modul
     return act
 
 
+def _apply_weight_init(layer: nn.Linear, init: str | None) -> None:
+    """Initialize ``layer`` using the given scheme."""
+
+    if init is None:
+        return
+
+    scheme = init.lower()
+    if scheme == "xavier_uniform":
+        nn.init.xavier_uniform_(layer.weight)
+    elif scheme == "xavier_normal":
+        nn.init.xavier_normal_(layer.weight)
+    elif scheme == "kaiming_uniform":
+        nn.init.kaiming_uniform_(layer.weight, nonlinearity="relu")
+    elif scheme == "kaiming_normal":
+        nn.init.kaiming_normal_(layer.weight, nonlinearity="relu")
+    else:
+        raise ValueError(f"Unknown weight_init '{init}'")
+    nn.init.zeros_(layer.bias)
+
+
 class MLP(nn.Module):
     """Simple multi-layer perceptron used throughout the framework.
 
@@ -50,6 +70,10 @@ class MLP(nn.Module):
         dropout: Dropout probability applied after each hidden layer.
         residual: If ``True`` add skip connections between blocks when the
             dimensions match.
+        weight_init: Optional initialisation scheme applied to every linear
+            layer.  Supported values are ``"xavier_uniform"``,
+            ``"xavier_normal"``, ``"kaiming_uniform"`` and
+            ``"kaiming_normal"``.
     """
 
     def __init__(
@@ -61,6 +85,7 @@ class MLP(nn.Module):
         activation: str | Callable[[], nn.Module] = nn.ReLU,
         dropout: float = 0.0,
         residual: bool = False,
+        weight_init: str | None = None,
     ) -> None:
         super().__init__()
         self.residual = residual
@@ -72,12 +97,15 @@ class MLP(nn.Module):
         if not (0 <= dropout < 1):
             raise ValueError(f"Dropout must be in the range [0, 1), but got {dropout}.")
         for h in hidden:
-            block = [nn.Linear(d, h), act_fn()]
+            lin = nn.Linear(d, h)
+            _apply_weight_init(lin, weight_init)
+            block = [lin, act_fn()]
             if dropout > 0:
                 block.append(nn.Dropout(dropout))
             self.blocks.append(nn.Sequential(*block))
             d = h
         self.out = nn.Linear(d, out_dim)
+        _apply_weight_init(self.out, weight_init)
         self.net = nn.Sequential(*self.blocks, self.out)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -140,6 +168,7 @@ class ACX(nn.Module):
         head_residual: bool | None = None,
         disc_residual: bool | None = None,
         disc_pack: int = 1,
+        weight_init: str | None = None,
     ) -> None:
         """Instantiate the model.
 
@@ -159,6 +188,7 @@ class ACX(nn.Module):
                 heads.
             disc_residual: Override residual connections for the discriminator.
             disc_pack: Number of samples concatenated for the discriminator.
+            weight_init: Initialisation scheme passed to all MLPs.
         """
 
         super().__init__()
@@ -175,6 +205,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=phi_dropout,
             residual=phi_residual,
+            weight_init=weight_init,
         )
         self.mu0 = MLP(
             rep_dim,
@@ -183,6 +214,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
+            weight_init=weight_init,
         )
         self.mu1 = MLP(
             rep_dim,
@@ -191,6 +223,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
+            weight_init=weight_init,
         )
         self.tau = MLP(
             rep_dim,
@@ -199,6 +232,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
+            weight_init=weight_init,
         )
         self.disc_pack = max(1, int(disc_pack))
         self.disc = MLP(
@@ -208,6 +242,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=disc_dropout,
             residual=disc_residual,
+            weight_init=weight_init,
         )
 
     def forward(
