@@ -62,6 +62,12 @@ contrastive representation loss can also be enabled via
 ``contrastive_weight`` to further balance covariates across treatment
 groups.
 
+Representations can further be disentangled into confounder-, outcome- and
+instrument-specific parts by setting ``disentangle=True`` and providing sizes
+for ``rep_dim_c``, ``rep_dim_a`` and ``rep_dim_i``. Two auxiliary adversaries
+controlled via ``adv_t_weight`` and ``adv_y_weight`` then encourage the desired
+independence structure.
+
 Customising parameters
 ----------------------
 

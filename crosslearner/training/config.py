@@ -13,6 +13,10 @@ class ModelConfig:
 
     p: int
     rep_dim: int = 64
+    disentangle: bool = False
+    rep_dim_c: int | None = None
+    rep_dim_a: int | None = None
+    rep_dim_i: int | None = None
     phi_layers: Iterable[int] | None = (128,)
     head_layers: Iterable[int] | None = (64,)
     disc_layers: Iterable[int] | None = (64,)
@@ -70,6 +74,8 @@ class TrainingConfig:
     lambda_dr: float = 0.0
     noise_std: float = 0.0
     noise_consistency_weight: float = 0.0
+    adv_t_weight: float = 0.0
+    adv_y_weight: float = 0.0
     tensorboard_logdir: Optional[str] = None
     weight_clip: Optional[float] = None
     val_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None

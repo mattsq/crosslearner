@@ -28,3 +28,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `lambda_dr` weights
 - Added optional noise injection and input consistency regularization via
   `noise_std` and `noise_consistency_weight`
+- Added optional representation disentanglement with adversarial training
+  through `disentangle` and `adv_t_weight`/`adv_y_weight` options
