@@ -356,3 +356,17 @@ def test_train_acx_r1_r2_unrolled():
     cfg = TrainingConfig(epochs=1, unrolled_steps=1, verbose=False)
     model = train_acx(loader, model_cfg, cfg, device="cpu")
     assert isinstance(model, ACX)
+
+
+def test_train_acx_contrastive_loss():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4)
+    cfg = TrainingConfig(
+        epochs=1,
+        contrastive_weight=1.0,
+        contrastive_margin=0.5,
+        contrastive_noise=0.01,
+        verbose=False,
+    )
+    model = train_acx(loader, model_cfg, cfg, device="cpu")
+    assert isinstance(model, ACX)

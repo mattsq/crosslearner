@@ -5,6 +5,7 @@ import copy
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
@@ -102,6 +103,18 @@ class ACXTrainer:
         y = y[:b].reshape(b // pack, -1)
         t = t[:b].reshape(b // pack, -1)
         return h, y, t
+
+    def _sample_negatives(self, t: torch.Tensor) -> torch.Tensor:
+        """Return indices of negative samples from the opposite treatment group."""
+        b = t.size(0)
+        neg_idx = torch.empty(b, dtype=torch.long, device=t.device)
+        for i in range(b):
+            mask = torch.nonzero(t != t[i], as_tuple=False).view(-1)
+            if mask.numel() == 0:
+                mask = torch.arange(b, device=t.device)
+            j = torch.randint(len(mask), (1,), device=t.device)
+            neg_idx[i] = mask[j]
+        return neg_idx
 
     def _unrolled_logits(
         self,
@@ -416,6 +429,7 @@ class ACXTrainer:
             loss_cons = mse(tau, m1 - m0)
             Ycf = torch.where(Tb.bool(), m0, m1)
             loss_adv = torch.tensor(0.0, device=device)
+            loss_contrast = torch.tensor(0.0, device=device)
             if not cfg.gradient_reversal:
                 fake_logits, fake_feats = self._unrolled_logits(
                     hb,
@@ -438,10 +452,24 @@ class ACXTrainer:
                         real_lbl = real_lbl * 0.9
                     loss_adv = bce(fake_logits, real_lbl)
 
+            if cfg.contrastive_weight > 0:
+                noise = (
+                    torch.randn_like(Xb) * cfg.contrastive_noise
+                    if cfg.contrastive_noise > 0
+                    else 0.0
+                )
+                h_pos = model.phi(Xb + noise)
+                neg_idx = self._sample_negatives(Tb.view(-1))
+                h_neg = hb[neg_idx].detach()
+                loss_contrast = F.triplet_margin_loss(
+                    hb, h_pos, h_neg, margin=cfg.contrastive_margin
+                )
+
             loss_g = (
                 cfg.alpha_out * loss_y
                 + cfg.beta_cons * loss_cons
                 + cfg.gamma_adv * loss_adv
+                + cfg.contrastive_weight * loss_contrast
             )
 
             if cfg.feature_matching:
