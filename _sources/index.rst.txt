@@ -16,6 +16,7 @@ the training procedure, hyperparameter sweeps and available modules.
    hyperparameter_sweeps
    usage_examples
    datasets
+   uncertainty
 
 
 .. toctree::

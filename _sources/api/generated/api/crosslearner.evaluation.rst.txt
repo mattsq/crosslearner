@@ -13,3 +13,4 @@ crosslearner.evaluation
    evaluate
    metrics
    propensity
+   uncertainty

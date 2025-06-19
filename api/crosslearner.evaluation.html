@@ -218,6 +218,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../generated/datasets/crosslearner.datasets.get_aircraft_dataloader.html">crosslearner.datasets.get_aircraft_dataloader</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../uncertainty.html">Uncertainty Estimation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
@@ -246,6 +247,7 @@
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.evaluation.evaluate.html">crosslearner.evaluation.evaluate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.evaluation.metrics.html">crosslearner.evaluation.metrics</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.evaluation.propensity.html">crosslearner.evaluation.propensity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.evaluation.uncertainty.html">crosslearner.evaluation.uncertainty</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="generated/api/crosslearner.experiments.html">crosslearner.experiments</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of crosslearner.experiments</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -465,6 +467,20 @@ against always choosing the best potential outcome.</p>
 </dd></dl>
 
 </section>
+<section id="module-crosslearner.evaluation.uncertainty">
+<span id="crosslearner-evaluation-uncertainty-module"></span><h2>crosslearner.evaluation.uncertainty module<a class="headerlink" href="#module-crosslearner.evaluation.uncertainty" title="Link to this heading">¶</a></h2>
+<p>Uncertainty estimation utilities.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.uncertainty.predict_tau_mc_dropout">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.uncertainty.</span></span><span class="sig-name descname"><span class="pre">predict_tau_mc_dropout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/uncertainty.html#predict_tau_mc_dropout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.uncertainty.predict_tau_mc_dropout" title="Link to this definition">¶</a></dt>
+<dd><p>Return mean and standard deviation of MC dropout predictions.</p>
+<p>The model is temporarily set to training mode so that dropout layers
+remain active during the forward passes. Predictions are collected over
+<code class="docutils literal notranslate"><span class="pre">passes</span></code> runs and aggregated to obtain an approximate posterior
+mean and standard deviation for the treatment effect.</p>
+</dd></dl>
+
+</section>
 <section id="module-crosslearner.evaluation">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-crosslearner.evaluation" title="Link to this heading">¶</a></h2>
 <p>Evaluation metrics and helpers.</p>
@@ -596,6 +612,16 @@ model predictions and this pseudo-outcome.</p>
 against always choosing the best potential outcome.</p>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.evaluation.predict_tau_mc_dropout">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">predict_tau_mc_dropout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/uncertainty.html#predict_tau_mc_dropout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.predict_tau_mc_dropout" title="Link to this definition">¶</a></dt>
+<dd><p>Return mean and standard deviation of MC dropout predictions.</p>
+<p>The model is temporarily set to training mode so that dropout layers
+remain active during the forward passes. Predictions are collected over
+<code class="docutils literal notranslate"><span class="pre">passes</span></code> runs and aggregated to obtain an approximate posterior
+mean and standard deviation for the treatment effect.</p>
+</dd></dl>
+
 </section>
 </section>
 
@@ -656,6 +682,10 @@ against always choosing the best potential outcome.</p>
 <li><a class="reference internal" href="#crosslearner.evaluation.propensity.estimate_propensity"><code class="docutils literal notranslate"><span class="pre">estimate_propensity()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#module-crosslearner.evaluation.uncertainty">crosslearner.evaluation.uncertainty module</a><ul>
+<li><a class="reference internal" href="#crosslearner.evaluation.uncertainty.predict_tau_mc_dropout"><code class="docutils literal notranslate"><span class="pre">predict_tau_mc_dropout()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-crosslearner.evaluation">Module contents</a><ul>
 <li><a class="reference internal" href="#crosslearner.evaluation.ate_error"><code class="docutils literal notranslate"><span class="pre">ate_error()</span></code></a></li>
 <li><a class="reference internal" href="#crosslearner.evaluation.att_error"><code class="docutils literal notranslate"><span class="pre">att_error()</span></code></a></li>
@@ -666,6 +696,7 @@ against always choosing the best potential outcome.</p>
 <li><a class="reference internal" href="#crosslearner.evaluation.evaluate_ipw"><code class="docutils literal notranslate"><span class="pre">evaluate_ipw()</span></code></a></li>
 <li><a class="reference internal" href="#crosslearner.evaluation.pehe"><code class="docutils literal notranslate"><span class="pre">pehe()</span></code></a></li>
 <li><a class="reference internal" href="#crosslearner.evaluation.policy_risk"><code class="docutils literal notranslate"><span class="pre">policy_risk()</span></code></a></li>
+<li><a class="reference internal" href="#crosslearner.evaluation.predict_tau_mc_dropout"><code class="docutils literal notranslate"><span class="pre">predict_tau_mc_dropout()</span></code></a></li>
 </ul>
 </li>
 </ul>

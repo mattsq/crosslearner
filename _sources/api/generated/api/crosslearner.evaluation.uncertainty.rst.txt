@@ -1,0 +1,12 @@
+crosslearner.evaluation.uncertainty
+===================================
+
+.. automodule:: crosslearner.evaluation.uncertainty
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      predict_tau_mc_dropout
+   

@@ -216,6 +216,7 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_aircraft_dataloader.html">crosslearner.datasets.get_aircraft_dataloader</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="uncertainty.html">Uncertainty Estimation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
@@ -244,6 +245,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.evaluation.evaluate.html">crosslearner.evaluation.evaluate</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.evaluation.metrics.html">crosslearner.evaluation.metrics</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.evaluation.propensity.html">crosslearner.evaluation.propensity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.evaluation.uncertainty.html">crosslearner.evaluation.uncertainty</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="api/generated/api/crosslearner.experiments.html">crosslearner.experiments</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle navigation of crosslearner.experiments</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -527,6 +529,13 @@
 
         <ul>
           <li><a href="api/crosslearner.evaluation.html#module-crosslearner.evaluation.propensity">module</a>, <a href="api/generated/api/crosslearner.evaluation.propensity.html#module-crosslearner.evaluation.propensity">[1]</a>
+</li>
+        </ul></li>
+        <li>
+    crosslearner.evaluation.uncertainty
+
+        <ul>
+          <li><a href="api/crosslearner.evaluation.html#module-crosslearner.evaluation.uncertainty">module</a>, <a href="api/generated/api/crosslearner.evaluation.uncertainty.html#module-crosslearner.evaluation.uncertainty">[1]</a>
 </li>
         </ul></li>
         <li>
@@ -1003,6 +1012,8 @@
 </li>
           <li><a href="api/crosslearner.evaluation.html#module-crosslearner.evaluation.propensity">crosslearner.evaluation.propensity</a>, <a href="api/generated/api/crosslearner.evaluation.propensity.html#module-crosslearner.evaluation.propensity">[1]</a>
 </li>
+          <li><a href="api/crosslearner.evaluation.html#module-crosslearner.evaluation.uncertainty">crosslearner.evaluation.uncertainty</a>, <a href="api/generated/api/crosslearner.evaluation.uncertainty.html#module-crosslearner.evaluation.uncertainty">[1]</a>
+</li>
           <li><a href="api/generated/api/crosslearner.experiments.html#module-crosslearner.experiments">crosslearner.experiments</a>
 </li>
           <li><a href="api/generated/api/crosslearner.experiments.manager.html#module-crosslearner.experiments.manager">crosslearner.experiments.manager</a>
@@ -1120,14 +1131,14 @@
           <li><a href="api/crosslearner.html#crosslearner.visualization.plot_losses">(in module crosslearner.visualization)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.html#crosslearner.plot_propensity_overlap">plot_propensity_overlap() (in module crosslearner)</a>
 
         <ul>
           <li><a href="api/crosslearner.html#crosslearner.visualization.plot_propensity_overlap">(in module crosslearner.visualization)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.html#crosslearner.plot_residuals">plot_residuals() (in module crosslearner)</a>
 
         <ul>
@@ -1154,6 +1165,14 @@
           <li><a href="api/crosslearner.models.baselines.html#crosslearner.models.baselines.XLearner.predict_tau">(crosslearner.models.baselines.XLearner method)</a>
 </li>
           <li><a href="api/crosslearner.models.baselines.html#crosslearner.models.baselines.xlearner.XLearner.predict_tau">(crosslearner.models.baselines.xlearner.XLearner method)</a>
+</li>
+        </ul></li>
+        <li><a href="api/crosslearner.html#crosslearner.predict_tau_mc_dropout">predict_tau_mc_dropout() (in module crosslearner)</a>
+
+        <ul>
+          <li><a href="api/crosslearner.evaluation.html#crosslearner.evaluation.predict_tau_mc_dropout">(in module crosslearner.evaluation)</a>
+</li>
+          <li><a href="api/crosslearner.evaluation.html#crosslearner.evaluation.uncertainty.predict_tau_mc_dropout">(in module crosslearner.evaluation.uncertainty)</a>
 </li>
         </ul></li>
         <li><a href="api/crosslearner.models.html#crosslearner.models.acx.ACX.propensity">propensity() (crosslearner.models.acx.ACX method)</a>
