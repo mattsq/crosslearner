@@ -323,9 +323,28 @@
           <section id="quickstart">
 <h1>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading">¶</a></h1>
 <p>Follow these steps to install <code class="docutils literal notranslate"><span class="pre">crosslearner</span></code> and train your first model.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">crosslearner</span></code> requires <strong>Python 3.10</strong> or later.  We recommend working in a
+virtual environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="o">.</span><span class="n">venv</span>
+<span class="n">source</span> <span class="o">.</span><span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
+</pre></div>
+</div>
+<p>Install the dependencies:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--extra-index-url<span class="w"> </span>https://download.pytorch.org/whl/cpu
+</pre></div>
+</div>
+<p>For development the <cite>black</cite> formatter and <cite>ruff</cite> linter are useful:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">black</span> <span class="n">ruff</span>
+</pre></div>
+</div>
+</section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
-<p>Install the package from source using <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
+<p>Once the environment is set up you can install <code class="docutils literal notranslate"><span class="pre">crosslearner</span></code> from the
+repository root:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>.
 </pre></div>
 </div>
@@ -339,6 +358,13 @@ report <span class="math notranslate nohighlight">\(\sqrt{\mathrm{PEHE}}\)</span
 </div>
 <p>This launches a short training loop and prints the final metric.
 Loss histories are logged to TensorBoard when available.</p>
+</section>
+<section id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h2>
+<p>To verify the installation run the test suite:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pytest</span> <span class="o">--</span><span class="n">cov</span><span class="o">=</span><span class="n">crosslearner</span> <span class="o">--</span><span class="n">cov</span><span class="o">-</span><span class="n">report</span><span class="o">=</span><span class="n">xml</span> <span class="o">-</span><span class="n">q</span>
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -398,8 +424,10 @@ Loss histories are logged to TensorBoard when available.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Quickstart</a><ul>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#minimal-example">Minimal example</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
 </ul>
 </li>
 </ul>
