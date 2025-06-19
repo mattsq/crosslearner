@@ -32,3 +32,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   through `disentangle` and `adv_t_weight`/`adv_y_weight` options
 - Added optional discriminator data augmentation, MMD penalty and multiple
   discriminator update steps for improved GAN stability
+- Added adaptive regularization controlled by `adaptive_reg` for tuning
+  gradient penalty strength based on discriminator loss

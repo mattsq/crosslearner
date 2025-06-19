@@ -397,3 +397,19 @@ def test_train_acx_noise_consistency():
     )
     model = train_acx(loader, model_cfg, cfg, device="cpu")
     assert isinstance(model, ACX)
+
+
+def test_adaptive_regularization_updates_lambda():
+    loader, _ = get_toy_dataloader(batch_size=4, n=16, p=4)
+    model_cfg = ModelConfig(p=4)
+    cfg = TrainingConfig(
+        epochs=2,
+        lambda_gp=0.2,
+        adaptive_reg=True,
+        d_reg_upper=0.6,
+        reg_factor=2.0,
+        lambda_gp_min=0.05,
+        verbose=False,
+    )
+    train_acx(loader, model_cfg, cfg, device="cpu")
+    assert cfg.lambda_gp <= 0.1
