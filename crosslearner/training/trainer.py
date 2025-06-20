@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from typing import Optional, Tuple
-import copy
+from collections import OrderedDict
+from torch.nn.utils import stateless
 
 import torch
 import torch.nn as nn
@@ -168,12 +169,20 @@ class ACXTrainer:
             logits = self.model.discriminator(hb_p, ycf_p, tb_p)
             feats = self.model.disc_features(hb_p, ycf_p, tb_p)
             return logits, feats
-        disc = copy.deepcopy(self.model.disc)
+        disc = self.model.disc
+        params = OrderedDict(
+            (n, p.detach().clone().requires_grad_(True))
+            for n, p in disc.named_parameters()
+        )
         for _ in range(steps):
             hb_r, y_r, t_r = self._pack_inputs(hb.detach(), yb.detach(), tb)
             hb_f, y_f, t_f = self._pack_inputs(hb.detach(), ycf.detach(), tb)
-            real_logits = disc(torch.cat([hb_r, y_r, t_r], dim=1))
-            fake_logits = disc(torch.cat([hb_f, y_f, t_f], dim=1))
+            real_logits = stateless.functional_call(
+                disc, params, (torch.cat([hb_r, y_r, t_r], dim=1),)
+            )
+            fake_logits = stateless.functional_call(
+                disc, params, (torch.cat([hb_f, y_f, t_f], dim=1),)
+            )
             if use_wgan:
                 loss_step = fake_logits.mean() - real_logits.mean()
             elif use_hinge:
@@ -193,12 +202,25 @@ class ACXTrainer:
                     real_lbl = real_lbl * 0.9
                     fake_lbl = fake_lbl + 0.1
                 loss_step = bce(real_logits, real_lbl) + bce(fake_logits, fake_lbl)
-            grads = torch.autograd.grad(loss_step, disc.parameters(), create_graph=True)
-            for p, g in zip(disc.parameters(), grads):
-                p.data.sub_(self.train_cfg.lr_d * g)
+            grads = torch.autograd.grad(
+                loss_step, tuple(params.values()), create_graph=True
+            )
+            params = OrderedDict(
+                (
+                    n,
+                    (p - self.train_cfg.lr_d * g).detach().requires_grad_(True),
+                )
+                for (n, p), g in zip(params.items(), grads)
+            )
         hb_p, ycf_p, tb_p = self._pack_inputs(hb, ycf, tb)
-        logits = disc(torch.cat([hb_p, ycf_p, tb_p], dim=1))
-        feats = disc.net[:-1](torch.cat([hb_p, ycf_p, tb_p], dim=1))
+        inp = torch.cat([hb_p, ycf_p, tb_p], dim=1)
+        logits = stateless.functional_call(disc, params, (inp,))
+        net_params = OrderedDict(
+            (k.split("blocks.", 1)[1], v)
+            for k, v in params.items()
+            if k.startswith("blocks.")
+        )
+        feats = stateless.functional_call(disc.net[:-1], net_params, (inp,))
         return logits, feats
 
     def _make_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.Optimizer]:
