@@ -414,7 +414,7 @@ class ACXTrainer:
 
             if cfg.warm_start > 0 and epoch < cfg.warm_start:
                 loss_y = mse(torch.where(Tb.bool(), m1, m0), Yb)
-                opt_g.zero_grad()
+                opt_g.zero_grad(set_to_none=True)
                 loss_y.backward()
                 if cfg.grad_clip:
                     nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
@@ -534,7 +534,7 @@ class ACXTrainer:
                         loss_d = loss_d + 0.5 * cfg.r2_gamma * penalty
 
                     if not freeze_d:
-                        opt_d.zero_grad()
+                        opt_d.zero_grad(set_to_none=True)
                         loss_d.backward()
                         opt_d.step()
                         if cfg.weight_clip is not None:
@@ -644,7 +644,7 @@ class ACXTrainer:
                 loss_grl = bce(t_logits, Tb)
                 loss_g += loss_grl
 
-            opt_g.zero_grad()
+            opt_g.zero_grad(set_to_none=True)
             loss_g.backward()
             if cfg.grad_clip:
                 nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
