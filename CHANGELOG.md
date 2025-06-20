@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documented the ``gradient_reversal`` training option with usage guidance
 - Documented risk-based early stopping with `risk_data` option
+- Documented the ``spectral_norm`` training option with usage guidance
 - Added `plot_partial_dependence` and `plot_ice` visualisations for exploring
   how predicted treatment effects change with a single feature
 - Replaced pairwise distance computation in `_mmd_rbf` with `torch.cdist` and
