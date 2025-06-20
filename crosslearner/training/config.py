@@ -58,7 +58,10 @@ class TrainingConfig:
     spectral_norm: bool = False
     feature_matching: bool = False
     label_smoothing: bool = False
-    instance_noise: bool = False
+    instance_noise: bool = (
+        False
+        #: Add decaying Gaussian noise to discriminator targets to regularise early training.
+    )
     gradient_reversal: bool = False
     ttur: bool = False
     disc_steps: int = 1

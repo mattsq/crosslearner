@@ -57,4 +57,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reused a single `torch.cdist` to compute all pairwise distances in `_mmd_rbf`
 - Switched `_mmd_rbf` to an unbiased estimator using the kernel trick and added
   a regression test comparing to the previous implementation
+- Documented the ``instance_noise`` training option with motivation and usage details
 
