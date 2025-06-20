@@ -372,6 +372,7 @@ class ACXTrainer:
         cfg = self.train_cfg
         model = self.model
         device = self.device
+        zero_tensor = torch.tensor(0.0, device=device)
         adv = (cfg.adv_loss or "bce").lower()
         use_wgan = cfg.use_wgan_gp or adv == "wgan-gp"
         use_hinge = adv == "hinge"
@@ -402,7 +403,7 @@ class ACXTrainer:
             hb_det = hb.detach()
             m0_det = m0.detach()
             m1_det = m1.detach()
-            rep_pen = torch.tensor(0.0, device=device)
+            rep_pen = zero_tensor
             if cfg.rep_consistency_weight > 0:
                 t_mask = Tb.view(-1) > 0.5
                 for g, mask in ((1, t_mask), (0, ~t_mask)):
@@ -562,14 +563,14 @@ class ACXTrainer:
             eps = model.epsilon
             q_tilde = m_obs + eps * (Tb - prop) / (prop * (1 - prop) + 1e-8)
             loss_dr = mse(Yb, q_tilde)
-            loss_noise = torch.tensor(0.0, device=device)
+            loss_noise = zero_tensor
             if cfg.noise_consistency_weight > 0 and cfg.noise_std > 0:
                 Xn = Xb + torch.randn_like(Xb) * cfg.noise_std
                 _, m0_n, m1_n, tau_n = model(Xn)
                 loss_noise = mse(m0_n, m0) + mse(m1_n, m1) + mse(tau_n, tau)
             Ycf = torch.where(Tb.bool(), m0, m1)
-            loss_adv = torch.tensor(0.0, device=device)
-            loss_contrast = torch.tensor(0.0, device=device)
+            loss_adv = zero_tensor
+            loss_contrast = zero_tensor
             if not cfg.gradient_reversal:
                 fake_logits, fake_feats = self._unrolled_logits(
                     hb,
@@ -592,8 +593,8 @@ class ACXTrainer:
                         real_lbl = real_lbl * 0.9
                     loss_adv = bce(fake_logits, real_lbl)
 
-            loss_adv_t = torch.tensor(0.0, device=device)
-            loss_adv_y = torch.tensor(0.0, device=device)
+            loss_adv_t = zero_tensor
+            loss_adv_y = zero_tensor
             if model.disentangle and (cfg.adv_t_weight > 0 or cfg.adv_y_weight > 0):
                 zc, za, zi = model.split(hb)
                 if cfg.adv_t_weight > 0:
@@ -603,7 +604,7 @@ class ACXTrainer:
                     y_pred = model.adv_y_pred(zc.detach(), grad_reverse(zi))
                     loss_adv_y = cfg.adv_y_weight * mse(y_pred, Yb)
 
-            loss_mmd = torch.tensor(0.0, device=device)
+            loss_mmd = zero_tensor
             if cfg.mmd_weight > 0:
                 h_t = hb[Tb.view(-1) > 0.5]
                 h_c = hb[Tb.view(-1) <= 0.5]

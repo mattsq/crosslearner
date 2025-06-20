@@ -49,4 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimized optimizer resets using `zero_grad(set_to_none=True)` in `ACXTrainer`
 - Replaced pairwise-mask logic in `_sample_negatives` with index lists for each
   treatment group
+- Cached a zero tensor per epoch and replaced redundant `torch.tensor(0.0)`
+  constructions
 

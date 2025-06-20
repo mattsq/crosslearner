@@ -100,7 +100,7 @@ def estimate_nuisances(
         for _ in range(outcome_epochs):
             for xb, tb, yb in loader:
                 pred0, pred1 = mu0(xb), mu1(xb)
-                loss = torch.tensor(0.0, device=device)
+                loss = 0.0
                 mask0 = tb == 0
                 mask1 = tb == 1
                 if mask0.any():
@@ -117,7 +117,7 @@ def estimate_nuisances(
                     pred0, pred1 = mu0(xb), mu1(xb)
                     mask0 = tb == 0
                     mask1 = tb == 1
-                    loss = torch.tensor(0.0, device=device)
+                    loss = 0.0
                     if mask0.any():
                         loss = loss + mse(pred0[mask0], yb[mask0])
                     if mask1.any():
