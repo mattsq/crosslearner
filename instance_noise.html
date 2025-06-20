@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Doubly Robust Objective and Propensity Head" href="doubly_robust.html" /><link rel="prev" title="Instance Noise for Robust Discriminator" href="instance_noise.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Unrolled Discriminator Updates" href="unrolled_discriminator.html" /><link rel="prev" title="Spectral Normalisation for Stable Training" href="spectral_norm.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Unrolled Discriminator Updates - crosslearner 0.1 documentation</title>
+        <title>Instance Noise for Robust Discriminator - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -208,8 +208,8 @@
 <li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_matching.html">Feature Matching for Stable GAN Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="instance_noise.html">Instance Noise for Robust Discriminator</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Unrolled Discriminator Updates</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Instance Noise for Robust Discriminator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="datasets.html">Datasets</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_toy_dataloader.html">crosslearner.datasets.get_toy_dataloader</a></li>
@@ -309,7 +309,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/unrolled_discriminator.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/instance_noise.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -329,49 +329,44 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="unrolled-discriminator-updates">
-<h1>Unrolled Discriminator Updates<a class="headerlink" href="#unrolled-discriminator-updates" title="Link to this heading">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">unrolled_steps</span></code> controls how many virtual optimisation steps
-are performed on the discriminator before computing the adversarial
-loss. Instead of updating the discriminator parameters in a separate
-optimizer step, the trainer backpropagates through the discriminator
-updates themselves. This makes the generator aware of how the
-discriminator will react, leading to more stable adversarial training
-when the discriminator learns much faster.</p>
+          <section id="instance-noise-for-robust-discriminator">
+<h1>Instance Noise for Robust Discriminator<a class="headerlink" href="#instance-noise-for-robust-discriminator" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">instance_noise</span></code> option injects Gaussian noise into the discriminator’s
+input targets early in training. Both the real outcomes <code class="docutils literal notranslate"><span class="pre">Y</span></code> and counterfactual
+estimates <code class="docutils literal notranslate"><span class="pre">Ycf</span></code> receive noise whose standard deviation decays linearly from
+<code class="docutils literal notranslate"><span class="pre">0.2</span></code> to <code class="docutils literal notranslate"><span class="pre">0</span></code> over the course of <code class="docutils literal notranslate"><span class="pre">epochs</span></code>. This prevents the
+discriminator from overfitting to exact outcome values and gives the generator
+a smoother optimisation landscape.</p>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
-<p>Adversarial objectives can oscillate if the discriminator quickly
-overfits the current generator output. Unrolling the discriminator
-for a few steps computes gradients that anticipate the discriminator’s
-learning trajectory, effectively performing a short look-ahead.
-This can mitigate sudden jumps in the loss landscape and prevent the
-discriminator from collapsing to trivial solutions.</p>
+<p>When the discriminator can perfectly separate real from fake samples it may
+drastically reduce the generator’s gradient signal. Adding small noise to the
+outcomes effectively blurs the decision boundary and regularises the
+discriminator. This is particularly helpful when datasets are small or noisy,
+where the discriminator might otherwise memorise the training data.</p>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
-<p>Enable unrolled updates by setting <code class="docutils literal notranslate"><span class="pre">unrolled_steps</span></code> in
+<p>Enable instance noise by setting <code class="docutils literal notranslate"><span class="pre">instance_noise=True</span></code> in
 <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
     <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">unrolled_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">instance_noise</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Setting <code class="docutils literal notranslate"><span class="pre">unrolled_steps</span></code> to <code class="docutils literal notranslate"><span class="pre">1</span></code> performs one virtual discriminator
-update using the current batch, differentiating through that step when
-calculating the generator gradients. Values greater than <code class="docutils literal notranslate"><span class="pre">3</span></code> rarely
-help and slow down training considerably.</p>
+<p>During each discriminator update a noise term is added to the observed outcome
+and the counterfactual prediction. The noise magnitude starts at <code class="docutils literal notranslate"><span class="pre">0.2</span></code> and
+decays linearly to <code class="docutils literal notranslate"><span class="pre">0</span></code> by the final epoch.</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
-<p>Use unrolled updates when the discriminator dominates the generator or
-training becomes unstable early on. They are most beneficial on small
-or imbalanced datasets where the discriminator can easily separate real
-and fake samples. For large datasets or well-balanced problems the
-additional computation may not be worth the minor stability gains.
-Start with <code class="docutils literal notranslate"><span class="pre">unrolled_steps=1</span></code> and disable the feature if training
-slows down without improvement.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">instance_noise</span></code> when training is unstable or the discriminator quickly
+achieves near-perfect accuracy. It works well together with other
+regularisation techniques such as feature matching or gradient reversal. On
+very large datasets or when discriminator overfitting is not an issue, the
+option can be left disabled.</p>
 </section>
 </section>
 
@@ -380,23 +375,23 @@ slows down without improvement.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="doubly_robust.html">
+          <a class="next-page" href="unrolled_discriminator.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Doubly Robust Objective and Propensity Head</div>
+                <div class="title">Unrolled Discriminator Updates</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="instance_noise.html">
+          <a class="prev-page" href="spectral_norm.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Instance Noise for Robust Discriminator</div>
+                <div class="title">Spectral Normalisation for Stable Training</div>
                 
               </div>
             </a>
@@ -430,7 +425,7 @@ slows down without improvement.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Unrolled Discriminator Updates</a><ul>
+<li><a class="reference internal" href="#">Instance Noise for Robust Discriminator</a><ul>
 <li><a class="reference internal" href="#motivation">Motivation</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
