@@ -463,7 +463,6 @@ class ACXTrainer:
                                 inputs=interpolates,
                                 grad_outputs=torch.ones_like(interp_logits),
                                 create_graph=True,
-                                retain_graph=True,
                                 only_inputs=True,
                             )[0]
                             gp = (
