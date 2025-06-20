@@ -1,13 +1,13 @@
 <!doctype html>
 <html class="no-js" lang="en" data-content_root="./">
-  <head>
-<meta charset="utf-8"/>
+  <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="#" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Discriminator Feature Augmentation" href="discriminator_augmentation.html" /><link rel="prev" title="Contrastive Representation Loss" href="contrastive_loss.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-<meta name="robots" content="noindex" />
-<title>Search - crosslearner 0.1 documentation</title><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+        <title>Representation Disentanglement and Auxiliary Adversaries - crosslearner 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -178,7 +178,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -192,14 +192,14 @@
   
   <span class="sidebar-brand-text">crosslearner 0.1 documentation</span>
   
-</a><form class="sidebar-search-container" method="get" action="#" role="search">
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="acx_architecture.html">ACX Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theoretical Background</a></li>
@@ -210,7 +210,7 @@
 <li class="toctree-l1"><a class="reference internal" href="spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="instance_noise.html">Instance Noise for Robust Discriminator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
-<li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Representation Disentanglement and Auxiliary Adversaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
@@ -311,7 +311,13 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          <div class="theme-toggle-container theme-toggle-content">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/representation_disentanglement.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
@@ -320,31 +326,110 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          
-<noscript>
-<div class="admonition error">
-  <p class="admonition-title">Error</p>
-  <p>
-    Please activate JavaScript to enable the search functionality.
-  </p>
-</div>
-</noscript>
+          <section id="representation-disentanglement-and-auxiliary-adversaries">
+<h1>Representation Disentanglement and Auxiliary Adversaries<a class="headerlink" href="#representation-disentanglement-and-auxiliary-adversaries" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">disentangle</span></code> flag of <code class="xref py py-class docutils literal notranslate"><span class="pre">crosslearner.models.ACX</span></code> and
+<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.ModelConfig" title="crosslearner.training.ModelConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelConfig</span></code></a> splits the encoder output into
+three parts:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">rep_dim_c</span></code></dt><dd><p>Dimensionality of the confounder representation <code class="docutils literal notranslate"><span class="pre">z_c</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">rep_dim_a</span></code></dt><dd><p>Dimensionality of the outcome-specific representation <code class="docutils literal notranslate"><span class="pre">z_a</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">rep_dim_i</span></code></dt><dd><p>Dimensionality of the instrument representation <code class="docutils literal notranslate"><span class="pre">z_i</span></code>.</p>
+</dd>
+</dl>
+<p>When <code class="docutils literal notranslate"><span class="pre">disentangle=True</span></code> the model routes these feature blocks to different
+heads. Two optional adversaries try to predict treatment and outcome from
+combinations of the blocks:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">adv_t_weight</span></code></dt><dd><p>Weight for a logistic adversary predicting treatment from
+<code class="docutils literal notranslate"><span class="pre">(z_c,</span> <span class="pre">z_a)</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">adv_y_weight</span></code></dt><dd><p>Weight for a regression adversary predicting the observed outcome from
+<code class="docutils literal notranslate"><span class="pre">(z_c,</span> <span class="pre">z_i)</span></code>.</p>
+</dd>
+</dl>
+<p>The adversaries are trained alongside the discriminator. Their gradients are
+reversed when backpropagated through <code class="docutils literal notranslate"><span class="pre">phi</span></code> so the encoder learns features that
+do not reveal treatment or outcome information beyond the designated blocks.</p>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
+<p>Real-world datasets often contain strong confounders or instruments that can
+leak into every part of the representation. By disentangling the encoder and
+penalising treatment or outcome predictability, the model is encouraged to store
+relevant information only where appropriate. This can reduce bias and improve
+counterfactual estimates when the independence assumptions of causal inference
+are violated.</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>Enable disentanglement by setting <code class="docutils literal notranslate"><span class="pre">disentangle=True</span></code> in <code class="docutils literal notranslate"><span class="pre">ModelConfig</span></code> (or the
+<code class="docutils literal notranslate"><span class="pre">ACX</span></code> constructor) and provide sizes for all three representation parts. Set
+<code class="docutils literal notranslate"><span class="pre">adv_t_weight</span></code> and <code class="docutils literal notranslate"><span class="pre">adv_y_weight</span></code> to positive values to activate the
+adversaries:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.training</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">TrainingConfig</span><span class="p">,</span> <span class="n">train_acx</span>
 
-<div id="search-results"></div>
+<span class="n">model_cfg</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span>
+    <span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">disentangle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">rep_dim_c</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">rep_dim_a</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+    <span class="n">rep_dim_i</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">train_cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+    <span class="n">adv_t_weight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">adv_y_weight</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">model_cfg</span><span class="p">,</span> <span class="n">train_cfg</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="when-to-use-it">
+<h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
+<p>Representation disentanglement is most beneficial when the treatment assignment
+or outcomes are strongly correlated with nuisance factors that the model should
+ignore. Start with small adversary weights (e.g. <code class="docutils literal notranslate"><span class="pre">0.1</span></code> to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>) and
+increase them if the encoder continues to leak information. On very small
+datasets or when causal assumptions hold perfectly, disabling this feature keeps
+the architecture simpler.</p>
+</section>
+</section>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="discriminator_augmentation.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Discriminator Feature Augmentation</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="contrastive_loss.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Contrastive Representation Loss</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -363,8 +448,29 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Representation Disentanglement and Auxiliary Adversaries</a><ul>
+<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -373,8 +479,5 @@
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
-    
-<script src="_static/searchtools.js"></script>
-<script src="_static/language_data.js"></script>
-<script src="searchindex.js"></script></body>
+    </body>
 </html>
