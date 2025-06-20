@@ -51,4 +51,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   treatment group
 - Cached a zero tensor per epoch and replaced redundant `torch.tensor(0.0)`
   constructions
+- Reused a single `torch.cdist` to compute all pairwise distances in `_mmd_rbf`
 

@@ -24,6 +24,16 @@ def test_mmd_rbf_matches_manual():
     assert torch.allclose(actual, expected, atol=1e-6)
 
 
+def test_mmd_rbf_non_default_sigma():
+    torch.manual_seed(1)
+    x = torch.randn(8, 2)
+    y = torch.randn(7, 2)
+    sigma = 2.5
+    expected = _mmd_rbf_manual(x, y, sigma)
+    actual = _mmd_rbf(x, y, sigma)
+    assert torch.allclose(actual, expected, atol=1e-6)
+
+
 def test_mmd_rbf_empty_inputs():
     x = torch.empty(0, 3)
     y = torch.randn(4, 3)
