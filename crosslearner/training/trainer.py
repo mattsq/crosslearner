@@ -143,15 +143,13 @@ class ACXTrainer:
 
     def _sample_negatives(self, t: torch.Tensor) -> torch.Tensor:
         """Return indices of negative samples from the opposite treatment group."""
-        b = t.size(0)
-        neg_idx = torch.empty(b, dtype=torch.long, device=t.device)
-        for i in range(b):
-            mask = torch.nonzero(t != t[i], as_tuple=False).view(-1)
-            if mask.numel() == 0:
-                mask = torch.arange(b, device=t.device)
-            j = torch.randint(len(mask), (1,), device=t.device)
-            neg_idx[i] = mask[j]
-        return neg_idx
+        t = t.view(-1)
+        mask = t.unsqueeze(0) != t.unsqueeze(1)
+        weights = mask.float()
+        weights = torch.where(
+            mask.any(dim=1, keepdim=True), weights, torch.ones_like(weights)
+        )
+        return torch.multinomial(weights, 1).squeeze(1)
 
     def _unrolled_logits(
         self,
