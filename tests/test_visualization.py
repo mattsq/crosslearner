@@ -12,6 +12,8 @@ from crosslearner.visualization import (
     plot_propensity_overlap,
     plot_residuals,
     plot_cate_calibration,
+    plot_partial_dependence,
+    plot_ice,
 )
 from crosslearner.training.history import EpochStats
 from crosslearner.models.acx import ACX
@@ -85,5 +87,21 @@ def test_plot_cate_calibration_returns_figure():
     tau_hat = torch.randn(20, 1)
     tau_true = torch.randn(20, 1)
     fig = plot_cate_calibration(tau_hat, tau_true)
+    assert fig is not None
+    matplotlib.pyplot.close(fig)
+
+
+def test_plot_partial_dependence_returns_figure():
+    model = ACX(p=2)
+    X = torch.randn(10, 2)
+    fig = plot_partial_dependence(model, X, feature=0)
+    assert fig is not None
+    matplotlib.pyplot.close(fig)
+
+
+def test_plot_ice_returns_figure():
+    model = ACX(p=2)
+    X = torch.randn(5, 2)
+    fig = plot_ice(model, X, feature=1)
     assert fig is not None
     matplotlib.pyplot.close(fig)
