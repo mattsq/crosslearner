@@ -44,4 +44,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   how predicted treatment effects change with a single feature
 - Replaced pairwise distance computation in `_mmd_rbf` with `torch.cdist` and
   added regression test
+- Removed `retain_graph=True` from gradient penalty computation
 
