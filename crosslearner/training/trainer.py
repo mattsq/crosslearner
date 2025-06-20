@@ -24,12 +24,13 @@ def _mmd_rbf(x: torch.Tensor, y: torch.Tensor, sigma: float = 1.0) -> torch.Tens
 
     if x.numel() == 0 or y.numel() == 0:
         return torch.tensor(0.0, device=x.device)
-    dist_xx = torch.cdist(x, x).pow(2)
-    dist_yy = torch.cdist(y, y).pow(2)
-    dist_xy = torch.cdist(x, y).pow(2)
-    k_xx = torch.exp(-dist_xx / (2 * sigma**2))
-    k_yy = torch.exp(-dist_yy / (2 * sigma**2))
-    k_xy = torch.exp(-dist_xy / (2 * sigma**2))
+    xy = torch.cat([x, y])
+    dist = torch.cdist(xy, xy).pow(2)
+    k = torch.exp(-dist / (2 * sigma**2))
+    n_x = x.size(0)
+    k_xx = k[:n_x, :n_x]
+    k_yy = k[n_x:, n_x:]
+    k_xy = k[:n_x, n_x:]
     return k_xx.mean() + k_yy.mean() - 2 * k_xy.mean()
 
 
