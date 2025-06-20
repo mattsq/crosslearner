@@ -16,6 +16,7 @@ the training procedure, hyperparameter sweeps and available modules.
    hyperparameter_sweeps
    usage_examples
    gradient_reversal
+   feature_matching
    datasets
    uncertainty
    risk_early_stopping
