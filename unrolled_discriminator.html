@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Usage Examples" href="usage_examples.html" /><link rel="prev" title="Theoretical Background" href="theory.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Doubly Robust Objective and Propensity Head" href="doubly_robust.html" /><link rel="prev" title="Spectral Normalisation for Stable Training" href="spectral_norm.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Hyperparameter Sweeps with Optuna - crosslearner 0.1 documentation</title>
+        <title>Unrolled Discriminator Updates - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -178,7 +178,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -203,12 +203,12 @@
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="acx_architecture.html">ACX Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theoretical Background</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Hyperparameter Sweeps with Optuna</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hyperparameter_sweeps.html">Hyperparameter Sweeps with Optuna</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_matching.html">Feature Matching for Stable GAN Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="datasets.html">Datasets</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_toy_dataloader.html">crosslearner.datasets.get_toy_dataloader</a></li>
@@ -308,7 +308,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/hyperparameter_sweeps.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/unrolled_discriminator.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -322,53 +322,56 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="hyperparameter-sweeps-with-optuna">
-<h1>Hyperparameter Sweeps with Optuna<a class="headerlink" href="#hyperparameter-sweeps-with-optuna" title="Link to this heading">¶</a></h1>
-<p><a class="reference external" href="https://optuna.org/">optuna</a> is a lightweight library for automated
-hyperparameter search. It repeatedly samples configurations, trains an AC-X
-model and keeps the one with the best validation metric.</p>
-<p>The snippet below sweeps a few hyperparameters and minimises the validation
-<span class="math notranslate nohighlight">\(\sqrt{\mathrm{PEHE}}\)</span>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.datasets.toy</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_toy_dataloader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.training.train_acx</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_acx</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.training</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">TrainingConfig</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span>
-
-<span class="n">loader</span><span class="p">,</span> <span class="p">(</span><span class="n">mu0</span><span class="p">,</span> <span class="n">mu1</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_toy_dataloader</span><span class="p">()</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">])</span>
-<span class="n">mu0_all</span> <span class="o">=</span> <span class="n">mu0</span>
-<span class="n">mu1_all</span> <span class="o">=</span> <span class="n">mu1</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">objective</span><span class="p">(</span><span class="n">trial</span><span class="p">):</span>
-    <span class="n">rep_dim</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s2">&quot;rep_dim&quot;</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
-    <span class="n">lr_g</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_loguniform</span><span class="p">(</span><span class="s2">&quot;lr_g&quot;</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">)</span>
-    <span class="n">lr_d</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_loguniform</span><span class="p">(</span><span class="s2">&quot;lr_d&quot;</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">)</span>
-    <span class="n">beta_cons</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s2">&quot;beta_cons&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">)</span>
-
-    <span class="n">model_cfg</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">rep_dim</span><span class="o">=</span><span class="n">rep_dim</span><span class="p">)</span>
-    <span class="n">train_cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
-        <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-        <span class="n">lr_g</span><span class="o">=</span><span class="n">lr_g</span><span class="p">,</span>
-        <span class="n">lr_d</span><span class="o">=</span><span class="n">lr_d</span><span class="p">,</span>
-        <span class="n">beta_cons</span><span class="o">=</span><span class="n">beta_cons</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">model_cfg</span><span class="p">,</span> <span class="n">train_cfg</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">mu0_all</span><span class="p">,</span> <span class="n">mu1_all</span><span class="p">)</span>
-
-<span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s2">&quot;minimize&quot;</span><span class="p">)</span>
-<span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Best value&quot;</span><span class="p">,</span> <span class="n">study</span><span class="o">.</span><span class="n">best_value</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Best params&quot;</span><span class="p">,</span> <span class="n">study</span><span class="o">.</span><span class="n">best_params</span><span class="p">)</span>
+          <section id="unrolled-discriminator-updates">
+<h1>Unrolled Discriminator Updates<a class="headerlink" href="#unrolled-discriminator-updates" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">unrolled_steps</span></code> controls how many virtual optimisation steps
+are performed on the discriminator before computing the adversarial
+loss. Instead of updating the discriminator parameters in a separate
+optimizer step, the trainer backpropagates through the discriminator
+updates themselves. This makes the generator aware of how the
+discriminator will react, leading to more stable adversarial training
+when the discriminator learns much faster.</p>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
+<p>Adversarial objectives can oscillate if the discriminator quickly
+overfits the current generator output. Unrolling the discriminator
+for a few steps computes gradients that anticipate the discriminator’s
+learning trajectory, effectively performing a short look-ahead.
+This can mitigate sudden jumps in the loss landscape and prevent the
+discriminator from collapsing to trivial solutions.</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>Enable unrolled updates by setting <code class="docutils literal notranslate"><span class="pre">unrolled_steps</span></code> in
+<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">unrolled_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">unrolled_steps</span></code> to <code class="docutils literal notranslate"><span class="pre">1</span></code> performs one virtual discriminator
+update using the current batch, differentiating through that step when
+calculating the generator gradients. Values greater than <code class="docutils literal notranslate"><span class="pre">3</span></code> rarely
+help and slow down training considerably.</p>
+</section>
+<section id="when-to-use-it">
+<h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
+<p>Use unrolled updates when the discriminator dominates the generator or
+training becomes unstable early on. They are most beneficial on small
+or imbalanced datasets where the discriminator can easily separate real
+and fake samples. For large datasets or well-balanced problems the
+additional computation may not be worth the minor stability gains.
+Start with <code class="docutils literal notranslate"><span class="pre">unrolled_steps=1</span></code> and disable the feature if training
+slows down without improvement.</p>
+</section>
 </section>
 
         </article>
@@ -376,23 +379,23 @@ model and keeps the one with the best validation metric.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="usage_examples.html">
+          <a class="next-page" href="doubly_robust.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Usage Examples</div>
+                <div class="title">Doubly Robust Objective and Propensity Head</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="theory.html">
+          <a class="prev-page" href="spectral_norm.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Theoretical Background</div>
+                <div class="title">Spectral Normalisation for Stable Training</div>
                 
               </div>
             </a>
@@ -414,8 +417,29 @@ model and keeps the one with the best validation metric.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Unrolled Discriminator Updates</a><ul>
+<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -424,6 +448,5 @@ model and keeps the one with the best validation metric.</p>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

@@ -18,6 +18,7 @@ the training procedure, hyperparameter sweeps and available modules.
    gradient_reversal
    feature_matching
    spectral_norm
+   unrolled_discriminator
    doubly_robust
    datasets
    uncertainty
