@@ -509,11 +509,12 @@ class ACXTrainer:
                         grads = torch.autograd.grad(
                             r1_logits.sum(), [hb_r1, y_r1], create_graph=True
                         )
-                        penalty = 0.0
-                        for g in grads:
-                            penalty = (
-                                penalty + g.pow(2).reshape(g.shape[0], -1).sum(1).mean()
-                            )
+                        penalty = (
+                            torch.cat([g.view(g.size(0), -1) for g in grads], dim=1)
+                            .pow(2)
+                            .sum(1)
+                            .mean()
+                        )
                         loss_d = loss_d + 0.5 * cfg.r1_gamma * penalty
 
                     if cfg.r2_gamma > 0:
@@ -524,11 +525,12 @@ class ACXTrainer:
                         grads = torch.autograd.grad(
                             r2_logits.sum(), [hb_r2, y_r2], create_graph=True
                         )
-                        penalty = 0.0
-                        for g in grads:
-                            penalty = (
-                                penalty + g.pow(2).reshape(g.shape[0], -1).sum(1).mean()
-                            )
+                        penalty = (
+                            torch.cat([g.view(g.size(0), -1) for g in grads], dim=1)
+                            .pow(2)
+                            .sum(1)
+                            .mean()
+                        )
                         loss_d = loss_d + 0.5 * cfg.r2_gamma * penalty
 
                     if not freeze_d:
