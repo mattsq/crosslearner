@@ -81,8 +81,8 @@ class TrainingConfig:
     contrastive_weight: float = 0.0
     contrastive_margin: float = 1.0
     contrastive_noise: float = 0.0
-    delta_prop: float = 0.0
-    lambda_dr: float = 0.0
+    delta_prop: float = 0.0  #: Weight for the propensity head cross-entropy loss.
+    lambda_dr: float = 0.0  #: Weight for the doubly robust loss term.
     noise_std: float = 0.0
     noise_consistency_weight: float = 0.0
     rep_consistency_weight: float = 0.0
