@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional, Tuple
 from collections import OrderedDict
-from torch.nn.utils import stateless
+from torch.func import functional_call
 
 import torch
 import torch.nn as nn
@@ -183,16 +183,15 @@ class ACXTrainer:
             return logits, feats
         disc = self.model.disc
         params = OrderedDict(
-            (n, p.detach().clone().requires_grad_(True))
-            for n, p in disc.named_parameters()
+            (n, p.detach().requires_grad_(True)) for n, p in disc.named_parameters()
         )
         for _ in range(steps):
             hb_r, y_r, t_r = self._pack_inputs(hb.detach(), yb.detach(), tb)
             hb_f, y_f, t_f = self._pack_inputs(hb.detach(), ycf.detach(), tb)
-            real_logits = stateless.functional_call(
+            real_logits = functional_call(
                 disc, params, (torch.cat([hb_r, y_r, t_r], dim=1),)
             )
-            fake_logits = stateless.functional_call(
+            fake_logits = functional_call(
                 disc, params, (torch.cat([hb_f, y_f, t_f], dim=1),)
             )
             if use_wgan:
@@ -217,22 +216,19 @@ class ACXTrainer:
             grads = torch.autograd.grad(
                 loss_step, tuple(params.values()), create_graph=True
             )
-            params = OrderedDict(
-                (
-                    n,
-                    (p - self.train_cfg.lr_d * g).detach().requires_grad_(True),
+            for (name, param), grad in zip(params.items(), grads):
+                params[name] = (
+                    (param - self.train_cfg.lr_d * grad).detach().requires_grad_(True)
                 )
-                for (n, p), g in zip(params.items(), grads)
-            )
         hb_p, ycf_p, tb_p = self._pack_inputs(hb, ycf, tb)
         inp = torch.cat([hb_p, ycf_p, tb_p], dim=1)
-        logits = stateless.functional_call(disc, params, (inp,))
+        logits = functional_call(disc, params, (inp,))
         net_params = OrderedDict(
             (k.split("blocks.", 1)[1], v)
             for k, v in params.items()
             if k.startswith("blocks.")
         )
-        feats = stateless.functional_call(disc.net[:-1], net_params, (inp,))
+        feats = functional_call(disc.net[:-1], net_params, (inp,))
         return logits, feats
 
     def _make_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.Optimizer]:
