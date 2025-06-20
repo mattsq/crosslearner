@@ -90,8 +90,16 @@ class TrainingConfig:
     noise_consistency_weight: float = 0.0
     rep_consistency_weight: float = 0.0
     rep_momentum: float = 0.99
-    adv_t_weight: float = 0.0
-    adv_y_weight: float = 0.0
+    adv_t_weight: float = (
+        0.0
+        #: Weight for predicting treatment from the confounder and
+        #: outcome representations when ``disentangle=True``.
+    )
+    adv_y_weight: float = (
+        0.0
+        #: Weight for predicting the observed outcome from the confounder and
+        #: instrument representations when ``disentangle=True``.
+    )
     tensorboard_logdir: Optional[str] = None
     weight_clip: Optional[float] = None
     val_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None
