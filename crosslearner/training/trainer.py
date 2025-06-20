@@ -20,18 +20,39 @@ from .grl import grad_reverse
 
 
 def _mmd_rbf(x: torch.Tensor, y: torch.Tensor, sigma: float = 1.0) -> torch.Tensor:
-    """Return the RBF Maximum Mean Discrepancy between two samples."""
+    """Return the (unbiased) RBF Maximum Mean Discrepancy between two samples."""
 
     if x.numel() == 0 or y.numel() == 0:
         return torch.tensor(0.0, device=x.device)
-    xy = torch.cat([x, y])
-    dist = torch.cdist(xy, xy).pow(2)
-    k = torch.exp(-dist / (2 * sigma**2))
-    n_x = x.size(0)
-    k_xx = k[:n_x, :n_x]
-    k_yy = k[n_x:, n_x:]
-    k_xy = k[:n_x, n_x:]
-    return k_xx.mean() + k_yy.mean() - 2 * k_xy.mean()
+
+    n_x, n_y = x.size(0), y.size(0)
+
+    # compute squared distances via the kernel trick without building the full
+    # pairwise distance matrix
+    x2 = x.pow(2).sum(1, keepdim=True)
+    y2 = y.pow(2).sum(1, keepdim=True)
+
+    dist_xx = x2 + x2.T - 2 * (x @ x.T)
+    dist_yy = y2 + y2.T - 2 * (y @ y.T)
+    dist_xy = x2 + y2.T - 2 * (x @ y.T)
+
+    k_xx = torch.exp(-dist_xx / (2 * sigma**2))
+    k_yy = torch.exp(-dist_yy / (2 * sigma**2))
+    k_xy = torch.exp(-dist_xy / (2 * sigma**2))
+
+    if n_x > 1:
+        k_xx.fill_diagonal_(0)
+        mmd_x = k_xx.sum() / (n_x * (n_x - 1))
+    else:
+        mmd_x = torch.tensor(0.0, device=x.device)
+
+    if n_y > 1:
+        k_yy.fill_diagonal_(0)
+        mmd_y = k_yy.sum() / (n_y * (n_y - 1))
+    else:
+        mmd_y = torch.tensor(0.0, device=x.device)
+
+    return mmd_x + mmd_y - 2 * k_xy.mean()
 
 
 class ACXTrainer:
