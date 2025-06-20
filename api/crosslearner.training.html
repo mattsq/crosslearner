@@ -207,6 +207,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../usage_examples.html">Usage Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../feature_matching.html">Feature Matching for Stable GAN Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../datasets.html">Datasets</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../generated/datasets/crosslearner.datasets.get_toy_dataloader.html">crosslearner.datasets.get_toy_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../generated/datasets/crosslearner.datasets.get_complex_dataloader.html">crosslearner.datasets.get_complex_dataloader</a></li>
@@ -594,7 +595,8 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crosslearner.training.TrainingConfig.delta_prop">
 <span class="sig-name descname"><span class="pre">delta_prop</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></em><a class="headerlink" href="#crosslearner.training.TrainingConfig.delta_prop" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Weight for the propensity head cross-entropy loss.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crosslearner.training.TrainingConfig.disc_aug_noise">
@@ -664,7 +666,8 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crosslearner.training.TrainingConfig.lambda_dr">
 <span class="sig-name descname"><span class="pre">lambda_dr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></em><a class="headerlink" href="#crosslearner.training.TrainingConfig.lambda_dr" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Weight for the doubly robust loss term.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="crosslearner.training.TrainingConfig.lambda_gp">
