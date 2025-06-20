@@ -179,6 +179,9 @@ behaviour:
   differences.
 - `plot_propensity_overlap` plots propensity score overlap.
 - `plot_residuals` displays residuals against predictions.
+- `plot_partial_dependence` visualises how the predicted effect varies with a
+  single covariate by averaging over the others.
+- `plot_ice` plots individual conditional expectation curves for a feature.
 
 ## Model Export
 

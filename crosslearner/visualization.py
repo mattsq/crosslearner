@@ -174,3 +174,67 @@ def plot_cate_calibration(
     ax.set_ylabel("true tau")
     fig.tight_layout()
     return fig
+
+
+def plot_partial_dependence(
+    model: ACX,
+    X: torch.Tensor,
+    feature: int,
+    *,
+    grid_points: int = 20,
+) -> plt.Figure:
+    """Return a partial dependence plot for the CATE predictions."""
+
+    device = model_device(model)
+    X = X.to(device)
+    vals = torch.linspace(X[:, feature].min(), X[:, feature].max(), grid_points)
+    vals = vals.to(device)
+    pdp = []
+    model.eval()
+    with torch.no_grad():
+        for v in vals:
+            Xv = X.clone()
+            Xv[:, feature] = v
+            _, _, _, tau = model(Xv)
+            pdp.append(tau.mean())
+    pdp = torch.stack(pdp)
+    fig, ax = plt.subplots()
+    ax.plot(vals.cpu(), pdp.cpu())
+    ax.set_xlabel(f"feature {feature}")
+    ax.set_ylabel("predicted tau")
+    fig.tight_layout()
+    return fig
+
+
+def plot_ice(
+    model: ACX,
+    X: torch.Tensor,
+    feature: int,
+    *,
+    grid_points: int = 20,
+    sample_limit: int | None = None,
+) -> plt.Figure:
+    """Return an Individual Conditional Expectation (ICE) plot for the CATE."""
+
+    device = model_device(model)
+    X = X.to(device)
+    vals = torch.linspace(X[:, feature].min(), X[:, feature].max(), grid_points)
+    vals = vals.to(device)
+    curves = []
+    model.eval()
+    with torch.no_grad():
+        for v in vals:
+            Xv = X.clone()
+            Xv[:, feature] = v
+            _, _, _, tau = model(Xv)
+            curves.append(tau.view(-1))
+    ice = torch.stack(curves)
+    if sample_limit is not None:
+        ice = ice[:, :sample_limit]
+    fig, ax = plt.subplots()
+    for i in range(ice.shape[1]):
+        ax.plot(vals.cpu(), ice[:, i].cpu(), color="gray", alpha=0.3)
+    ax.set_xlabel(f"feature {feature}")
+    ax.set_ylabel("predicted tau")
+    fig.tight_layout()
+    return fig
