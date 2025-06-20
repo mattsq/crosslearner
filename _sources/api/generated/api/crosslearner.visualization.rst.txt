@@ -10,7 +10,9 @@ crosslearner.visualization
    
       plot_cate_calibration
       plot_covariate_balance
+      plot_ice
       plot_losses
+      plot_partial_dependence
       plot_propensity_overlap
       plot_residuals
       plot_tau_distribution
