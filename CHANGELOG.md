@@ -47,4 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `retain_graph=True` from gradient penalty computation
 - Vectorised R1/R2 gradient penalty computation
 - Optimized optimizer resets using `zero_grad(set_to_none=True)` in `ACXTrainer`
+- Replaced pairwise-mask logic in `_sample_negatives` with index lists for each
+  treatment group
 
