@@ -448,6 +448,9 @@ class ACXTrainer:
                     hb_f, y_f, t_f = self._pack_inputs(hb_aug, Ycf, Tb)
                     real_logits = model.discriminator(hb_r, y_r, t_r)
                     fake_logits = model.discriminator(hb_f, y_f, t_f)
+                    lbl_shape = real_logits.shape
+                    ones_real = torch.ones(lbl_shape, device=device)
+                    zeros_fake = torch.zeros(lbl_shape, device=device)
 
                     if use_wgan:
                         wdist = fake_logits.mean() - real_logits.mean()
@@ -461,7 +464,7 @@ class ACXTrainer:
                             grads = torch.autograd.grad(
                                 outputs=interp_logits,
                                 inputs=interpolates,
-                                grad_outputs=torch.ones_like(interp_logits),
+                                grad_outputs=ones_real,
                                 create_graph=True,
                                 only_inputs=True,
                             )[0]
@@ -476,15 +479,12 @@ class ACXTrainer:
                         )
                     elif use_ls:
                         mse_adv = nn.MSELoss()
-                        loss_d = mse_adv(
-                            real_logits, torch.ones_like(real_logits)
-                        ) + mse_adv(
-                            fake_logits,
-                            torch.zeros_like(fake_logits),
+                        loss_d = mse_adv(real_logits, ones_real) + mse_adv(
+                            fake_logits, zeros_fake
                         )
                     else:
-                        real_lbl = torch.ones_like(real_logits)
-                        fake_lbl = torch.zeros_like(fake_logits)
+                        real_lbl = ones_real
+                        fake_lbl = zeros_fake
                         if cfg.label_smoothing:
                             real_lbl = real_lbl * 0.9
                             fake_lbl = fake_lbl + 0.1
