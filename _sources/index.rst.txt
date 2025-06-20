@@ -19,6 +19,7 @@ the training procedure, hyperparameter sweeps and available modules.
    feature_matching
    spectral_norm
    instance_noise
+   contrastive_loss
    discriminator_augmentation
    unrolled_discriminator
    doubly_robust
