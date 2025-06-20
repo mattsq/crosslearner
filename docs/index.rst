@@ -18,6 +18,7 @@ the training procedure, hyperparameter sweeps and available modules.
    gradient_reversal
    datasets
    uncertainty
+   risk_early_stopping
 
 
 .. toctree::
