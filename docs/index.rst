@@ -23,6 +23,7 @@ the training procedure, hyperparameter sweeps and available modules.
    contrastive_loss
    mmd_regularization
    representation_disentanglement
+   consistency_regularization
    discriminator_augmentation
    unrolled_discriminator
    doubly_robust
