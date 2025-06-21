@@ -351,8 +351,8 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">return_history</span></code> option of <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>
 determines whether <a class="reference internal" href="api/generated/api/crosslearner.training.train_acx.html#module-crosslearner.training.train_acx" title="crosslearner.training.train_acx"><code class="xref py py-func docutils literal notranslate"><span class="pre">train_acx()</span></code></a> returns a
 <code class="docutils literal notranslate"><span class="pre">History</span></code> object alongside the trained model.  <code class="docutils literal notranslate"><span class="pre">History</span></code> is a list of
-<code class="xref py py-class docutils literal notranslate"><span class="pre">EpochStats</span></code> dataclasses recording losses and
-validation metrics for each epoch.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">EpochStats</span></code> dataclasses recording losses,
+gradient norms and learning rates for each epoch.</p>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
 <p>Analysing how losses evolve can reveal mode collapse or overfitting that is not

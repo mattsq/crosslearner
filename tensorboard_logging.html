@@ -354,6 +354,9 @@ an instance of <code class="xref py py-class docutils literal notranslate"><span
 standard metrics are written as event files. This includes generator and
 adversary losses as well as the validation PEHE or orthogonal risk if either
 <code class="docutils literal notranslate"><span class="pre">val_data</span></code> or <code class="docutils literal notranslate"><span class="pre">risk_data</span></code> are provided.</p>
+<p>Additional monitoring options <code class="docutils literal notranslate"><span class="pre">log_grad_norms</span></code> and <code class="docutils literal notranslate"><span class="pre">log_learning_rate</span></code>
+record gradient norms and optimiser learning rates respectively.  Setting
+<code class="docutils literal notranslate"><span class="pre">log_weight_histograms</span></code> writes parameter distributions for offline analysis.</p>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
 <p>Visualising loss curves helps diagnose convergence issues and compare different
@@ -367,6 +370,8 @@ running longer experiments where printing every epoch would clutter the output.<
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
     <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
     <span class="n">tensorboard_logdir</span><span class="o">=</span><span class="s2">&quot;runs/experiment1&quot;</span><span class="p">,</span>
+    <span class="n">log_grad_norms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">log_learning_rate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>

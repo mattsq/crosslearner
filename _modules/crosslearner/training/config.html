@@ -472,6 +472,18 @@
         <span class="kc">None</span>
         <span class="c1">#: Directory in which to write TensorBoard event files during training.</span>
     <span class="p">)</span>
+    <span class="n">log_grad_norms</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">False</span>
+        <span class="c1">#: Record gradient norms to TensorBoard when ``tensorboard_logdir`` is set.</span>
+    <span class="p">)</span>
+    <span class="n">log_learning_rate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">False</span>
+        <span class="c1">#: Log the learning rate of each optimiser at the end of every epoch.</span>
+    <span class="p">)</span>
+    <span class="n">log_weight_histograms</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">False</span>
+        <span class="c1">#: Write histograms of model parameters to TensorBoard once per epoch.</span>
+    <span class="p">)</span>
     <span class="n">weight_clip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
         <span class="kc">None</span>
         <span class="c1">#: Clip discriminator weights to ``[-weight_clip, weight_clip]`` after</span>
