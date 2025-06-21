@@ -17,6 +17,7 @@ the training procedure, hyperparameter sweeps and available modules.
    usage_examples
    gradient_reversal
    feature_matching
+   label_smoothing
    spectral_norm
    exponential_moving_average
    weight_clipping
