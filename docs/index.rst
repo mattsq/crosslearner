@@ -28,6 +28,7 @@ the training procedure, hyperparameter sweeps and available modules.
    datasets
    uncertainty
    risk_early_stopping
+   tensorboard_logging
 
 
 .. toctree::
