@@ -43,5 +43,8 @@ contrastive_weight: 0.0
 contrastive_margin: 1.0
 contrastive_noise: 0.0
 tensorboard_logdir: null
+log_grad_norms: false
+log_learning_rate: false
+log_weight_histograms: false
 weight_clip: null
 patience: 0

@@ -8,6 +8,10 @@ standard metrics are written as event files. This includes generator and
 adversary losses as well as the validation PEHE or orthogonal risk if either
 ``val_data`` or ``risk_data`` are provided.
 
+Additional monitoring options ``log_grad_norms`` and ``log_learning_rate``
+record gradient norms and optimiser learning rates respectively.  Setting
+``log_weight_histograms`` writes parameter distributions for offline analysis.
+
 Motivation
 ----------
 
@@ -24,6 +28,8 @@ Pass a directory to ``tensorboard_logdir`` in the training configuration::
    cfg = TrainingConfig(
        epochs=30,
        tensorboard_logdir="runs/experiment1",
+       log_grad_norms=True,
+       log_learning_rate=True,
    )
    model = train_acx(loader, ModelConfig(p=10), cfg)
 
