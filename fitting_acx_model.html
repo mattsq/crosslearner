@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Fitting AC-X Models" href="fitting_acx_model.html" /><link rel="prev" title="Theoretical Background" href="theory.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Usage Examples" href="usage_examples.html" /><link rel="prev" title="Hyperparameter Sweeps with Optuna" href="hyperparameter_sweeps.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Hyperparameter Sweeps with Optuna - crosslearner 0.1 documentation</title>
+        <title>Fitting AC-X Models - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -178,7 +178,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -203,8 +203,8 @@
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="acx_architecture.html">ACX Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theoretical Background</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Hyperparameter Sweeps with Optuna</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fitting_acx_model.html">Fitting AC-X Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hyperparameter_sweeps.html">Hyperparameter Sweeps with Optuna</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Fitting AC-X Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_matching.html">Feature Matching for Stable GAN Training</a></li>
@@ -326,7 +326,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/hyperparameter_sweeps.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/fitting_acx_model.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -340,53 +340,74 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="hyperparameter-sweeps-with-optuna">
-<h1>Hyperparameter Sweeps with Optuna<a class="headerlink" href="#hyperparameter-sweeps-with-optuna" title="Link to this heading">¶</a></h1>
-<p><a class="reference external" href="https://optuna.org/">optuna</a> is a lightweight library for automated
-hyperparameter search. It repeatedly samples configurations, trains an AC-X
-model and keeps the one with the best validation metric.</p>
-<p>The snippet below sweeps a few hyperparameters and minimises the validation
-<span class="math notranslate nohighlight">\(\sqrt{\mathrm{PEHE}}\)</span>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.datasets.toy</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_toy_dataloader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.training.train_acx</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_acx</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.training</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">TrainingConfig</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span>
-
-<span class="n">loader</span><span class="p">,</span> <span class="p">(</span><span class="n">mu0</span><span class="p">,</span> <span class="n">mu1</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_toy_dataloader</span><span class="p">()</span>
-<span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">loader</span><span class="p">])</span>
-<span class="n">mu0_all</span> <span class="o">=</span> <span class="n">mu0</span>
-<span class="n">mu1_all</span> <span class="o">=</span> <span class="n">mu1</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">objective</span><span class="p">(</span><span class="n">trial</span><span class="p">):</span>
-    <span class="n">rep_dim</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s2">&quot;rep_dim&quot;</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
-    <span class="n">lr_g</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_loguniform</span><span class="p">(</span><span class="s2">&quot;lr_g&quot;</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">)</span>
-    <span class="n">lr_d</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_loguniform</span><span class="p">(</span><span class="s2">&quot;lr_d&quot;</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">)</span>
-    <span class="n">beta_cons</span> <span class="o">=</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_float</span><span class="p">(</span><span class="s2">&quot;beta_cons&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">)</span>
-
-    <span class="n">model_cfg</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">rep_dim</span><span class="o">=</span><span class="n">rep_dim</span><span class="p">)</span>
-    <span class="n">train_cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
-        <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-        <span class="n">lr_g</span><span class="o">=</span><span class="n">lr_g</span><span class="p">,</span>
-        <span class="n">lr_d</span><span class="o">=</span><span class="n">lr_d</span><span class="p">,</span>
-        <span class="n">beta_cons</span><span class="o">=</span><span class="n">beta_cons</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">model_cfg</span><span class="p">,</span> <span class="n">train_cfg</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">mu0_all</span><span class="p">,</span> <span class="n">mu1_all</span><span class="p">)</span>
-
-<span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span><span class="n">direction</span><span class="o">=</span><span class="s2">&quot;minimize&quot;</span><span class="p">)</span>
-<span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Best value&quot;</span><span class="p">,</span> <span class="n">study</span><span class="o">.</span><span class="n">best_value</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Best params&quot;</span><span class="p">,</span> <span class="n">study</span><span class="o">.</span><span class="n">best_params</span><span class="p">)</span>
-</pre></div>
-</div>
+          <section id="fitting-ac-x-models">
+<h1>Fitting AC-X Models<a class="headerlink" href="#fitting-ac-x-models" title="Link to this heading">¶</a></h1>
+<p>This page provides a high level guide for training AC-X models. It covers
+selecting sensible hyperparameters, diagnosing common training issues and
+interpreting model outputs.</p>
+<section id="selecting-hyperparameters">
+<h2>Selecting hyperparameters<a class="headerlink" href="#selecting-hyperparameters" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">crosslearner</span></code> exposes two configuration dataclasses:
+<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.ModelConfig" title="crosslearner.training.ModelConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelConfig</span></code></a> controls the architecture while
+<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a> handles optimisation. The
+following guidelines help choose good defaults.</p>
+<ul class="simple">
+<li><p><strong>Representation size</strong> <code class="docutils literal notranslate"><span class="pre">rep_dim</span></code> – start small (<code class="docutils literal notranslate"><span class="pre">32</span></code> or <code class="docutils literal notranslate"><span class="pre">64</span></code>) for toy
+datasets and increase to <code class="docutils literal notranslate"><span class="pre">128</span></code> or larger as the number of covariates grows.</p></li>
+<li><p><strong>Hidden layers</strong> <code class="docutils literal notranslate"><span class="pre">phi_layers</span></code> and <code class="docutils literal notranslate"><span class="pre">head_layers</span></code> – one or two layers with
+<code class="docutils literal notranslate"><span class="pre">relu</span></code> activations often suffice. Add depth only when the dataset is
+complex or highly nonlinear.</p></li>
+<li><p><strong>Dropout and residual connections</strong> – use dropout on small datasets to
+prevent overfitting. Residual connections can stabilise deep networks.</p></li>
+<li><p><strong>Learning rates</strong> <code class="docutils literal notranslate"><span class="pre">lr_g</span></code> and <code class="docutils literal notranslate"><span class="pre">lr_d</span></code> – the generator and discriminator
+often use similar rates around <code class="docutils literal notranslate"><span class="pre">1e-3</span></code>. If the discriminator overwhelms the
+generator, lower <code class="docutils literal notranslate"><span class="pre">lr_d</span></code> or enable <a class="reference internal" href="ttur.html"><span class="doc">Two Time-Scale Update Rule (TTUR)</span></a>.</p></li>
+<li><p><strong>Regularisation weights</strong> – penalties such as <code class="docutils literal notranslate"><span class="pre">lambda_gp</span></code> and
+<code class="docutils literal notranslate"><span class="pre">r1_gamma</span></code> help when the discriminator loss diverges. Increase them
+gradually until training stabilises.</p></li>
+</ul>
+<p>For a systematic search refer to <a class="reference internal" href="hyperparameter_sweeps.html"><span class="doc">Hyperparameter Sweeps with Optuna</span></a> which integrates
+<code class="docutils literal notranslate"><span class="pre">optuna</span></code> for automated tuning.</p>
+</section>
+<section id="diagnosing-training-pathologies">
+<h2>Diagnosing training pathologies<a class="headerlink" href="#diagnosing-training-pathologies" title="Link to this heading">¶</a></h2>
+<p>Monitoring losses and metrics during training is essential. Enable
+<code class="docutils literal notranslate"><span class="pre">return_history=True</span></code> in the training configuration to obtain a list of loss
+values per epoch. <a class="reference internal" href="training_history.html"><span class="doc">Tracking Training History</span></a> details how to visualise this data.</p>
+<p>Typical symptoms and fixes include:</p>
+<ul class="simple">
+<li><p><strong>Discriminator loss near zero</strong> – the discriminator dominates. Reduce its
+learning rate, add dropout or increase the gradient penalty.</p></li>
+<li><p><strong>Generator loss stagnates</strong> – try higher <code class="docutils literal notranslate"><span class="pre">lr_g</span></code> or apply
+<a class="reference internal" href="warm_start.html"><span class="doc">Warm Start for Stable Optimisation</span></a> so adversarial objectives kick in later.</p></li>
+<li><p><strong>Noisy metrics</strong> – log to TensorBoard via <code class="docutils literal notranslate"><span class="pre">tensorboard_logdir</span></code> and smooth
+the curves. Increase batch size if possible.</p></li>
+<li><p><strong>Divergence</strong> – check that inputs are normalised and consider enabling
+<a class="reference internal" href="spectral_norm.html"><span class="doc">Spectral Normalisation for Stable Training</span></a> or <a class="reference internal" href="instance_noise.html"><span class="doc">Instance Noise for Robust Discriminator</span></a>.</p></li>
+</ul>
+</section>
+<section id="generating-and-interpreting-results">
+<h2>Generating and interpreting results<a class="headerlink" href="#generating-and-interpreting-results" title="Link to this heading">¶</a></h2>
+<p>After training, pass a tensor of covariates <code class="docutils literal notranslate"><span class="pre">X</span></code> through the model to obtain
+three outputs <code class="docutils literal notranslate"><span class="pre">(mu0_hat,</span> <span class="pre">mu1_hat,</span> <span class="pre">tau_hat)</span></code>. The treatment effect
+<code class="docutils literal notranslate"><span class="pre">tau_hat</span></code> can be evaluated with <a class="reference internal" href="api/generated/api/crosslearner.evaluation.evaluate.html#crosslearner.evaluation.evaluate" title="crosslearner.evaluation.evaluate"><code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.evaluation.evaluate()</span></code></a>
+when ground truth counterfactuals are known. For observational data use
+<a class="reference internal" href="api/crosslearner.evaluation.html#crosslearner.evaluation.evaluate_ipw" title="crosslearner.evaluation.evaluate_ipw"><code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.evaluation.evaluate_ipw()</span></code></a> or
+<a class="reference internal" href="api/crosslearner.evaluation.html#crosslearner.evaluation.evaluate_dr" title="crosslearner.evaluation.evaluate_dr"><code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.evaluation.evaluate_dr()</span></code></a>.</p>
+<p>The outcome heads <code class="docutils literal notranslate"><span class="pre">mu0</span></code> and <code class="docutils literal notranslate"><span class="pre">mu1</span></code> predict potential outcomes under control
+and treatment. Subtracting them also yields the CATE. The estimates can be
+exported to TorchScript or ONNX using <code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.export.export_model()</span></code>
+for deployment or further analysis.</p>
+<p>Interpreting the effect estimates in context requires domain knowledge.
+Inspect distributions of <code class="docutils literal notranslate"><span class="pre">tau_hat</span></code> across subgroups and compare against known
+benchmarks or randomised data if available.</p>
+</section>
 </section>
 
         </article>
@@ -394,23 +415,23 @@ model and keeps the one with the best validation metric.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="fitting_acx_model.html">
+          <a class="next-page" href="usage_examples.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Fitting AC-X Models</div>
+                <div class="title">Usage Examples</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="theory.html">
+          <a class="prev-page" href="hyperparameter_sweeps.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Theoretical Background</div>
+                <div class="title">Hyperparameter Sweeps with Optuna</div>
                 
               </div>
             </a>
@@ -432,8 +453,29 @@ model and keeps the one with the best validation metric.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Fitting AC-X Models</a><ul>
+<li><a class="reference internal" href="#selecting-hyperparameters">Selecting hyperparameters</a></li>
+<li><a class="reference internal" href="#diagnosing-training-pathologies">Diagnosing training pathologies</a></li>
+<li><a class="reference internal" href="#generating-and-interpreting-results">Generating and interpreting results</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -442,6 +484,5 @@ model and keeps the one with the best validation metric.</p>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>
