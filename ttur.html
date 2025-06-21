@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Feature Matching for Stable GAN Training" href="feature_matching.html" /><link rel="prev" title="Usage Examples" href="usage_examples.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Doubly Robust Objective and Propensity Head" href="doubly_robust.html" /><link rel="prev" title="Warm Start for Stable Optimisation" href="warm_start.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Gradient Reversal for Adversarial Training - crosslearner 0.1 documentation</title>
+        <title>Two Time-Scale Update Rule (TTUR) - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -205,7 +205,7 @@
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theoretical Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hyperparameter_sweeps.html">Hyperparameter Sweeps with Optuna</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Gradient Reversal for Adversarial Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_matching.html">Feature Matching for Stable GAN Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="r1_r2_regularization.html">R1 and R2 Gradient Penalties</a></li>
@@ -217,7 +217,7 @@
 <li class="toctree-l1"><a class="reference internal" href="discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="warm_start.html">Warm Start for Stable Optimisation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ttur.html">Two Time-Scale Update Rule (TTUR)</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Two Time-Scale Update Rule (TTUR)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="datasets.html">Datasets</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_toy_dataloader.html">crosslearner.datasets.get_toy_dataloader</a></li>
@@ -319,7 +319,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/gradient_reversal.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/ttur.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -339,63 +339,41 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="gradient-reversal-for-adversarial-training">
-<h1>Gradient Reversal for Adversarial Training<a class="headerlink" href="#gradient-reversal-for-adversarial-training" title="Link to this heading">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">gradient_reversal</span></code> option offers an alternative way to train the discriminator.
-Instead of alternating optimisation steps for the generator and discriminator,
-the model can use a gradient reversal layer (GRL) so that the discriminator’s loss
-flows through a fixed feature extractor while its gradients are multiplied by
-<code class="docutils literal notranslate"><span class="pre">-grl_weight</span></code> before reaching the encoder.
-This yields an adversarial signal without a separate discriminator update step.</p>
+          <section id="two-time-scale-update-rule-ttur">
+<h1>Two Time-Scale Update Rule (TTUR)<a class="headerlink" href="#two-time-scale-update-rule-ttur" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">ttur</span></code> flag of <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a> enables a
+simple variant of the <em>two time-scale update rule</em>. After each epoch the
+training loop checks the discriminator loss. When the loss drops below <code class="docutils literal notranslate"><span class="pre">0.3</span></code>
+the discriminator is temporarily frozen for the next epoch, allowing the
+generator to catch up without competing against an overly strong adversary.</p>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
-<p>Alternating generator and discriminator updates can be unstable, especially
-on small datasets where the discriminator quickly overfits. By attaching a GRL
-between the encoder and discriminator we force the representation network to
-produce features that confuse the discriminator while still training the
-classifier in a single backward pass.
-This typically leads to simpler code, fewer optimisation hyperparameters and more
-stable training in the early stages.</p>
+<p>GAN optimisation can become unstable when the discriminator learns much faster
+than the generator. A dominating discriminator drives its loss close to zero,
+which leaves the generator with vanishing gradients. The two time-scale update
+rule counteracts this by updating the two networks at different speeds. This
+implementation freezes discriminator updates whenever it is already performing
+well, effectively reducing its learning rate compared to the generator.</p>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
-<p>Enable gradient reversal by passing <code class="docutils literal notranslate"><span class="pre">gradient_reversal=True</span></code> to
-<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a> and optionally adjust the
-strength of the adversarial signal with <code class="docutils literal notranslate"><span class="pre">grl_weight</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
-    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">gradient_reversal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">grl_weight</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+<p>Activate the scheme by passing <code class="docutils literal notranslate"><span class="pre">ttur=True</span></code> when constructing the training
+configuration:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">train_cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">ttur</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This will bypass explicit discriminator updates and instead update the
-discriminator together with the generator. During backpropagation the GRL
-multiplies the gradients from the discriminator by <code class="docutils literal notranslate"><span class="pre">-grl_weight</span></code>.</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
-<p>Gradient reversal works best when the discriminator tends to overpower the
-generator or when computational simplicity is preferred. It is particularly
-useful for quick experiments or low-resource settings where performing
-multiple discriminator steps per batch might be costly.</p>
-<p>However, for larger datasets or when fine-grained control over adversarial
-optimisation is required, disabling <code class="docutils literal notranslate"><span class="pre">gradient_reversal</span></code> and using separate
-<code class="docutils literal notranslate"><span class="pre">disc_steps</span></code> may yield better performance.</p>
-</section>
-<section id="references">
-<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
-<div role="list" class="citation-list">
-<div class="citation" id="ganin2016" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span>Ganin2016<span class="fn-bracket">]</span></span>
-<p>Ganin, Y., Ustinova, E., Ajakan, H., Germain, P., Larochelle, H.,
-Laviolette, F., Marchand, M., &amp; Lempitsky, V. <em>Domain-Adversarial Training of
-Neural Networks.</em> JMLR 2016. Introduces the gradient reversal layer for
-domain adaptation.</p>
-</div>
-</div>
+<p>Enable <code class="docutils literal notranslate"><span class="pre">ttur</span></code> if you observe that the discriminator quickly achieves near-zero
+loss and the generator fails to improve. Freezing the discriminator for short
+periods gives the generator breathing room and can stabilise training on small
+or noisy datasets. Leave <code class="docutils literal notranslate"><span class="pre">ttur</span></code> disabled when both networks converge smoothly
+or when using alternative techniques such as gradient penalties to balance their
+learning speeds.</p>
 </section>
 </section>
 
@@ -404,23 +382,23 @@ domain adaptation.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="feature_matching.html">
+          <a class="next-page" href="doubly_robust.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Feature Matching for Stable GAN Training</div>
+                <div class="title">Doubly Robust Objective and Propensity Head</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="usage_examples.html">
+          <a class="prev-page" href="warm_start.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Usage Examples</div>
+                <div class="title">Warm Start for Stable Optimisation</div>
                 
               </div>
             </a>
@@ -454,11 +432,10 @@ domain adaptation.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Gradient Reversal for Adversarial Training</a><ul>
+<li><a class="reference internal" href="#">Two Time-Scale Update Rule (TTUR)</a><ul>
 <li><a class="reference internal" href="#motivation">Motivation</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
-<li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 </ul>
