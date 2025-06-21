@@ -68,7 +68,11 @@ class TrainingConfig:
         #: Add decaying Gaussian noise to discriminator targets to regularise early training.
     )
     gradient_reversal: bool = False
-    ttur: bool = False
+    ttur: bool = (
+        False
+        #: Freeze discriminator updates when its loss drops below ``0.3``
+        #: to implement a two time-scale update rule.
+    )
     disc_steps: int = 1
     disc_aug_prob: float = 0.0
     disc_aug_noise: float = 0.0
