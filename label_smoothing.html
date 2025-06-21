@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Discriminator Feature Augmentation" href="discriminator_augmentation.html" /><link rel="prev" title="Representation Disentanglement and Auxiliary Adversaries" href="representation_disentanglement.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Spectral Normalisation for Stable Training" href="spectral_norm.html" /><link rel="prev" title="Feature Matching for Stable GAN Training" href="feature_matching.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Consistency Regularization - crosslearner 0.1 documentation</title>
+        <title>Label Smoothing for the Discriminator - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -207,7 +207,7 @@
 <li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_matching.html">Feature Matching for Stable GAN Training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="label_smoothing.html">Label Smoothing for the Discriminator</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Label Smoothing for the Discriminator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exponential_moving_average.html">Exponential Moving Average of Generator Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_clipping.html">Weight Clipping for Wasserstein Training</a></li>
@@ -217,7 +217,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Consistency Regularization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="warm_start.html">Warm Start for Stable Optimisation</a></li>
@@ -324,7 +324,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/consistency_regularization.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/label_smoothing.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -344,72 +344,47 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="consistency-regularization">
-<h1>Consistency Regularization<a class="headerlink" href="#consistency-regularization" title="Link to this heading">¶</a></h1>
-<p>Several optional hyperparameters encourage stable representations and robust predictions
-by penalising inconsistency in the encoder and outputs.
-These settings are all part of <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>.</p>
-<section id="noise-consistency">
-<h2>Noise Consistency<a class="headerlink" href="#noise-consistency" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">noise_std</span></code> controls the standard deviation of Gaussian noise added to the
-input features during training.  When <code class="docutils literal notranslate"><span class="pre">noise_consistency_weight</span></code> is positive,
-the model is evaluated on both the clean and noisy inputs and their predictions
-are compared with a mean squared error penalty.  The additional loss
-<code class="docutils literal notranslate"><span class="pre">noise_consistency_weight</span></code> * <code class="docutils literal notranslate"><span class="pre">MSE(f(X),</span> <span class="pre">f(X+\epsilon))</span></code> encourages the
-potential outcome and treatment effect heads to be invariant to small
-perturbations.  This acts as a lightweight data augmentation that can improve
-robustness.</p>
-<p>Example usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
-    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">noise_std</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-    <span class="n">noise_consistency_weight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
-</pre></div>
-</div>
+          <section id="label-smoothing-for-the-discriminator">
+<h1>Label Smoothing for the Discriminator<a class="headerlink" href="#label-smoothing-for-the-discriminator" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">label_smoothing</span></code> option replaces the discriminator’s hard targets
+<code class="docutils literal notranslate"><span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">1</span></code> with softened labels <code class="docutils literal notranslate"><span class="pre">0.1</span></code> and <code class="docutils literal notranslate"><span class="pre">0.9</span></code> when using the
+binary cross-entropy adversarial loss. This one-sided smoothing keeps the
+adversary from becoming overconfident early in training.</p>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
+<p>Overly confident discriminators can drive the generator’s gradients towards
+zero. Softening the targets reduces this effect and encourages more stable
+learning. Label smoothing was introduced for classification tasks in
+<a href="#id1"><span class="problematic" id="id2">:footcite:`Szegedy2016`</span></a> and has since proven effective in GAN setups.</p>
 </section>
-<section id="representation-drift">
-<h2>Representation Drift<a class="headerlink" href="#representation-drift" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">rep_consistency_weight</span></code> introduces a penalty on changes in the encoder’s
-representation statistics across epochs.  For each treatment group the trainer
-tracks an exponential moving average of the mean and variance of the encoded
-features.  <code class="docutils literal notranslate"><span class="pre">rep_momentum</span></code> sets the decay rate for this moving average
-(default <code class="docutils literal notranslate"><span class="pre">0.99</span></code>).  During training the current batch statistics are compared
-to the stored averages and their squared difference is scaled by
-<code class="docutils literal notranslate"><span class="pre">rep_consistency_weight</span></code>.</p>
-<p>This regularisation discourages large shifts in the latent space, which can
-otherwise destabilise adversarial training.  It is especially helpful when the
-encoder oscillates or collapses as the discriminator improves.</p>
-<p>Example usage:</p>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>Enable label smoothing via <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
     <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">rep_consistency_weight</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-    <span class="n">rep_momentum</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span>
+    <span class="n">label_smoothing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>When <code class="docutils literal notranslate"><span class="pre">adv_loss</span></code> is <code class="docutils literal notranslate"><span class="pre">&quot;bce&quot;</span></code> (the default), the discriminator learns from
+<code class="docutils literal notranslate"><span class="pre">0.9</span></code> and <code class="docutils literal notranslate"><span class="pre">0.1</span></code> targets instead of perfect <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">0</span></code>. Other loss
+choices ignore this option.</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
-<p>Enable these penalties when training becomes unstable or when small input
-perturbations lead to noticeably different predictions.  Start with small
-weights (around <code class="docutils literal notranslate"><span class="pre">0.5</span></code> for <code class="docutils literal notranslate"><span class="pre">rep_consistency_weight</span></code> and <code class="docutils literal notranslate"><span class="pre">0.1</span></code> to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>
-for <code class="docutils literal notranslate"><span class="pre">noise_consistency_weight</span></code>) and only increase them if the model still
-exhibits large variance between epochs.  On very large datasets or when
-adversarial training is already stable, these options can be left at their
-default value of <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+<p>Activate <code class="docutils literal notranslate"><span class="pre">label_smoothing</span></code> if the discriminator quickly dominates and the
+generator struggles to improve. On larger datasets or with hinge or
+Wasserstein losses the effect is smaller and the option can remain <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <div role="list" class="citation-list">
-<div class="citation" id="tarvainen2017" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span>Tarvainen2017<span class="fn-bracket">]</span></span>
-<p>Tarvainen, A., &amp; Valpola, H. <em>Mean Teachers Are Better Role
-Models: Weight-Averaged Consistency Targets Improve Semi-Supervised Deep
-Learning Results.</em> NIPS 2017. Explores consistency regularisation via noisy
-inputs.</p>
+<div class="citation" id="szegedy2016" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Szegedy2016<span class="fn-bracket">]</span></span>
+<p>Szegedy, C., Vanhoucke, V., Ioffe, S., Shlens, J., &amp;
+Wojna, Z. <em>Rethinking the Inception Architecture for Computer Vision.</em>
+CVPR 2016. Proposes label smoothing as a regularisation technique.</p>
 </div>
 </div>
 </section>
@@ -420,23 +395,23 @@ inputs.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="discriminator_augmentation.html">
+          <a class="next-page" href="spectral_norm.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Discriminator Feature Augmentation</div>
+                <div class="title">Spectral Normalisation for Stable Training</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="representation_disentanglement.html">
+          <a class="prev-page" href="feature_matching.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Representation Disentanglement and Auxiliary Adversaries</div>
+                <div class="title">Feature Matching for Stable GAN Training</div>
                 
               </div>
             </a>
@@ -470,9 +445,9 @@ inputs.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Consistency Regularization</a><ul>
-<li><a class="reference internal" href="#noise-consistency">Noise Consistency</a></li>
-<li><a class="reference internal" href="#representation-drift">Representation Drift</a></li>
+<li><a class="reference internal" href="#">Label Smoothing for the Discriminator</a><ul>
+<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
