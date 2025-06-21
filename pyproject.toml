@@ -27,6 +27,7 @@ dependencies = [
 crosslearner-train = "crosslearner.__main__:main"
 crosslearner-benchmarks = "crosslearner.benchmarks.run_benchmarks:main"
 crosslearner-benchmark = "crosslearner.benchmarks.run_benchmarks:main_baselines"
+crosslearner-sweep = "crosslearner.sweep:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
