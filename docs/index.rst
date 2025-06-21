@@ -18,6 +18,7 @@ the training procedure, hyperparameter sweeps and available modules.
    gradient_reversal
    feature_matching
    spectral_norm
+   weight_clipping
    r1_r2_regularization
    instance_noise
    contrastive_loss
