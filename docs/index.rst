@@ -26,6 +26,7 @@ the training procedure, hyperparameter sweeps and available modules.
    consistency_regularization
    discriminator_augmentation
    unrolled_discriminator
+   warm_start
    doubly_robust
    datasets
    uncertainty
