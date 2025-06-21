@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Theoretical Background" href="theory.html" /><link rel="prev" title="Quickstart" href="quickstart.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="R1 and R2 Gradient Penalties" href="r1_r2_regularization.html" /><link rel="prev" title="Spectral Normalisation for Stable Training" href="spectral_norm.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>ACX Architecture - crosslearner 0.1 documentation</title>
+        <title>Weight Clipping for Wasserstein Training - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -201,14 +201,14 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">ACX Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="acx_architecture.html">ACX Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theoretical Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hyperparameter_sweeps.html">Hyperparameter Sweeps with Optuna</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_matching.html">Feature Matching for Stable GAN Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="weight_clipping.html">Weight Clipping for Wasserstein Training</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Weight Clipping for Wasserstein Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="r1_r2_regularization.html">R1 and R2 Gradient Penalties</a></li>
 <li class="toctree-l1"><a class="reference internal" href="instance_noise.html">Instance Noise for Robust Discriminator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
@@ -320,7 +320,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/acx_architecture.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/weight_clipping.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -340,133 +340,54 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="acx-architecture">
-<h1>ACX Architecture<a class="headerlink" href="#acx-architecture" title="Link to this heading">¶</a></h1>
-<p>The AC-X model implements an adversarially trained version of the
-<code class="docutils literal notranslate"><span class="pre">X</span></code>-learner. It consists of four main components:</p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">phi</span></code></dt><dd><p>Shared representation network that maps the covariates to a hidden
-feature space of dimension <code class="docutils literal notranslate"><span class="pre">rep_dim</span></code>.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">mu0</span></code> and <code class="docutils literal notranslate"><span class="pre">mu1</span></code></dt><dd><p>Outcome heads predicting control and treated responses from the
-representation.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">tau</span></code></dt><dd><p>Treatment‑effect head estimating the conditional average treatment
-effect (CATE).</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">disc</span></code></dt><dd><p>Discriminator used for adversarial training.</p>
-</dd>
-</dl>
-<p>All networks are configurable multi-layer perceptrons created by
-<code class="xref py py-class docutils literal notranslate"><span class="pre">crosslearner.models.MLP</span></code>. Residual connections and dropout can be
-turned on or off for each module individually.</p>
-<section id="configuration-options">
-<h2>Configuration options<a class="headerlink" href="#configuration-options" title="Link to this heading">¶</a></h2>
-<p>The <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.ModelConfig" title="crosslearner.training.ModelConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">crosslearner.training.ModelConfig</span></code></a> dataclass exposes the
-following parameters:</p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">p</span></code></dt><dd><p>Number of covariates.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">rep_dim</span></code></dt><dd><p>Size of the shared representation.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">phi_layers</span></code></dt><dd><p>Hidden layer sizes for <code class="docutils literal notranslate"><span class="pre">phi</span></code>.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">head_layers</span></code></dt><dd><p>Hidden layers for the outcome and effect heads.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">disc_layers</span></code></dt><dd><p>Hidden layers for the discriminator.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">activation</span></code></dt><dd><p>Activation function used in all MLPs.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">phi_dropout</span></code>, <code class="docutils literal notranslate"><span class="pre">head_dropout</span></code>, <code class="docutils literal notranslate"><span class="pre">disc_dropout</span></code></dt><dd><p>Dropout probabilities for each component.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">residual</span></code> and <code class="docutils literal notranslate"><span class="pre">*_residual</span></code></dt><dd><p>Enable residual connections globally or per component.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">disc_pack</span></code></dt><dd><p>Number of samples concatenated for the discriminator.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">weight_init</span></code></dt><dd><p>Initialisation scheme applied to linear layers. Options include
-<code class="docutils literal notranslate"><span class="pre">&quot;xavier_uniform&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;kaiming_uniform&quot;</span></code>.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">batch_norm</span></code></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> insert <code class="docutils literal notranslate"><span class="pre">BatchNorm1d</span></code> layers after each hidden linear
-layer.</p>
-</dd>
-</dl>
+          <section id="weight-clipping-for-wasserstein-training">
+<h1>Weight Clipping for Wasserstein Training<a class="headerlink" href="#weight-clipping-for-wasserstein-training" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">weight_clip</span></code> sets a hard bound on the discriminator’s parameters after each
+update.  When a positive value is supplied, every weight in the discriminator
+is clamped to the interval <code class="docutils literal notranslate"><span class="pre">[-weight_clip,</span> <span class="pre">weight_clip]</span></code> immediately after an
+optimiser step.  This mirrors the original <em>Wasserstein GAN</em> training scheme
+and keeps the discriminator within a bounded Lipschitz constant.</p>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
+<p>Wasserstein GANs require the discriminator (“critic”) to be 1-Lipschitz.  The
+simplest way to enforce this constraint is by clipping its weights to a small
+range.  Although more advanced techniques like gradient penalties and spectral
+normalisation exist, weight clipping remains a lightweight option that can
+stabilise adversarial training when other methods are unsuitable or
+computationally expensive.</p>
 </section>
-<section id="new-features">
-<h2>New features<a class="headerlink" href="#new-features" title="Link to this heading">¶</a></h2>
-<p>Recent versions add optional weight initialisation and batch
-normalisation. When enabled, every linear layer is initialised according
-to the chosen scheme and followed by a batch-normalisation layer. This
-can improve stability when training on more complex datasets. A
-contrastive representation loss can also be enabled via
-<code class="docutils literal notranslate"><span class="pre">contrastive_weight</span></code> to further balance covariates across treatment
-groups.</p>
-<p>An optional adaptive regularization scheme <code class="docutils literal notranslate"><span class="pre">adaptive_reg</span></code> can tune the
-gradient penalty strength on the fly based on the discriminator loss to
-improve adversarial stability.</p>
-<p>Representations can further be disentangled into confounder-, outcome- and
-instrument-specific parts by setting <code class="docutils literal notranslate"><span class="pre">disentangle=True</span></code> and providing sizes
-for <code class="docutils literal notranslate"><span class="pre">rep_dim_c</span></code>, <code class="docutils literal notranslate"><span class="pre">rep_dim_a</span></code> and <code class="docutils literal notranslate"><span class="pre">rep_dim_i</span></code>. Two auxiliary adversaries
-controlled via <code class="docutils literal notranslate"><span class="pre">adv_t_weight</span></code> and <code class="docutils literal notranslate"><span class="pre">adv_y_weight</span></code> then encourage the desired
-independence structure.</p>
-</section>
-<section id="customising-parameters">
-<h2>Customising parameters<a class="headerlink" href="#customising-parameters" title="Link to this heading">¶</a></h2>
-<p>The features can be controlled either directly when instantiating
-<code class="xref py py-class docutils literal notranslate"><span class="pre">crosslearner.models.ACX</span></code> or through
-<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.ModelConfig" title="crosslearner.training.ModelConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelConfig</span></code></a>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACX</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.training</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelConfig</span>
-
-<span class="c1"># Direct instantiation</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">ACX</span><span class="p">(</span>
-    <span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">rep_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
-    <span class="n">weight_init</span><span class="o">=</span><span class="s2">&quot;kaiming_uniform&quot;</span><span class="p">,</span>
-    <span class="n">batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>Specify a positive <code class="docutils literal notranslate"><span class="pre">weight_clip</span></code> value in
+<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">weight_clip</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="c1"># Using a configuration object</span>
-<span class="n">cfg</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span>
-    <span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">rep_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
-    <span class="n">weight_init</span><span class="o">=</span><span class="s2">&quot;kaiming_uniform&quot;</span><span class="p">,</span>
-    <span class="n">batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">ACX</span><span class="p">(</span>
-    <span class="n">cfg</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>
-    <span class="n">rep_dim</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">rep_dim</span><span class="p">,</span>
-    <span class="n">phi_layers</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">phi_layers</span><span class="p">,</span>
-    <span class="n">head_layers</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">head_layers</span><span class="p">,</span>
-    <span class="n">disc_layers</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">disc_layers</span><span class="p">,</span>
-    <span class="n">activation</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">activation</span><span class="p">,</span>
-    <span class="n">phi_dropout</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">phi_dropout</span><span class="p">,</span>
-    <span class="n">head_dropout</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">head_dropout</span><span class="p">,</span>
-    <span class="n">disc_dropout</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">disc_dropout</span><span class="p">,</span>
-    <span class="n">residual</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">residual</span><span class="p">,</span>
-    <span class="n">phi_residual</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">phi_residual</span><span class="p">,</span>
-    <span class="n">head_residual</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">head_residual</span><span class="p">,</span>
-    <span class="n">disc_residual</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">disc_residual</span><span class="p">,</span>
-    <span class="n">disc_pack</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">disc_pack</span><span class="p">,</span>
-    <span class="n">weight_init</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">weight_init</span><span class="p">,</span>
-    <span class="n">batch_norm</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>After each discriminator update the trainer applies
+<code class="docutils literal notranslate"><span class="pre">p.data.clamp_(-weight_clip,</span> <span class="pre">weight_clip)</span></code> to every parameter <code class="docutils literal notranslate"><span class="pre">p</span></code> in the
+adversary.  Setting <code class="docutils literal notranslate"><span class="pre">weight_clip</span></code> to <code class="docutils literal notranslate"><span class="pre">None</span></code> disables this behaviour.</p>
+</section>
+<section id="when-to-use-it">
+<h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
+<p>Weight clipping is most appropriate when experimenting with Wasserstein-style
+losses or when gradient penalties slow down training.  It can help avoid
+exploding discriminator gradients on small datasets but may limit capacity if
+the clip value is too low.  Start with a value around <code class="docutils literal notranslate"><span class="pre">0.01</span></code> and adjust
+based on training stability.  Avoid combining it with spectral normalisation,
+as both aim to bound the discriminator and may over-constrain it.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <div role="list" class="citation-list">
-<div class="citation" id="kueng2018" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span>Kueng2018<span class="fn-bracket">]</span></span>
-<p>Kueng, R., et al. <em>Neural Network Methods for Causal Inference: A
-Review of DragonNet and Related Approaches.</em> 2018. Describes the DragonNet
-architecture that inspires AC-X.</p>
-</div>
-<div class="citation" id="kunzel2019" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span>Künzel2019<span class="fn-bracket">]</span></span>
-<p>Künzel, S., Sekhon, J., Bickel, P., &amp; Yu, B. <em>Metalearners for
-Estimating Heterogeneous Treatment Effects using Machine Learning.</em> PNAS
-2019. Introduces the X-learner strategy.</p>
+<div class="citation" id="arjovsky2017" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Arjovsky2017<span class="fn-bracket">]</span></span>
+<p>Arjovsky, M., Chintala, S., &amp; Bottou, L. <em>Wasserstein GAN.</em>
+ICML 2017. Introduces weight clipping as a method to enforce the
+Lipschitz constraint in Wasserstein GANs.</p>
 </div>
 </div>
 </section>
@@ -477,23 +398,23 @@ Estimating Heterogeneous Treatment Effects using Machine Learning.</em> PNAS
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="theory.html">
+          <a class="next-page" href="r1_r2_regularization.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Theoretical Background</div>
+                <div class="title">R1 and R2 Gradient Penalties</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="quickstart.html">
+          <a class="prev-page" href="spectral_norm.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Quickstart</div>
+                <div class="title">Spectral Normalisation for Stable Training</div>
                 
               </div>
             </a>
@@ -527,10 +448,10 @@ Estimating Heterogeneous Treatment Effects using Machine Learning.</em> PNAS
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">ACX Architecture</a><ul>
-<li><a class="reference internal" href="#configuration-options">Configuration options</a></li>
-<li><a class="reference internal" href="#new-features">New features</a></li>
-<li><a class="reference internal" href="#customising-parameters">Customising parameters</a></li>
+<li><a class="reference internal" href="#">Weight Clipping for Wasserstein Training</a><ul>
+<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>

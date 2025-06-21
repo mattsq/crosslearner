@@ -207,6 +207,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../feature_matching.html">Feature Matching for Stable GAN Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../weight_clipping.html">Weight Clipping for Wasserstein Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../r1_r2_regularization.html">R1 and R2 Gradient Penalties</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../instance_noise.html">Instance Noise for Robust Discriminator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contrastive_loss.html">Contrastive Representation Loss</a></li>
@@ -459,7 +460,12 @@
         <span class="kc">None</span>
         <span class="c1">#: Directory in which to write TensorBoard event files during training.</span>
     <span class="p">)</span>
-    <span class="n">weight_clip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">weight_clip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">None</span>
+        <span class="c1">#: Clip discriminator weights to ``[-weight_clip, weight_clip]`` after</span>
+        <span class="c1">#: each update.  Useful for Wasserstein-style training.  ``None``</span>
+        <span class="c1">#: disables clipping.</span>
+    <span class="p">)</span>
     <span class="n">val_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">risk_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">risk_folds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
