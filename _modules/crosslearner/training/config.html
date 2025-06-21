@@ -215,6 +215,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../warm_start.html">Warm Start for Stable Optimisation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../datasets.html">Datasets</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_toy_dataloader.html">crosslearner.datasets.get_toy_dataloader</a></li>
@@ -389,7 +390,12 @@
     <span class="n">sched_g_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">sched_d_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">grad_clip</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span>
-    <span class="n">warm_start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">warm_start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mi">0</span>
+        <span class="c1">#: Number of initial epochs using only the outcome loss before</span>
+        <span class="c1">#: adversarial objectives kick in.  Setting this to ``&gt;0`` can</span>
+        <span class="c1">#: stabilise training on small or noisy datasets.</span>
+    <span class="p">)</span>
     <span class="n">use_wgan_gp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">adv_loss</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bce&quot;</span>
     <span class="n">ema_decay</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
