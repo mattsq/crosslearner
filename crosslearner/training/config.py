@@ -51,7 +51,12 @@ class TrainingConfig:
     sched_g_kwargs: dict = field(default_factory=dict)
     sched_d_kwargs: dict = field(default_factory=dict)
     grad_clip: float = 2.0
-    warm_start: int = 0
+    warm_start: int = (
+        0
+        #: Number of initial epochs using only the outcome loss before
+        #: adversarial objectives kick in.  Setting this to ``>0`` can
+        #: stabilise training on small or noisy datasets.
+    )
     use_wgan_gp: bool = False
     adv_loss: str = "bce"
     ema_decay: Optional[float] = None
