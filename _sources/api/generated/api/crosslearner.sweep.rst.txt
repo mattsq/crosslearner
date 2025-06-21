@@ -1,0 +1,12 @@
+crosslearner.sweep
+==================
+
+.. automodule:: crosslearner.sweep
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      main
+   

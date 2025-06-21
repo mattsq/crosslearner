@@ -17,6 +17,7 @@
    experiments
    export
    models
+   sweep
    training
    utils
    visualization
