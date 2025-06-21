@@ -369,8 +369,10 @@ visualisation beyond what TensorBoard provides.</p>
 <span class="n">model</span><span class="p">,</span> <span class="n">history</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Pass <code class="docutils literal notranslate"><span class="pre">history</span></code> to <a class="reference internal" href="api/crosslearner.html#crosslearner.visualization.plot_losses" title="crosslearner.visualization.plot_losses"><code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.visualization.plot_losses()</span></code></a> or
-implement your own analytics.</p>
+<p>Pass <code class="docutils literal notranslate"><span class="pre">history</span></code> to <a class="reference internal" href="api/crosslearner.html#crosslearner.visualization.plot_losses" title="crosslearner.visualization.plot_losses"><code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.visualization.plot_losses()</span></code></a> to visualise
+losses over time. Additional helpers <code class="docutils literal notranslate"><span class="pre">plot_grad_norms</span></code> and
+<code class="docutils literal notranslate"><span class="pre">plot_learning_rates</span></code> allow inspecting gradient norms and optimiser
+learning rates. You can also implement your own analytics.</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
