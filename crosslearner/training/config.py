@@ -119,7 +119,12 @@ class TrainingConfig:
         None
         #: Directory in which to write TensorBoard event files during training.
     )
-    weight_clip: Optional[float] = None
+    weight_clip: Optional[float] = (
+        None
+        #: Clip discriminator weights to ``[-weight_clip, weight_clip]`` after
+        #: each update.  Useful for Wasserstein-style training.  ``None``
+        #: disables clipping.
+    )
     val_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None
     risk_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None
     risk_folds: int = 5
