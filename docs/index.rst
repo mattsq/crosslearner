@@ -18,6 +18,7 @@ the training procedure, hyperparameter sweeps and available modules.
    gradient_reversal
    feature_matching
    spectral_norm
+   exponential_moving_average
    weight_clipping
    wgan_gp
    r1_r2_regularization
