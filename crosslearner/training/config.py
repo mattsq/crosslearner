@@ -70,8 +70,14 @@ class TrainingConfig:
     mmd_weight: float = 0.0
     mmd_sigma: float = 1.0
     lambda_gp: float = 10.0
-    r1_gamma: float = 0.0
-    r2_gamma: float = 0.0
+    r1_gamma: float = (
+        0.0
+        #: Coefficient for the R1 gradient penalty on real samples.
+    )
+    r2_gamma: float = (
+        0.0
+        #: Coefficient for the R2 gradient penalty on fake samples.
+    )
     adaptive_reg: bool = False
     d_reg_lower: float = 0.3
     d_reg_upper: float = 0.7
