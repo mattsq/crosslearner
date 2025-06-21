@@ -64,4 +64,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documented optional MMD regularisation via ``mmd_weight`` and ``mmd_sigma``
 - Documented TensorBoard logging via ``tensorboard_logdir`` option
 - Documented ``warm_start`` option for pretraining the generator
+- Documented ``opt_g_kwargs`` and ``opt_d_kwargs`` for custom optimizer
+  arguments
 

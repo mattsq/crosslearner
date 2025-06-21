@@ -20,6 +20,7 @@ the training procedure, hyperparameter sweeps and available modules.
    label_smoothing
    spectral_norm
    exponential_moving_average
+   optimizer_kwargs
    weight_clipping
    wgan_gp
    r1_r2_regularization
