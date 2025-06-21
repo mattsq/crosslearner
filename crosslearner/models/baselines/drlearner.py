@@ -52,6 +52,11 @@ class DRLearner:
         else:
             self.model_e.fit(X, T)
             e_hat = self.model_e.predict_proba(X)[:, 1]
+
+        # guard against extreme propensities which would otherwise create
+        # NaNs in the doubly robust pseudo-outcomes
+        eps = 1e-3
+        e_hat = np.clip(e_hat, eps, 1 - eps)
         mu0_hat = self.model_mu0.predict(X)
         mu1_hat = self.model_mu1.predict(X)
         tau_tilde = (
