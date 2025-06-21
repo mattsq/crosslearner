@@ -68,4 +68,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   arguments
 - Added options to log gradient norms, learning rates and weight histograms for
   improved training diagnostics
+- Extended visualisation utilities to plot auxiliary losses, gradient norms and
+  learning rate schedules
 
