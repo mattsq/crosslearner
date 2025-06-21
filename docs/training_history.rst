@@ -25,8 +25,10 @@ Set ``return_history=True`` when calling the training routine::
    )
    model, history = train_acx(loader, ModelConfig(p=10), cfg)
 
-Pass ``history`` to :func:`crosslearner.visualization.plot_losses` or
-implement your own analytics.
+Pass ``history`` to :func:`crosslearner.visualization.plot_losses` to visualise
+losses over time. Additional helpers ``plot_grad_norms`` and
+``plot_learning_rates`` allow inspecting gradient norms and optimiser
+learning rates. You can also implement your own analytics.
 
 When to use it
 --------------

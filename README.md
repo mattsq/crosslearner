@@ -168,8 +168,10 @@ Use the config file as a starting point for your own experiments on IHDP, ACIC o
 ## Visualisation
 
 The `History` returned by `train_acx` can be passed to
-`crosslearner.visualization.plot_losses` to plot generator and discriminator
-losses.  The module also provides several utilities for exploring model
+`crosslearner.visualization.plot_losses` to plot generator, discriminator and
+auxiliary losses. Gradient norms and learning rates can be visualised with
+`plot_grad_norms` and `plot_learning_rates`. The module also provides several
+utilities for exploring model
 behaviour:
 
 - `scatter_tau` produces a scatter plot of predicted versus true treatment

@@ -15,6 +15,8 @@ from .visualization import (
     plot_covariate_balance,
     plot_propensity_overlap,
     plot_residuals,
+    plot_grad_norms,
+    plot_learning_rates,
     plot_partial_dependence,
     plot_ice,
 )
@@ -33,6 +35,8 @@ __all__ = [
     "plot_covariate_balance",
     "plot_propensity_overlap",
     "plot_residuals",
+    "plot_grad_norms",
+    "plot_learning_rates",
     "plot_partial_dependence",
     "plot_ice",
     "ExperimentManager",

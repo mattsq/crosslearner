@@ -18,12 +18,29 @@ def plot_losses(history: History):
         Matplotlib figure with the loss trajectories.
     """
     epochs = [h.epoch for h in history]
-    fig, ax = plt.subplots()
-    ax.plot(epochs, [h.loss_d for h in history], label="discriminator")
-    ax.plot(epochs, [h.loss_g for h in history], label="generator")
-    ax.set_xlabel("epoch")
-    ax.set_ylabel("loss")
-    ax.legend()
+    fig, ax1 = plt.subplots()
+    ax1.plot(epochs, [h.loss_d for h in history], label="discriminator")
+    ax1.plot(epochs, [h.loss_g for h in history], label="generator")
+    ax1.plot(epochs, [h.loss_y for h in history], label="outcome")
+    ax1.plot(epochs, [h.loss_cons for h in history], label="consistency")
+    ax1.plot(epochs, [h.loss_adv for h in history], label="adversarial")
+    ax1.set_xlabel("epoch")
+    ax1.set_ylabel("loss")
+    has_val = any(h.val_pehe is not None for h in history)
+    if has_val:
+        ax2 = ax1.twinx()
+        ax2.plot(
+            epochs,
+            [h.val_pehe if h.val_pehe is not None else float("nan") for h in history],
+            "k--",
+            label="val_pehe",
+        )
+        ax2.set_ylabel("PEHE")
+        lines1, labels1 = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax2.legend(lines1 + lines2, labels1 + labels2)
+    else:
+        ax1.legend()
     fig.tight_layout()
     return fig
 
@@ -236,5 +253,37 @@ def plot_ice(
         ax.plot(vals.cpu(), ice[:, i].cpu(), color="gray", alpha=0.3)
     ax.set_xlabel(f"feature {feature}")
     ax.set_ylabel("predicted tau")
+    fig.tight_layout()
+    return fig
+
+
+def plot_grad_norms(history: History) -> plt.Figure:
+    """Return a matplotlib Figure with gradient norm curves."""
+
+    epochs = [h.epoch for h in history]
+    fig, ax = plt.subplots()
+    if any(h.grad_norm_g is not None for h in history):
+        ax.plot(epochs, [h.grad_norm_g for h in history], label="generator")
+    if any(h.grad_norm_d is not None for h in history):
+        ax.plot(epochs, [h.grad_norm_d for h in history], label="discriminator")
+    ax.set_xlabel("epoch")
+    ax.set_ylabel("gradient norm")
+    ax.legend()
+    fig.tight_layout()
+    return fig
+
+
+def plot_learning_rates(history: History) -> plt.Figure:
+    """Return a matplotlib Figure with learning rate schedules."""
+
+    epochs = [h.epoch for h in history]
+    fig, ax = plt.subplots()
+    if any(h.lr_g is not None for h in history):
+        ax.plot(epochs, [h.lr_g for h in history], label="generator")
+    if any(h.lr_d is not None for h in history):
+        ax.plot(epochs, [h.lr_d for h in history], label="discriminator")
+    ax.set_xlabel("epoch")
+    ax.set_ylabel("learning rate")
+    ax.legend()
     fig.tight_layout()
     return fig

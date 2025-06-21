@@ -11,6 +11,8 @@ from crosslearner.visualization import (
     plot_covariate_balance,
     plot_propensity_overlap,
     plot_residuals,
+    plot_grad_norms,
+    plot_learning_rates,
     plot_cate_calibration,
     plot_partial_dependence,
     plot_ice,
@@ -103,5 +105,41 @@ def test_plot_ice_returns_figure():
     model = ACX(p=2)
     X = torch.randn(5, 2)
     fig = plot_ice(model, X, feature=1)
+    assert fig is not None
+    matplotlib.pyplot.close(fig)
+
+
+def test_plot_grad_norms_returns_figure():
+    hist = [
+        EpochStats(
+            epoch=0,
+            loss_d=0.0,
+            loss_g=0.0,
+            loss_y=0.0,
+            loss_cons=0.0,
+            loss_adv=0.0,
+            grad_norm_g=1.0,
+            grad_norm_d=2.0,
+        )
+    ]
+    fig = plot_grad_norms(hist)
+    assert fig is not None
+    matplotlib.pyplot.close(fig)
+
+
+def test_plot_learning_rates_returns_figure():
+    hist = [
+        EpochStats(
+            epoch=0,
+            loss_d=0.0,
+            loss_g=0.0,
+            loss_y=0.0,
+            loss_cons=0.0,
+            loss_adv=0.0,
+            lr_g=1e-3,
+            lr_d=1e-3,
+        )
+    ]
+    fig = plot_learning_rates(hist)
     assert fig is not None
     matplotlib.pyplot.close(fig)
