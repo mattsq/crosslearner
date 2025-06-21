@@ -14,6 +14,7 @@ the training procedure, hyperparameter sweeps and available modules.
    acx_architecture
    theory
    hyperparameter_sweeps
+   fitting_acx_model
    usage_examples
    gradient_reversal
    feature_matching
