@@ -386,6 +386,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">model_e</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
             <span class="n">e_hat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_e</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># guard against extreme propensities which would otherwise create</span>
+        <span class="c1"># NaNs in the doubly robust pseudo-outcomes</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-3</span>
+        <span class="n">e_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">e_hat</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">eps</span><span class="p">)</span>
         <span class="n">mu0_hat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_mu0</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="n">mu1_hat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_mu1</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="n">tau_tilde</span> <span class="o">=</span> <span class="p">(</span>
