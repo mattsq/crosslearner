@@ -59,7 +59,13 @@ class TrainingConfig:
     )
     use_wgan_gp: bool = False
     adv_loss: str = "bce"
-    ema_decay: Optional[float] = None
+    ema_decay: Optional[float] = (
+        None
+        #: Exponential moving average decay for generator parameters.
+        #: When set, a detached copy of the model is updated after each
+        #: optimisation step via ``p_ema = ema_decay * p_ema + (1 - ema_decay) * p``.
+        #: The EMA weights are used for evaluation and returned at the end of training.
+    )
     spectral_norm: bool = False
     feature_matching: bool = False
     label_smoothing: bool = False
