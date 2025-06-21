@@ -115,3 +115,13 @@ The features can be controlled either directly when instantiating
         weight_init=cfg.weight_init,
         batch_norm=cfg.batch_norm,
     )
+
+References
+----------
+
+.. [Kueng2018] Kueng, R., et al. *Neural Network Methods for Causal Inference: A
+   Review of DragonNet and Related Approaches.* 2018. Describes the DragonNet
+   architecture that inspires AC-X.
+.. [Künzel2019] Künzel, S., Sekhon, J., Bickel, P., & Yu, B. *Metalearners for
+   Estimating Heterogeneous Treatment Effects using Machine Learning.* PNAS
+   2019. Introduces the X-learner strategy.

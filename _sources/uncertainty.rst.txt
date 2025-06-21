@@ -17,3 +17,10 @@ Example usage::
 
 This approximates a Bayesian posterior over the model weights and yields
 pointwise credible intervals for the CATE.
+
+References
+----------
+
+.. [Gal2016] Gal, Y., & Ghahramani, Z. *Dropout as a Bayesian Approximation:"
+   Representing Model Uncertainty in Deep Learning.* ICML 2016. Shows how
+   Monte Carlo dropout provides uncertainty estimates.

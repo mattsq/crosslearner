@@ -41,3 +41,10 @@ achieves near-perfect accuracy. It works well together with other
 regularisation techniques such as feature matching or gradient reversal. On
 very large datasets or when discriminator overfitting is not an issue, the
 option can be left disabled.
+
+References
+----------
+
+.. [Arjovsky2017] Arjovsky, M., & Bottou, L. *Towards Principled Methods for
+   Training Generative Adversarial Networks.* 2017. Introduced instance noise
+   as a stabilisation strategy.

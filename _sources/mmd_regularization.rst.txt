@@ -44,3 +44,10 @@ generator. It pairs well with feature matching and discriminator
 augmentation. Large ``mmd_weight`` values can slow convergence, so begin
 with a small weight such as ``0.1`` and increase only if the
 representations remain divergent.
+
+References
+----------
+
+.. [Gretton2012] Gretton, A., Borgwardt, K., Rasch, M., Schölkopf, B., & Smola,
+   A. *A Kernel Two-Sample Test.* JMLR 2012. Provides the maximum mean
+   discrepancy statistic used for this regulariser.
