@@ -45,3 +45,10 @@ Avoid combining it with explicit weight clipping, as both attempt to limit
 the discriminator's capacity. If training becomes sluggish, consider lowering
 ``lambda_gp`` or disabling gradient penalties altogether when spectral
 normalisation is enabled.
+
+References
+----------
+
+.. [Miyato2018] Miyato, T., Kataoka, T., Koyama, M., & Yoshida, Y. *Spectral
+   Normalization for Generative Adversarial Networks.* ICLR 2018. Introduces
+   spectral normalisation as a lightweight Lipschitz constraint.

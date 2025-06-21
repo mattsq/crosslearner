@@ -46,3 +46,10 @@ and fake samples. For large datasets or well-balanced problems the
 additional computation may not be worth the minor stability gains.
 Start with ``unrolled_steps=1`` and disable the feature if training
 slows down without improvement.
+
+References
+----------
+
+.. [Metz2017] Metz, L., Poole, B., Pfau, D., & Sohl-Dickstein, J. *Unrolled
+   Generative Adversarial Networks.* ICLR 2017. Proposes differentiating through
+   virtual discriminator updates for improved stability.

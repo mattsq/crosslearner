@@ -61,3 +61,11 @@ exhibits large variance between epochs.  On very large datasets or when
 adversarial training is already stable, these options can be left at their
 default value of ``0``.
 
+References
+----------
+
+.. [Tarvainen2017] Tarvainen, A., & Valpola, H. *Mean Teachers Are Better Role
+   Models: Weight-Averaged Consistency Targets Improve Semi-Supervised Deep
+   Learning Results.* NIPS 2017. Explores consistency regularisation via noisy
+   inputs.
+

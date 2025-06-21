@@ -44,3 +44,10 @@ spectral normalisation and gradient reversal. Set ``eta_fm`` between ``0.5`` and
 ``5`` to gently regularise the generator without overpowering the main losses.
 If training slows down or the generator fails to learn, decrease ``eta_fm`` or
 turn off ``feature_matching``.
+
+References
+----------
+
+.. [Salimans2016] Salimans, T., Goodfellow, I., Zaremba, W., Cheung, V., Radford,
+   A., & Chen, X. *Improved Techniques for Training GANs.* NIPS 2016. Describes
+   feature matching for stabilising adversarial learning.

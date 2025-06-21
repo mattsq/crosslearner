@@ -48,3 +48,10 @@ small ``contrastive_weight`` (between ``0.1`` and ``1.0``) often suffices. If
 the loss dominates training or decreases convergence speed, reduce the weight or
 set it to zero. Adding a little ``contrastive_noise`` (e.g. ``0.01``) can
 prevent collapse by ensuring positives are not identical to the anchor.
+
+References
+----------
+
+.. [Hadsell2006] Hadsell, R., Chopra, S., & LeCun, Y. *Dimensionality Reduction
+   by Learning an Invariant Mapping.* CVPR 2006. Early work on contrastive and
+   triplet losses for representation learning.

@@ -43,3 +43,10 @@ loss oscillates because the discriminator dominates the generator. They can
 replace or complement the standard WGAN-GP penalty. Start with small values
 around ``0.1`` and adjust based on discriminator smoothness. If training
 slows down excessively, reduce the weights or disable the penalties.
+
+References
+----------
+
+.. [Mescheder2018] Mescheder, L., Geiger, A., & Nowozin, S. *Which Training
+   Methods for GANs Do Actually Converge?* ICML 2018. Analyses gradient
+   penalties such as R1 and R2 for stabilising GANs.
