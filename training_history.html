@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="ACX Architecture" href="acx_architecture.html" /><link rel="prev" title="crosslearner documentation" href="index.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Monitoring Training with TensorBoard" href="tensorboard_logging.html" /><link rel="prev" title="Orthogonal Risk for Early Stopping" href="risk_early_stopping.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Quickstart - crosslearner 0.1 documentation</title>
+        <title>Tracking Training History - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -200,7 +200,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="acx_architecture.html">ACX Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theoretical Background</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hyperparameter_sweeps.html">Hyperparameter Sweeps with Optuna</a></li>
@@ -237,7 +237,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="uncertainty.html">Uncertainty Estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="risk_early_stopping.html">Orthogonal Risk for Early Stopping</a></li>
-<li class="toctree-l1"><a class="reference internal" href="training_history.html">Tracking Training History</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Tracking Training History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tensorboard_logging.html">Monitoring Training with TensorBoard</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
@@ -323,7 +323,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/quickstart.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/training_history.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -343,50 +343,46 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="quickstart">
-<h1>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading">¶</a></h1>
-<p>Follow these steps to install <code class="docutils literal notranslate"><span class="pre">crosslearner</span></code> and train your first model.</p>
-<section id="prerequisites">
-<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">crosslearner</span></code> requires <strong>Python 3.10</strong> or later.  We recommend working in a
-virtual environment:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="o">.</span><span class="n">venv</span>
-<span class="n">source</span> <span class="o">.</span><span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
-</pre></div>
-</div>
-<p>Install the dependencies:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
-pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--extra-index-url<span class="w"> </span>https://download.pytorch.org/whl/cpu
-</pre></div>
-</div>
-<p>For development the <cite>black</cite> formatter and <cite>ruff</cite> linter are useful:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">black</span> <span class="n">ruff</span>
-</pre></div>
-</div>
+          <section id="tracking-training-history">
+<h1>Tracking Training History<a class="headerlink" href="#tracking-training-history" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">return_history</span></code> option of <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>
+determines whether <a class="reference internal" href="api/generated/api/crosslearner.training.train_acx.html#module-crosslearner.training.train_acx" title="crosslearner.training.train_acx"><code class="xref py py-func docutils literal notranslate"><span class="pre">train_acx()</span></code></a> returns a
+<code class="docutils literal notranslate"><span class="pre">History</span></code> object alongside the trained model.  <code class="docutils literal notranslate"><span class="pre">History</span></code> is a list of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">EpochStats</span></code> dataclasses recording losses and
+validation metrics for each epoch.</p>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
+<p>Analysing how losses evolve can reveal mode collapse or overfitting that is not
+obvious from the final metric alone.  Access to the full history allows custom
+visualisation beyond what TensorBoard provides.</p>
 </section>
-<section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
-<p>Once the environment is set up you can install <code class="docutils literal notranslate"><span class="pre">crosslearner</span></code> from the
-repository root:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>.
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>Set <code class="docutils literal notranslate"><span class="pre">return_history=True</span></code> when calling the training routine:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">return_history</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">model</span><span class="p">,</span> <span class="n">history</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Pass <code class="docutils literal notranslate"><span class="pre">history</span></code> to <a class="reference internal" href="api/crosslearner.html#crosslearner.visualization.plot_losses" title="crosslearner.visualization.plot_losses"><code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.visualization.plot_losses()</span></code></a> or
+implement your own analytics.</p>
 </section>
-<section id="minimal-example">
-<h2>Minimal example<a class="headerlink" href="#minimal-example" title="Link to this heading">¶</a></h2>
-<p>Run the command line entry point to train on a toy dataset and
-report <span class="math notranslate nohighlight">\(\sqrt{\mathrm{PEHE}}\)</span>:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>crosslearner-train
-</pre></div>
+<section id="when-to-use-it">
+<h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
+<p>Enable <code class="docutils literal notranslate"><span class="pre">return_history</span></code> during experimentation or when you need to log metrics
+for offline analysis.  Disable it in production training loops to avoid the
+additional return value and keep the interface simple.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="abadi2016" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Abadi2016<span class="fn-bracket">]</span></span>
+<p>Abadi, M., et al. <em>TensorFlow: A System for Large-Scale Machine
+Learning.</em> OSDI 2016. Discusses tracking and visualising training metrics.</p>
 </div>
-<p>This launches a short training loop and prints the final metric.
-Loss histories are logged to TensorBoard when available.</p>
-</section>
-<section id="testing">
-<h2>Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h2>
-<p>To verify the installation run the test suite:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pytest</span> <span class="o">--</span><span class="n">cov</span><span class="o">=</span><span class="n">crosslearner</span> <span class="o">--</span><span class="n">cov</span><span class="o">-</span><span class="n">report</span><span class="o">=</span><span class="n">xml</span> <span class="o">-</span><span class="n">q</span>
-</pre></div>
 </div>
 </section>
 </section>
@@ -396,23 +392,23 @@ Loss histories are logged to TensorBoard when available.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="acx_architecture.html">
+          <a class="next-page" href="tensorboard_logging.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">ACX Architecture</div>
+                <div class="title">Monitoring Training with TensorBoard</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="index.html">
+          <a class="prev-page" href="risk_early_stopping.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Home</div>
+                <div class="title">Orthogonal Risk for Early Stopping</div>
                 
               </div>
             </a>
@@ -446,11 +442,11 @@ Loss histories are logged to TensorBoard when available.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Quickstart</a><ul>
-<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#minimal-example">Minimal example</a></li>
-<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#">Tracking Training History</a><ul>
+<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 </ul>
@@ -466,6 +462,5 @@ Loss histories are logged to TensorBoard when available.</p>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=5fa4622c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </body>
 </html>

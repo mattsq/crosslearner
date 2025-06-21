@@ -35,6 +35,7 @@ the training procedure, hyperparameter sweeps and available modules.
    datasets
    uncertainty
    risk_early_stopping
+   training_history
    tensorboard_logging
 
 
