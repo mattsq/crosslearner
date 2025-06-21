@@ -46,3 +46,10 @@ training instability. They act as lightweight regularisers and pair well with
 other stabilisation techniques such as feature matching or gradient
 reversal. On very large datasets or when the discriminator already trains
 slowly, these options can usually be left at ``0``.
+
+References
+----------
+
+.. [Karras2020] Karras, T., Aila, T., Laine, S., & Lehtinen, J. *Training
+   Generative Adversarial Networks with Limited Data.* 2020. Proposes
+   discriminator augmentation for improved stability with few samples.

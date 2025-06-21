@@ -50,3 +50,11 @@ However, for larger datasets or when fine-grained control over adversarial
 optimisation is required, disabling ``gradient_reversal`` and using separate
 ``disc_steps`` may yield better performance.
 
+References
+----------
+
+.. [Ganin2016] Ganin, Y., Ustinova, E., Ajakan, H., Germain, P., Larochelle, H.,
+   Laviolette, F., Marchand, M., & Lempitsky, V. *Domain-Adversarial Training of
+   Neural Networks.* JMLR 2016. Introduces the gradient reversal layer for
+   domain adaptation.
+

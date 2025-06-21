@@ -51,3 +51,9 @@ Tips
 * Combine ``risk_data`` with ``tensorboard_logdir`` to plot the risk over time.
 * If you have ground-truth potential outcomes prefer ``val_data`` to monitor
   PEHE directly.
+
+References
+----------
+
+.. [Foster2019] Foster, D., & Syrgkanis, V. *Orthogonal Statistical Learning.*
+   2019. Provides the orthogonal risk used for early stopping.

@@ -72,3 +72,11 @@ ignore. Start with small adversary weights (e.g. ``0.1`` to ``1.0``) and
 increase them if the encoder continues to leak information. On very small
 datasets or when causal assumptions hold perfectly, disabling this feature keeps
 the architecture simpler.
+
+References
+----------
+
+.. [Locatello2019] Locatello, F., Bauer, S., Lucic, M., Gelly, S., Bachem, O.,
+   & Schölkopf, B. *Challenging Common Assumptions in the Unsupervised Learning
+   of Disentangled Representations.* ICML 2019. Discusses limitations and
+   benefits of disentangled representations.

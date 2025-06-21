@@ -38,3 +38,10 @@ Enable ``tensorboard_logdir`` whenever you want a graphical overview of the
 training process. It is especially helpful during development to spot unstable
 adversarial dynamics or overfitting. For quick tests you can keep it ``None`` to
 avoid writing additional files.
+
+References
+----------
+
+.. [Abadi2016] Abadi, M., et al. *TensorFlow: A System for Large-Scale Machine
+   Learning.* OSDI 2016. Introduces TensorBoard for visualising training
+   metrics.
