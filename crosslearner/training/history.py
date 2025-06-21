@@ -15,6 +15,10 @@ class EpochStats:
     loss_cons: float
     loss_adv: float
     val_pehe: Optional[float] = None
+    grad_norm_g: Optional[float] = None
+    grad_norm_d: Optional[float] = None
+    lr_g: Optional[float] = None
+    lr_d: Optional[float] = None
 
 
 History = List[EpochStats]

@@ -399,6 +399,7 @@ class ACXTrainer:
         loss_d_sum = loss_g_sum = 0.0
         loss_y_sum = loss_cons_sum = loss_adv_sum = 0.0
         batch_count = 0
+        grad_norm_g_sum = grad_norm_d_sum = 0.0
         rep_sums = {
             0: torch.zeros(self.model.rep_dim, device=device),
             1: torch.zeros(self.model.rep_dim, device=device),
@@ -566,6 +567,15 @@ class ACXTrainer:
                     if not freeze_d:
                         opt_d.zero_grad(set_to_none=True)
                         loss_d.backward()
+                        if cfg.log_grad_norms:
+                            total = sum(
+                                (
+                                    p.grad.detach().pow(2).sum()
+                                    for p in model.disc.parameters()
+                                    if p.grad is not None
+                                )
+                            )
+                            grad_norm_d_sum += float(torch.sqrt(total).item())
                         opt_d.step()
                         if cfg.weight_clip is not None:
                             for p_ in model.disc.parameters():
@@ -676,6 +686,22 @@ class ACXTrainer:
 
             opt_g.zero_grad(set_to_none=True)
             loss_g.backward()
+            if cfg.log_grad_norms:
+                total = sum(
+                    (
+                        p.grad.detach().pow(2).sum()
+                        for p in (
+                            list(model.phi.parameters())
+                            + list(model.mu0.parameters())
+                            + list(model.mu1.parameters())
+                            + list(model.tau.parameters())
+                            + list(model.prop.parameters())
+                            + [model.epsilon]
+                        )
+                        if p.grad is not None
+                    )
+                )
+                grad_norm_g_sum += float(torch.sqrt(total).item())
             if cfg.grad_clip:
                 nn.utils.clip_grad_norm_(model.parameters(), cfg.grad_clip)
             opt_g.step()
@@ -712,6 +738,9 @@ class ACXTrainer:
             loss_cons=loss_cons_sum / max(1, batch_count),
             loss_adv=loss_adv_sum / max(1, batch_count),
         )
+        if cfg.log_grad_norms and batch_count > 0:
+            stats.grad_norm_g = grad_norm_g_sum / batch_count
+            stats.grad_norm_d = grad_norm_d_sum / batch_count
         return stats
 
     def train(self, loader: DataLoader) -> ACX | Tuple[ACX, History]:
@@ -787,6 +816,21 @@ class ACXTrainer:
             if writer:
                 writer.add_scalar("loss/discriminator", stats.loss_d, epoch)
                 writer.add_scalar("loss/generator", stats.loss_g, epoch)
+                if cfg.log_grad_norms:
+                    writer.add_scalar("grad_norm/generator", stats.grad_norm_g, epoch)
+                    writer.add_scalar(
+                        "grad_norm/discriminator", stats.grad_norm_d, epoch
+                    )
+                if cfg.log_learning_rate:
+                    writer.add_scalar(
+                        "lr/generator", opt_g.param_groups[0]["lr"], epoch
+                    )
+                    writer.add_scalar(
+                        "lr/discriminator", opt_d.param_groups[0]["lr"], epoch
+                    )
+                if cfg.log_weight_histograms:
+                    for name, param in model.named_parameters():
+                        writer.add_histogram(name, param, epoch)
 
             metric_g = (
                 stats.val_pehe

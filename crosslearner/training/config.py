@@ -125,6 +125,18 @@ class TrainingConfig:
         None
         #: Directory in which to write TensorBoard event files during training.
     )
+    log_grad_norms: bool = (
+        False
+        #: Record gradient norms to TensorBoard when ``tensorboard_logdir`` is set.
+    )
+    log_learning_rate: bool = (
+        False
+        #: Log the learning rate of each optimiser at the end of every epoch.
+    )
+    log_weight_histograms: bool = (
+        False
+        #: Write histograms of model parameters to TensorBoard once per epoch.
+    )
     weight_clip: Optional[float] = (
         None
         #: Clip discriminator weights to ``[-weight_clip, weight_clip]`` after
