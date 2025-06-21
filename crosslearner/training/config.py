@@ -100,7 +100,10 @@ class TrainingConfig:
         #: Weight for predicting the observed outcome from the confounder and
         #: instrument representations when ``disentangle=True``.
     )
-    tensorboard_logdir: Optional[str] = None
+    tensorboard_logdir: Optional[str] = (
+        None
+        #: Directory in which to write TensorBoard event files during training.
+    )
     weight_clip: Optional[float] = None
     val_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None
     risk_data: Optional[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = None
