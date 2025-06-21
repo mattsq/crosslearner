@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="crosslearner.datasets.get_toy_dataloader" href="generated/datasets/crosslearner.datasets.get_toy_dataloader.html" /><link rel="prev" title="Doubly Robust Objective and Propensity Head" href="doubly_robust.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Representation Disentanglement and Auxiliary Adversaries" href="representation_disentanglement.html" /><link rel="prev" title="Contrastive Representation Loss" href="contrastive_loss.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Datasets - crosslearner 0.1 documentation</title>
+        <title>MMD Regularization for Balanced Representations - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -210,12 +210,12 @@
 <li class="toctree-l1"><a class="reference internal" href="spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="instance_noise.html">Instance Noise for Robust Discriminator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">MMD Regularization for Balanced Representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
-<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Datasets</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="datasets.html">Datasets</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_toy_dataloader.html">crosslearner.datasets.get_toy_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_complex_dataloader.html">crosslearner.datasets.get_complex_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_confounding_dataloader.html">crosslearner.datasets.get_confounding_dataloader</a></li>
@@ -313,7 +313,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/datasets.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/mmd_regularization.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -333,77 +333,47 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="datasets">
-<h1>Datasets<a class="headerlink" href="#datasets" title="Link to this heading">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">crosslearner</span></code> ships with several datasets used for benchmarking and
-experimentation. Each dataset is available through a loader function in
-<a class="reference internal" href="api/generated/api/crosslearner.datasets.html#module-crosslearner.datasets" title="crosslearner.datasets"><code class="xref py py-mod docutils literal notranslate"><span class="pre">crosslearner.datasets</span></code></a> that returns a <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> and ground
-truth outcomes where applicable.</p>
-<section id="available-loaders">
-<h2>Available loaders<a class="headerlink" href="#available-loaders" title="Link to this heading">¶</a></h2>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_toy_dataloader.html#crosslearner.datasets.get_toy_dataloader" title="crosslearner.datasets.get_toy_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_toy_dataloader</span></code></a>([...])</p></td>
-<td><p>Return <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> with simple synthetic data.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_complex_dataloader.html#crosslearner.datasets.get_complex_dataloader" title="crosslearner.datasets.get_complex_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_complex_dataloader</span></code></a>([...])</p></td>
-<td><p>Return DataLoader with a more complex synthetic dataset.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_confounding_dataloader.html#crosslearner.datasets.get_confounding_dataloader" title="crosslearner.datasets.get_confounding_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_confounding_dataloader</span></code></a>([...])</p></td>
-<td><p>Return synthetic dataloader with adjustable confounding strength.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_ihdp_dataloader.html#crosslearner.datasets.get_ihdp_dataloader" title="crosslearner.datasets.get_ihdp_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_ihdp_dataloader</span></code></a>(...)</p></td>
-<td><p>Load the IHDP dataset on demand.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_jobs_dataloader.html#crosslearner.datasets.get_jobs_dataloader" title="crosslearner.datasets.get_jobs_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_jobs_dataloader</span></code></a>(...)</p></td>
-<td><p>Load the Jobs dataset on demand.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_acic2016_dataloader.html#crosslearner.datasets.get_acic2016_dataloader" title="crosslearner.datasets.get_acic2016_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_acic2016_dataloader</span></code></a>(...)</p></td>
-<td><p>Load the ACIC 2016 dataset on demand.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_acic2018_dataloader.html#crosslearner.datasets.get_acic2018_dataloader" title="crosslearner.datasets.get_acic2018_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_acic2018_dataloader</span></code></a>(...)</p></td>
-<td><p>Load the ACIC 2018 dataset on demand.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_twins_dataloader.html#crosslearner.datasets.get_twins_dataloader" title="crosslearner.datasets.get_twins_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_twins_dataloader</span></code></a>(...)</p></td>
-<td><p>Load the Twins dataset on demand.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_lalonde_dataloader.html#crosslearner.datasets.get_lalonde_dataloader" title="crosslearner.datasets.get_lalonde_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_lalonde_dataloader</span></code></a>(...)</p></td>
-<td><p>Load the LaLonde dataset on demand.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_aircraft_dataloader.html#crosslearner.datasets.get_aircraft_dataloader" title="crosslearner.datasets.get_aircraft_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_aircraft_dataloader</span></code></a>([...])</p></td>
-<td><p>Return <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> with aircraft performance data.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+          <section id="mmd-regularization-for-balanced-representations">
+<h1>MMD Regularization for Balanced Representations<a class="headerlink" href="#mmd-regularization-for-balanced-representations" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">mmd_weight</span></code> and <code class="docutils literal notranslate"><span class="pre">mmd_sigma</span></code> options introduce a kernel-based
+regularisation term. During each generator update the encoder outputs for
+treated and control units are compared using the <strong>maximum mean discrepancy</strong>
+(MMD) with a radial basis function (RBF) kernel. The squared MMD is multiplied
+by <code class="docutils literal notranslate"><span class="pre">mmd_weight</span></code> and added to the generator loss.</p>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
+<p>Adversarial consistency alone may not fully align the representation
+across treatment groups. If the discriminator easily separates real and
+counterfactual outcomes, the generator can still learn distinct feature
+distributions for treated and control samples. The MMD penalty explicitly
+drives the mean embeddings of both groups together, encouraging an
+invariant representation that improves effect estimation on imbalanced
+datasets.</p>
 </section>
-<section id="dataset-descriptions">
-<h2>Dataset descriptions<a class="headerlink" href="#dataset-descriptions" title="Link to this heading">¶</a></h2>
-<p>The loaders cover both synthetic benchmarks and popular real-world datasets.</p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_toy_dataloader</span></code></dt><dd><p>Generates a small synthetic task with 10 covariates and known potential
-outcomes.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">get_complex_dataloader</span></code></dt><dd><p>Harder synthetic generator with 20 features and nonlinear treatment effects.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">get_confounding_dataloader</span></code></dt><dd><p>Synthetic data where the amount of unobserved confounding can be adjusted.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">get_ihdp_dataloader</span></code></dt><dd><p>Semi-synthetic Infant Health and Development Program benchmark with 100
-replications.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">get_jobs_dataloader</span></code></dt><dd><p>Jobs training dataset (NSW study) used for off-policy evaluation.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">get_acic2016_dataloader</span></code> / <code class="docutils literal notranslate"><span class="pre">get_acic2018_dataloader</span></code></dt><dd><p>Load the ACIC challenge benchmarks.  The loaders automatically download the
-<code class="docutils literal notranslate"><span class="pre">.npz</span></code> files if they are not present locally.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">get_twins_dataloader</span></code></dt><dd><p>Twins dataset of US twin births with fully observed counterfactuals.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">get_lalonde_dataloader</span></code></dt><dd><p>Original LaLonde dataset with only the ATE available.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">get_aircraft_dataloader</span></code></dt><dd><p>Simulated aircraft performance data based on the Breguet range equation.</p>
-</dd>
-</dl>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>Activate the penalty by setting <code class="docutils literal notranslate"><span class="pre">mmd_weight</span></code> to a positive value in
+<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">mmd_weight</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">mmd_sigma</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">mmd_sigma</span></code> controls the bandwidth of the RBF kernel. Start with a
+value similar to the standard deviation of the encoder output (often
+between <code class="docutils literal notranslate"><span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">3</span></code>).</p>
+</section>
+<section id="when-to-use-it">
+<h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
+<p>Use MMD regularisation when treatment groups have markedly different
+covariate distributions or when the discriminator quickly overpowers the
+generator. It pairs well with feature matching and discriminator
+augmentation. Large <code class="docutils literal notranslate"><span class="pre">mmd_weight</span></code> values can slow convergence, so begin
+with a small weight such as <code class="docutils literal notranslate"><span class="pre">0.1</span></code> and increase only if the
+representations remain divergent.</p>
 </section>
 </section>
 
@@ -412,23 +382,23 @@ replications.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="generated/datasets/crosslearner.datasets.get_toy_dataloader.html">
+          <a class="next-page" href="representation_disentanglement.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">crosslearner.datasets.get_toy_dataloader</div>
+                <div class="title">Representation Disentanglement and Auxiliary Adversaries</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="doubly_robust.html">
+          <a class="prev-page" href="contrastive_loss.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Doubly Robust Objective and Propensity Head</div>
+                <div class="title">Contrastive Representation Loss</div>
                 
               </div>
             </a>
@@ -462,9 +432,10 @@ replications.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Datasets</a><ul>
-<li><a class="reference internal" href="#available-loaders">Available loaders</a></li>
-<li><a class="reference internal" href="#dataset-descriptions">Dataset descriptions</a></li>
+<li><a class="reference internal" href="#">MMD Regularization for Balanced Representations</a><ul>
+<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
 </ul>
 </li>
 </ul>
