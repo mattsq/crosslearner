@@ -207,6 +207,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../feature_matching.html">Feature Matching for Stable GAN Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exponential_moving_average.html">Exponential Moving Average of Generator Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../weight_clipping.html">Weight Clipping for Wasserstein Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../wgan_gp.html">Wasserstein Gradient Penalty</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../r1_r2_regularization.html">R1 and R2 Gradient Penalties</a></li>
@@ -401,7 +402,13 @@
     <span class="p">)</span>
     <span class="n">use_wgan_gp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">adv_loss</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bce&quot;</span>
-    <span class="n">ema_decay</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ema_decay</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">None</span>
+        <span class="c1">#: Exponential moving average decay for generator parameters.</span>
+        <span class="c1">#: When set, a detached copy of the model is updated after each</span>
+        <span class="c1">#: optimisation step via ``p_ema = ema_decay * p_ema + (1 - ema_decay) * p``.</span>
+        <span class="c1">#: The EMA weights are used for evaluation and returned at the end of training.</span>
+    <span class="p">)</span>
     <span class="n">spectral_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">feature_matching</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">label_smoothing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>

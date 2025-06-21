@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Consistency Regularization" href="consistency_regularization.html" /><link rel="prev" title="MMD Regularization for Balanced Representations" href="mmd_regularization.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Weight Clipping for Wasserstein Training" href="weight_clipping.html" /><link rel="prev" title="Spectral Normalisation for Stable Training" href="spectral_norm.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Representation Disentanglement and Auxiliary Adversaries - crosslearner 0.1 documentation</title>
+        <title>Exponential Moving Average of Generator Parameters - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -208,14 +208,14 @@
 <li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_matching.html">Feature Matching for Stable GAN Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="exponential_moving_average.html">Exponential Moving Average of Generator Parameters</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Exponential Moving Average of Generator Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_clipping.html">Weight Clipping for Wasserstein Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="wgan_gp.html">Wasserstein Gradient Penalty</a></li>
 <li class="toctree-l1"><a class="reference internal" href="r1_r2_regularization.html">R1 and R2 Gradient Penalties</a></li>
 <li class="toctree-l1"><a class="reference internal" href="instance_noise.html">Instance Noise for Robust Discriminator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Representation Disentanglement and Auxiliary Adversaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
@@ -322,7 +322,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/representation_disentanglement.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/exponential_moving_average.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -342,86 +342,54 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="representation-disentanglement-and-auxiliary-adversaries">
-<h1>Representation Disentanglement and Auxiliary Adversaries<a class="headerlink" href="#representation-disentanglement-and-auxiliary-adversaries" title="Link to this heading">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">disentangle</span></code> flag of <code class="xref py py-class docutils literal notranslate"><span class="pre">crosslearner.models.ACX</span></code> and
-<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.ModelConfig" title="crosslearner.training.ModelConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelConfig</span></code></a> splits the encoder output into
-three parts:</p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">rep_dim_c</span></code></dt><dd><p>Dimensionality of the confounder representation <code class="docutils literal notranslate"><span class="pre">z_c</span></code>.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">rep_dim_a</span></code></dt><dd><p>Dimensionality of the outcome-specific representation <code class="docutils literal notranslate"><span class="pre">z_a</span></code>.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">rep_dim_i</span></code></dt><dd><p>Dimensionality of the instrument representation <code class="docutils literal notranslate"><span class="pre">z_i</span></code>.</p>
-</dd>
-</dl>
-<p>When <code class="docutils literal notranslate"><span class="pre">disentangle=True</span></code> the model routes these feature blocks to different
-heads. Two optional adversaries try to predict treatment and outcome from
-combinations of the blocks:</p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">adv_t_weight</span></code></dt><dd><p>Weight for a logistic adversary predicting treatment from
-<code class="docutils literal notranslate"><span class="pre">(z_c,</span> <span class="pre">z_a)</span></code>.</p>
-</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">adv_y_weight</span></code></dt><dd><p>Weight for a regression adversary predicting the observed outcome from
-<code class="docutils literal notranslate"><span class="pre">(z_c,</span> <span class="pre">z_i)</span></code>.</p>
-</dd>
-</dl>
-<p>The adversaries are trained alongside the discriminator. Their gradients are
-reversed when backpropagated through <code class="docutils literal notranslate"><span class="pre">phi</span></code> so the encoder learns features that
-do not reveal treatment or outcome information beyond the designated blocks.</p>
+          <section id="exponential-moving-average-of-generator-parameters">
+<h1>Exponential Moving Average of Generator Parameters<a class="headerlink" href="#exponential-moving-average-of-generator-parameters" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">ema_decay</span></code> option creates a slowly-updated shadow copy of the
+generator network. After every optimisation step each non-discriminator
+parameter is blended with its previous value using
+<code class="docutils literal notranslate"><span class="pre">ema_param</span> <span class="pre">=</span> <span class="pre">ema_decay</span> <span class="pre">*</span> <span class="pre">ema_param</span> <span class="pre">+</span> <span class="pre">(1</span> <span class="pre">-</span> <span class="pre">ema_decay)</span> <span class="pre">*</span> <span class="pre">param</span></code>.
+The resulting exponential moving average (EMA) often yields smoother
+predictions than the raw, rapidly changing weights.</p>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
-<p>Real-world datasets often contain strong confounders or instruments that can
-leak into every part of the representation. By disentangling the encoder and
-penalising treatment or outcome predictability, the model is encouraged to store
-relevant information only where appropriate. This can reduce bias and improve
-counterfactual estimates when the independence assumptions of causal inference
-are violated.</p>
+<p>GAN training can be noisy: generator weights fluctuate as they react to
+the discriminator. Averaging the parameters over time reduces this
+variance and can improve generalisation. It also provides a stable model
+for computing validation metrics. The technique is lightweight and
+requires only a single extra model copy.</p>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
-<p>Enable disentanglement by setting <code class="docutils literal notranslate"><span class="pre">disentangle=True</span></code> in <code class="docutils literal notranslate"><span class="pre">ModelConfig</span></code> (or the
-<code class="docutils literal notranslate"><span class="pre">ACX</span></code> constructor) and provide sizes for all three representation parts. Set
-<code class="docutils literal notranslate"><span class="pre">adv_t_weight</span></code> and <code class="docutils literal notranslate"><span class="pre">adv_y_weight</span></code> to positive values to activate the
-adversaries:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.training</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">TrainingConfig</span><span class="p">,</span> <span class="n">train_acx</span>
-
-<span class="n">model_cfg</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span>
-    <span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">disentangle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">rep_dim_c</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-    <span class="n">rep_dim_a</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
-    <span class="n">rep_dim_i</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+<p>Specify <code class="docutils literal notranslate"><span class="pre">ema_decay</span></code> in <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>
+with a value between <code class="docutils literal notranslate"><span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">1</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">0.999</span></code>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">ema_decay</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
 <span class="p">)</span>
-
-<span class="n">train_cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
-    <span class="n">epochs</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
-    <span class="n">adv_t_weight</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">adv_y_weight</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">model_cfg</span><span class="p">,</span> <span class="n">train_cfg</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>During training the trainer maintains an EMA model whose parameters are
+updated after each generator step. This copy is used for validation and
+is returned when training finishes.</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
-<p>Representation disentanglement is most beneficial when the treatment assignment
-or outcomes are strongly correlated with nuisance factors that the model should
-ignore. Start with small adversary weights (e.g. <code class="docutils literal notranslate"><span class="pre">0.1</span></code> to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>) and
-increase them if the encoder continues to leak information. On very small
-datasets or when causal assumptions hold perfectly, disabling this feature keeps
-the architecture simpler.</p>
+<p>Enable the EMA when you observe unstable validation performance or want
+more reliable treatment effect estimates. Smaller decay values (around
+<code class="docutils literal notranslate"><span class="pre">0.9</span></code>) adapt faster but track the current weights closely, while larger
+values (<code class="docutils literal notranslate"><span class="pre">0.99</span></code> or <code class="docutils literal notranslate"><span class="pre">0.999</span></code>) provide stronger smoothing. If memory is
+limited or you do not need extra stability set <code class="docutils literal notranslate"><span class="pre">ema_decay</span></code> to <code class="docutils literal notranslate"><span class="pre">None</span></code>
+(the default) to disable the feature.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
 <div role="list" class="citation-list">
-<div class="citation" id="locatello2019" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span>Locatello2019<span class="fn-bracket">]</span></span>
-<p>Locatello, F., Bauer, S., Lucic, M., Gelly, S., Bachem, O.,
-&amp; Schölkopf, B. <em>Challenging Common Assumptions in the Unsupervised Learning
-of Disentangled Representations.</em> ICML 2019. Discusses limitations and
-benefits of disentangled representations.</p>
+<div class="citation" id="polyak1992" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Polyak1992<span class="fn-bracket">]</span></span>
+<p>Polyak, B., &amp; Juditsky, A. <em>Acceleration of stochastic
+approximation by averaging.</em> SIAM Journal on Control and Optimization,
+1992. Introduces the idea of averaging iterates for variance reduction.</p>
 </div>
 </div>
 </section>
@@ -432,23 +400,23 @@ benefits of disentangled representations.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="consistency_regularization.html">
+          <a class="next-page" href="weight_clipping.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Consistency Regularization</div>
+                <div class="title">Weight Clipping for Wasserstein Training</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="mmd_regularization.html">
+          <a class="prev-page" href="spectral_norm.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">MMD Regularization for Balanced Representations</div>
+                <div class="title">Spectral Normalisation for Stable Training</div>
                 
               </div>
             </a>
@@ -482,7 +450,7 @@ benefits of disentangled representations.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Representation Disentanglement and Auxiliary Adversaries</a><ul>
+<li><a class="reference internal" href="#">Exponential Moving Average of Generator Parameters</a><ul>
 <li><a class="reference internal" href="#motivation">Motivation</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
