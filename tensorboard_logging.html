@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Unrolled Discriminator Updates" href="unrolled_discriminator.html" /><link rel="prev" title="Representation Disentanglement and Auxiliary Adversaries" href="representation_disentanglement.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="crosslearner" href="api/modules.html" /><link rel="prev" title="Orthogonal Risk for Early Stopping" href="risk_early_stopping.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Discriminator Feature Augmentation - crosslearner 0.1 documentation</title>
+        <title>Monitoring Training with TensorBoard - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -212,7 +212,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Discriminator Feature Augmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="datasets.html">Datasets</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -230,7 +230,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="uncertainty.html">Uncertainty Estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="risk_early_stopping.html">Orthogonal Risk for Early Stopping</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tensorboard_logging.html">Monitoring Training with TensorBoard</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monitoring Training with TensorBoard</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
@@ -315,7 +315,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/discriminator_augmentation.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/tensorboard_logging.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -335,49 +335,42 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="discriminator-feature-augmentation">
-<h1>Discriminator Feature Augmentation<a class="headerlink" href="#discriminator-feature-augmentation" title="Link to this heading">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">disc_aug_prob</span></code> and <code class="docutils literal notranslate"><span class="pre">disc_aug_noise</span></code> options provide simple data
-augmentation for the discriminator. During each discriminator update the
-encoded representation <code class="docutils literal notranslate"><span class="pre">h_b</span></code> is optionally corrupted before being fed to the
-adversary. <code class="docutils literal notranslate"><span class="pre">disc_aug_prob</span></code> applies dropout with the given probability and
-<code class="docutils literal notranslate"><span class="pre">disc_aug_noise</span></code> adds Gaussian noise with the specified standard deviation.
-This augmentation is applied equally to real and fake samples so the
-discriminator must remain robust to these perturbations.</p>
+          <section id="monitoring-training-with-tensorboard">
+<h1>Monitoring Training with TensorBoard<a class="headerlink" href="#monitoring-training-with-tensorboard" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">tensorboard_logdir</span></code> option of <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>
+enables detailed logging of the training progress. When set to a directory path
+an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.tensorboard.SummaryWriter</span></code> is created and
+standard metrics are written as event files. This includes generator and
+adversary losses as well as the validation PEHE or orthogonal risk if either
+<code class="docutils literal notranslate"><span class="pre">val_data</span></code> or <code class="docutils literal notranslate"><span class="pre">risk_data</span></code> are provided.</p>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
-<p>GAN discriminators often learn sharp decision boundaries that quickly
-separate the generator’s outputs from real data. When this happens the
-generator receives vanishing gradients and training stalls. By randomly
-dropping features or adding jitter we force the discriminator to rely on
-broader patterns rather than exact activations, preventing early
-overfitting. These simple perturbations can stabilise adversarial training,
-especially on small datasets.</p>
+<p>Visualising loss curves helps diagnose convergence issues and compare different
+settings. TensorBoard provides an interactive dashboard that lets you inspect
+how metrics evolve over time. This is useful when tuning hyperparameters or
+running longer experiments where printing every epoch would clutter the output.</p>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
-<p>Enable the augmentation through <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>
-by setting either <code class="docutils literal notranslate"><span class="pre">disc_aug_prob</span></code> or <code class="docutils literal notranslate"><span class="pre">disc_aug_noise</span></code> (or both):</p>
+<p>Pass a directory to <code class="docutils literal notranslate"><span class="pre">tensorboard_logdir</span></code> in the training configuration:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
     <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">disc_aug_prob</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-    <span class="n">disc_aug_noise</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">tensorboard_logdir</span><span class="o">=</span><span class="s2">&quot;runs/experiment1&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>With the above configuration each discriminator step will use dropout with
-probability <code class="docutils literal notranslate"><span class="pre">0.2</span></code> on the representation passed to the discriminator and
-add Gaussian noise with standard deviation <code class="docutils literal notranslate"><span class="pre">0.05</span></code>.</p>
+<p>After training launch TensorBoard to view the logs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tensorboard</span> <span class="o">--</span><span class="n">logdir</span> <span class="n">runs</span><span class="o">/</span><span class="n">experiment1</span>
+</pre></div>
+</div>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">disc_aug_prob</span></code> and <code class="docutils literal notranslate"><span class="pre">disc_aug_noise</span></code> are most helpful when the
-discriminator easily distinguishes real from fake samples, leading to
-training instability. They act as lightweight regularisers and pair well with
-other stabilisation techniques such as feature matching or gradient
-reversal. On very large datasets or when the discriminator already trains
-slowly, these options can usually be left at <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+<p>Enable <code class="docutils literal notranslate"><span class="pre">tensorboard_logdir</span></code> whenever you want a graphical overview of the
+training process. It is especially helpful during development to spot unstable
+adversarial dynamics or overfitting. For quick tests you can keep it <code class="docutils literal notranslate"><span class="pre">None</span></code> to
+avoid writing additional files.</p>
 </section>
 </section>
 
@@ -386,23 +379,23 @@ slowly, these options can usually be left at <code class="docutils literal notra
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="unrolled_discriminator.html">
+          <a class="next-page" href="api/modules.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Unrolled Discriminator Updates</div>
+                <div class="title">crosslearner</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="representation_disentanglement.html">
+          <a class="prev-page" href="risk_early_stopping.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Representation Disentanglement and Auxiliary Adversaries</div>
+                <div class="title">Orthogonal Risk for Early Stopping</div>
                 
               </div>
             </a>
@@ -436,7 +429,7 @@ slowly, these options can usually be left at <code class="docutils literal notra
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Discriminator Feature Augmentation</a><ul>
+<li><a class="reference internal" href="#">Monitoring Training with TensorBoard</a><ul>
 <li><a class="reference internal" href="#motivation">Motivation</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>

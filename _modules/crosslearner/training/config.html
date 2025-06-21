@@ -229,6 +229,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../uncertainty.html">Uncertainty Estimation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../risk_early_stopping.html">Orthogonal Risk for Early Stopping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tensorboard_logging.html">Monitoring Training with TensorBoard</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
@@ -435,7 +436,10 @@
         <span class="c1">#: Weight for predicting the observed outcome from the confounder and</span>
         <span class="c1">#: instrument representations when ``disentangle=True``.</span>
     <span class="p">)</span>
-    <span class="n">tensorboard_logdir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">tensorboard_logdir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">None</span>
+        <span class="c1">#: Directory in which to write TensorBoard event files during training.</span>
+    <span class="p">)</span>
     <span class="n">weight_clip</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">val_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">risk_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
