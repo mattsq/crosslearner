@@ -207,6 +207,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../feature_matching.html">Feature Matching for Stable GAN Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../r1_r2_regularization.html">R1 and R2 Gradient Penalties</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../instance_noise.html">Instance Noise for Robust Discriminator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
@@ -406,8 +407,14 @@
     <span class="n">mmd_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">mmd_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="n">lambda_gp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span>
-    <span class="n">r1_gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">r2_gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">r1_gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.0</span>
+        <span class="c1">#: Coefficient for the R1 gradient penalty on real samples.</span>
+    <span class="p">)</span>
+    <span class="n">r2_gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.0</span>
+        <span class="c1">#: Coefficient for the R2 gradient penalty on fake samples.</span>
+    <span class="p">)</span>
     <span class="n">adaptive_reg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">d_reg_lower</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span>
     <span class="n">d_reg_upper</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span>
