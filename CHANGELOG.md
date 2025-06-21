@@ -60,4 +60,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documented the ``instance_noise`` training option with motivation and usage details
 - Documented optional discriminator feature augmentation via ``disc_aug_prob`` and ``disc_aug_noise``
 - Documented representation disentanglement with ``adv_t_weight`` and ``adv_y_weight``
+- Documented optional MMD regularisation via ``mmd_weight`` and ``mmd_sigma``
 
