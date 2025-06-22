@@ -523,6 +523,11 @@ class ACX(nn.Module):
         """Variance of ensemble treatment effect predictions from last forward."""
         return self._tau_var
 
+    @property
+    def effect_consistency_weight(self) -> torch.Tensor:
+        """Inverse variance weight used for epistemic consistency loss."""
+        return 1.0 / (1.0 + self._tau_var.detach())
+
     def moe_entropy(self) -> torch.Tensor:
         """Entropy of the gating distribution."""
 

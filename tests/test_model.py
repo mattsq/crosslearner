@@ -75,3 +75,12 @@ def test_acx_tau_variance():
     var = model.tau_variance
     assert var.shape == (4, 1)
     assert torch.any(var >= 0)
+
+
+def test_acx_effect_consistency_weight():
+    model = ACX(p=2, tau_heads=3)
+    X = torch.randn(3, 2)
+    _ = model(X)
+    weight = model.effect_consistency_weight
+    expected = 1.0 / (1.0 + model.tau_variance)
+    assert torch.allclose(weight, expected)

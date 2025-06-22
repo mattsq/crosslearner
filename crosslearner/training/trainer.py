@@ -592,7 +592,7 @@ class ACXTrainer:
             m_obs = torch.where(Tb.bool(), m1, m0)
             loss_y = mse(m_obs, Yb)
             if cfg.epistemic_consistency:
-                weight = 1.0 / (1.0 + model.tau_variance.detach())
+                weight = model.effect_consistency_weight
                 loss_cons = ((tau - (m1 - m0)) ** 2 * weight).mean()
             else:
                 loss_cons = mse(tau, m1 - m0)
