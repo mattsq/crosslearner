@@ -185,7 +185,7 @@ class MOEHeads(nn.Module):
 
     def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         w = self.softmax(self.gate(x))
-        self._gates = w
+        self._gates = w.detach()
         m0 = torch.stack([head(x) for head in self.mu0], dim=1).squeeze(-1)
         m1 = torch.stack([head(x) for head in self.mu1], dim=1).squeeze(-1)
         m0 = (w * m0).sum(dim=1, keepdim=True)

@@ -71,4 +71,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   improved training diagnostics
 - Extended visualisation utilities to plot auxiliary losses, gradient norms and
   learning rate schedules
+- Detached MOE gating weights to avoid memory leaks and added unit tests for
+  ``MOEHeads`` gating behaviour
 
