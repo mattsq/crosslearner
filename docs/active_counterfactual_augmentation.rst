@@ -37,6 +37,9 @@ with generator predictions as outcomes. All ``DataLoader`` options such as
 ``num_workers`` and ``pin_memory`` are preserved when the augmented loader is
 constructed.
 
+Model parameters are frozen during this search so no gradients are stored for
+the network.
+
 When to use it
 --------------
 
