@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional, Tuple
 from collections import OrderedDict
 from torch.func import functional_call
+import inspect
 
 import torch
 import torch.nn as nn
@@ -225,8 +226,7 @@ class ACXTrainer:
         dataset = TensorDataset(
             torch.cat([X, Xp]), torch.cat([T, Tp]), torch.cat([Y, Yp])
         )
-        return DataLoader(
-            dataset,
+        kwargs = dict(
             batch_size=loader.batch_size,
             shuffle=True,
             num_workers=loader.num_workers,
@@ -237,11 +237,19 @@ class ACXTrainer:
             worker_init_fn=loader.worker_init_fn,
             multiprocessing_context=loader.multiprocessing_context,
             generator=loader.generator,
-            prefetch_factor=loader.prefetch_factor,
-            persistent_workers=loader.persistent_workers,
-            pin_memory_device=loader.pin_memory_device,
-            in_order=loader.in_order,
         )
+
+        sig = inspect.signature(DataLoader.__init__)
+        for attr in (
+            "prefetch_factor",
+            "persistent_workers",
+            "pin_memory_device",
+            "in_order",
+        ):
+            if attr in sig.parameters:
+                kwargs[attr] = getattr(loader, attr)
+
+        return DataLoader(dataset, **kwargs)
 
     def _unrolled_logits(
         self,

@@ -83,4 +83,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   related options
 - Active augmentation now preserves ``DataLoader`` settings when appending
   pseudo data
+- Active augmentation now handles optional ``DataLoader`` arguments for
+  compatibility with older PyTorch versions
 
