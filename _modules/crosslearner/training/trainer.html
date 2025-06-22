@@ -218,6 +218,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
@@ -436,6 +437,7 @@
             <span class="n">disc_residual</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disc_residual</span><span class="p">,</span>
             <span class="n">disc_pack</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disc_pack</span><span class="p">,</span>
             <span class="n">batch_norm</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">,</span>
+            <span class="n">moe_experts</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">moe_experts</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">train_cfg</span><span class="o">.</span><span class="n">spectral_norm</span><span class="p">:</span>
             <span class="n">apply_spectral_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
@@ -462,6 +464,7 @@
                 <span class="n">disc_residual</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disc_residual</span><span class="p">,</span>
                 <span class="n">disc_pack</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disc_pack</span><span class="p">,</span>
                 <span class="n">batch_norm</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">,</span>
+                <span class="n">moe_experts</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">moe_experts</span><span class="p">,</span>
             <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">train_cfg</span><span class="o">.</span><span class="n">spectral_norm</span><span class="p">:</span>
                 <span class="n">apply_spectral_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ema_model</span><span class="p">)</span>
@@ -619,8 +622,7 @@
 
         <span class="n">opt_g</span> <span class="o">=</span> <span class="n">opt_cls</span><span class="p">(</span>
             <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-            <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">mu0</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-            <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">mu1</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+            <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">head_parameters</span><span class="p">())</span>
             <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tau</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
             <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">prop</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
             <span class="o">+</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">epsilon</span><span class="p">],</span>
@@ -1007,6 +1009,7 @@
                 <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">lambda_dr</span> <span class="o">*</span> <span class="n">loss_dr</span>
                 <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">noise_consistency_weight</span> <span class="o">*</span> <span class="n">loss_noise</span>
                 <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">rep_consistency_weight</span> <span class="o">*</span> <span class="n">rep_pen</span>
+                <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">moe_entropy_weight</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">moe_entropy</span><span class="p">()</span>
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">feature_matching</span><span class="p">:</span>
@@ -1036,8 +1039,7 @@
                         <span class="n">p</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
                         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span>
                             <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-                            <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">mu0</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-                            <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">mu1</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+                            <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">head_parameters</span><span class="p">())</span>
                             <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tau</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
                             <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">prop</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
                             <span class="o">+</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">epsilon</span><span class="p">]</span>

@@ -218,6 +218,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
@@ -375,7 +376,8 @@
     <span class="n">disc_pack</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
         <span class="mi">1</span>  <span class="c1">#: Number of samples concatenated for PacGAN-style discriminator.</span>
     <span class="p">)</span>
-    <span class="n">batch_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+    <span class="n">batch_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">moe_experts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1">#: Number of expert pairs for mixture-of-experts heads.</span></div>
 
 
 
@@ -457,6 +459,7 @@
     <span class="n">noise_std</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">noise_consistency_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">rep_consistency_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">moe_entropy_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1">#: Weight for gating entropy regularization.</span>
     <span class="n">rep_momentum</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.99</span>
     <span class="n">adv_t_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
         <span class="mf">0.0</span>

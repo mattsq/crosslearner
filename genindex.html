@@ -217,6 +217,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
@@ -769,6 +770,12 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.ema_decay">ema_decay (crosslearner.training.TrainingConfig attribute)</a>
 </li>
+        <li><a href="api/crosslearner.models.html#crosslearner.models.acx.MOEHeads.entropy">entropy() (crosslearner.models.acx.MOEHeads method)</a>
+
+        <ul>
+          <li><a href="api/crosslearner.models.html#crosslearner.models.acx.NullMOE.entropy">(crosslearner.models.acx.NullMOE method)</a>
+</li>
+        </ul></li>
         <li><a href="api/crosslearner.html#crosslearner.EpochStats.epoch">epoch (crosslearner.EpochStats attribute)</a>
 
         <ul>
@@ -789,10 +796,10 @@
           <li><a href="api/crosslearner.evaluation.html#crosslearner.evaluation.propensity.estimate_propensity">(in module crosslearner.evaluation.propensity)</a>
 </li>
         </ul></li>
-        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.eta_fm">eta_fm (crosslearner.training.TrainingConfig attribute)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.eta_fm">eta_fm (crosslearner.training.TrainingConfig attribute)</a>
+</li>
         <li><a href="api/crosslearner.html#crosslearner.evaluate">evaluate() (in module crosslearner)</a>
 
         <ul>
@@ -852,6 +859,10 @@
         <ul>
           <li><a href="api/crosslearner.models.html#crosslearner.models.acx.MLP.forward">(crosslearner.models.acx.MLP method)</a>
 </li>
+          <li><a href="api/crosslearner.models.html#crosslearner.models.acx.MOEHeads.forward">(crosslearner.models.acx.MOEHeads method)</a>
+</li>
+          <li><a href="api/crosslearner.models.html#crosslearner.models.acx.NullMOE.forward">(crosslearner.models.acx.NullMOE method)</a>
+</li>
           <li><a href="api/crosslearner.training.html#crosslearner.training.grl.GradReverse.forward">(crosslearner.training.grl.GradReverse static method)</a>
 </li>
         </ul></li>
@@ -864,6 +875,8 @@
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.gamma_adv">gamma_adv (crosslearner.training.TrainingConfig attribute)</a>
+</li>
+        <li><a href="api/crosslearner.models.html#crosslearner.models.acx.MOEHeads.gates">gates (crosslearner.models.acx.MOEHeads property)</a>
 </li>
         <li><a href="api/crosslearner.datasets.html#crosslearner.datasets.get_acic2016_dataloader">get_acic2016_dataloader() (in module crosslearner.datasets)</a>, <a href="generated/datasets/crosslearner.datasets.get_acic2016_dataloader.html#crosslearner.datasets.get_acic2016_dataloader">[1]</a>
 </li>
@@ -943,9 +956,11 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.training.html#crosslearner.training.ModelConfig.head_dropout">head_dropout (crosslearner.training.ModelConfig attribute)</a>
 </li>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.ModelConfig.head_layers">head_layers (crosslearner.training.ModelConfig attribute)</a>
+</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="api/crosslearner.training.html#crosslearner.training.ModelConfig.head_layers">head_layers (crosslearner.training.ModelConfig attribute)</a>
+        <li><a href="api/crosslearner.models.html#crosslearner.models.acx.ACX.head_parameters">head_parameters() (crosslearner.models.acx.ACX method)</a>
 </li>
         <li><a href="api/crosslearner.training.html#crosslearner.training.ModelConfig.head_residual">head_residual (crosslearner.training.ModelConfig attribute)</a>
 </li>
@@ -1149,6 +1164,16 @@
 </li>
         </ul></li>
     </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/crosslearner.models.html#crosslearner.models.acx.ACX.moe_entropy">moe_entropy() (crosslearner.models.acx.ACX method)</a>
+</li>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.moe_entropy_weight">moe_entropy_weight (crosslearner.training.TrainingConfig attribute)</a>
+</li>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.ModelConfig.moe_experts">moe_experts (crosslearner.training.ModelConfig attribute)</a>
+</li>
+        <li><a href="api/crosslearner.models.html#crosslearner.models.acx.MOEHeads">MOEHeads (class in crosslearner.models.acx)</a>
+</li>
+    </ul></td>
   </tr></table>
 </section>
 
@@ -1160,13 +1185,15 @@
 </li>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.noise_std">noise_std (crosslearner.training.TrainingConfig attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.nuisance_early_stop">nuisance_early_stop (crosslearner.training.TrainingConfig attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.nuisance_outcome_epochs">nuisance_outcome_epochs (crosslearner.training.TrainingConfig attribute)</a>
 </li>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.nuisance_propensity_epochs">nuisance_propensity_epochs (crosslearner.training.TrainingConfig attribute)</a>
+</li>
+        <li><a href="api/crosslearner.models.html#crosslearner.models.acx.NullMOE">NullMOE (class in crosslearner.models.acx)</a>
 </li>
     </ul></td>
   </tr></table>

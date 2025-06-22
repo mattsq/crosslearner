@@ -2,10 +2,12 @@
 <html class="no-js" lang="en" data-content_root="./">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Consistency Regularization" href="consistency_regularization.html" /><link rel="prev" title="Representation Disentanglement and Auxiliary Adversaries" href="representation_disentanglement.html" />
 
-    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 --><title>Python Module Index - crosslearner 0.1 documentation</title>
-<link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>Mixture-of-Experts Potential-Outcome Heads - crosslearner 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -197,7 +199,7 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="acx_architecture.html">ACX Architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theoretical Background</a></li>
@@ -217,7 +219,7 @@
 <li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
@@ -324,7 +326,13 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          <div class="theme-toggle-container theme-toggle-content">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/mixture_of_experts.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
@@ -339,280 +347,53 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          
-<section class="domainindex-section">
-  <h1>Python Module Index</h1>
-  <div class="domainindex-jumpbox"><a href="#cap-c"><strong>c</strong></a></div>
+          <section id="mixture-of-experts-potential-outcome-heads">
+<h1>Mixture-of-Experts Potential-Outcome Heads<a class="headerlink" href="#mixture-of-experts-potential-outcome-heads" title="Link to this heading">¶</a></h1>
+<p>Setting <code class="docutils literal notranslate"><span class="pre">moe_experts</span></code> greater than <code class="docutils literal notranslate"><span class="pre">1</span></code> in <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.ModelConfig" title="crosslearner.training.ModelConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelConfig</span></code></a>
+replaces the single potential-outcome heads with a set of expert pairs. A gating
+network <code class="docutils literal notranslate"><span class="pre">g(x)</span></code> softly selects experts for each sample and the final predictions
+are the weighted sum of their outputs.</p>
+<p>This allows the model to specialise to heterogeneous sub-populations while
+sharing a common representation. To encourage sparse selections, the trainer adds
+an entropy penalty on the gating distribution controlled by <code class="docutils literal notranslate"><span class="pre">moe_entropy_weight</span></code>
+from <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">moe_entropy_weight</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">model_cfg</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">moe_experts</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">model_cfg</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Existing adversarial and consistency losses operate on the aggregated outputs so
+no other changes are required.</p>
 </section>
-<table class="domainindex-table">
-  <tr class="pcap">
-    <td></td><td>&#160;</td><td></td>
-  </tr>
-  <tr class="cap" id="cap-c">
-    <td></td><td><strong>c</strong></td><td></td>
-  </tr>
-  <tr>
-    <td><img src="_static/minus.png" class="toggler"
-              id="toggle-1" style="display: none" alt="-" /></td>
-    <td>
-        <a href="api/generated/api/crosslearner.html#module-crosslearner"><code class="xref">crosslearner</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.benchmarks.html#module-crosslearner.benchmarks"><code class="xref">crosslearner.benchmarks</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.benchmarks.run_benchmarks.html#module-crosslearner.benchmarks.run_benchmarks"><code class="xref">crosslearner.benchmarks.run_benchmarks</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.configs.html#module-crosslearner.configs"><code class="xref">crosslearner.configs</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.html#module-crosslearner.datasets"><code class="xref">crosslearner.datasets</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.acic2016.html#module-crosslearner.datasets.acic2016"><code class="xref">crosslearner.datasets.acic2016</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.acic2018.html#module-crosslearner.datasets.acic2018"><code class="xref">crosslearner.datasets.acic2018</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.aircraft.html#module-crosslearner.datasets.aircraft"><code class="xref">crosslearner.datasets.aircraft</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.complex.html#module-crosslearner.datasets.complex"><code class="xref">crosslearner.datasets.complex</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.ihdp.html#module-crosslearner.datasets.ihdp"><code class="xref">crosslearner.datasets.ihdp</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.jobs.html#module-crosslearner.datasets.jobs"><code class="xref">crosslearner.datasets.jobs</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.lalonde.html#module-crosslearner.datasets.lalonde"><code class="xref">crosslearner.datasets.lalonde</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.synthetic.html#module-crosslearner.datasets.synthetic"><code class="xref">crosslearner.datasets.synthetic</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.toy.html#module-crosslearner.datasets.toy"><code class="xref">crosslearner.datasets.toy</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.twins.html#module-crosslearner.datasets.twins"><code class="xref">crosslearner.datasets.twins</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.datasets.utils.html#module-crosslearner.datasets.utils"><code class="xref">crosslearner.datasets.utils</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.evaluation.html#module-crosslearner.evaluation"><code class="xref">crosslearner.evaluation</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/crosslearner.evaluation.html#module-crosslearner.evaluation.evaluate"><code class="xref">crosslearner.evaluation.evaluate</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.evaluation.metrics.html#module-crosslearner.evaluation.metrics"><code class="xref">crosslearner.evaluation.metrics</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.evaluation.propensity.html#module-crosslearner.evaluation.propensity"><code class="xref">crosslearner.evaluation.propensity</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.evaluation.uncertainty.html#module-crosslearner.evaluation.uncertainty"><code class="xref">crosslearner.evaluation.uncertainty</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.experiments.html#module-crosslearner.experiments"><code class="xref">crosslearner.experiments</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.experiments.manager.html#module-crosslearner.experiments.manager"><code class="xref">crosslearner.experiments.manager</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.export.html#module-crosslearner.export"><code class="xref">crosslearner.export</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.models.html#module-crosslearner.models"><code class="xref">crosslearner.models</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.models.acx.html#module-crosslearner.models.acx"><code class="xref">crosslearner.models.acx</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.models.baselines.html#module-crosslearner.models.baselines"><code class="xref">crosslearner.models.baselines</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.models.baselines.base.html#module-crosslearner.models.baselines.base"><code class="xref">crosslearner.models.baselines.base</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.models.baselines.drlearner.html#module-crosslearner.models.baselines.drlearner"><code class="xref">crosslearner.models.baselines.drlearner</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.models.baselines.slearner.html#module-crosslearner.models.baselines.slearner"><code class="xref">crosslearner.models.baselines.slearner</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.models.baselines.tlearner.html#module-crosslearner.models.baselines.tlearner"><code class="xref">crosslearner.models.baselines.tlearner</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.models.baselines.xlearner.html#module-crosslearner.models.baselines.xlearner"><code class="xref">crosslearner.models.baselines.xlearner</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.sweep.html#module-crosslearner.sweep"><code class="xref">crosslearner.sweep</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.training.html#module-crosslearner.training"><code class="xref">crosslearner.training</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.training.config.html#module-crosslearner.training.config"><code class="xref">crosslearner.training.config</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.training.grl.html#module-crosslearner.training.grl"><code class="xref">crosslearner.training.grl</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.training.history.html#module-crosslearner.training.history"><code class="xref">crosslearner.training.history</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.training.nuisance.html#module-crosslearner.training.nuisance"><code class="xref">crosslearner.training.nuisance</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.training.train_acx.html#module-crosslearner.training.train_acx"><code class="xref">crosslearner.training.train_acx</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.training.trainer.html#module-crosslearner.training.trainer"><code class="xref">crosslearner.training.trainer</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.utils.html#module-crosslearner.utils"><code class="xref">crosslearner.utils</code></a></td><td>
-    <em></em></td>
-  </tr>
-  <tr class="cg-1">
-    <td></td>
-    <td>&#160;&#160;&#160;
-        <a href="api/generated/api/crosslearner.visualization.html#module-crosslearner.visualization"><code class="xref">crosslearner.visualization</code></a></td><td>
-    <em></em></td>
-  </tr>
-</table>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="consistency_regularization.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Consistency Regularization</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="representation_disentanglement.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Representation Disentanglement and Auxiliary Adversaries</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">

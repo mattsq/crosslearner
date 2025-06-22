@@ -218,6 +218,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
@@ -477,6 +478,116 @@
 
 
 
+<div class="viewcode-block" id="MOEHeads">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.MOEHeads">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MOEHeads</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mixture-of-experts potential-outcome heads.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">in_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">num_experts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">hidden</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">activation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
+        <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">batch_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_experts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_experts</span><span class="p">)</span>
+        <span class="n">act_fn</span> <span class="o">=</span> <span class="n">_get_activation</span><span class="p">(</span><span class="n">activation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">MLP</span><span class="p">(</span>
+                    <span class="n">in_dim</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">hidden</span><span class="o">=</span><span class="n">hidden</span><span class="p">,</span>
+                    <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
+                    <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
+                    <span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">,</span>
+                    <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_experts</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">MLP</span><span class="p">(</span>
+                    <span class="n">in_dim</span><span class="p">,</span>
+                    <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">hidden</span><span class="o">=</span><span class="n">hidden</span><span class="p">,</span>
+                    <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
+                    <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
+                    <span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">,</span>
+                    <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_experts</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gate</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
+            <span class="n">in_dim</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_experts</span><span class="p">,</span>
+            <span class="n">hidden</span><span class="o">=</span><span class="n">hidden</span><span class="p">,</span>
+            <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
+            <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
+            <span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">,</span>
+            <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">softmax</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gates</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="MOEHeads.forward">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.MOEHeads.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gate</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gates</span> <span class="o">=</span> <span class="n">w</span>
+        <span class="n">m0</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">head</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">head</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">head</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">head</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">m0</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">m0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">m1</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">m1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">m0</span><span class="p">,</span> <span class="n">m1</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Gating weights have not been computed yet&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gates</span>
+
+<div class="viewcode-block" id="MOEHeads.entropy">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.MOEHeads.entropy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gates</span><span class="o">.</span><span class="n">clamp_min</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">w</span><span class="o">.</span><span class="n">log</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="NullMOE">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.NullMOE">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NullMOE</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fallback when ``moe_experts`` is ``1``.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mu0</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span> <span class="n">mu1</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span> <span class="o">=</span> <span class="n">mu0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span> <span class="o">=</span> <span class="n">mu1</span>
+
+<div class="viewcode-block" id="NullMOE.forward">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.NullMOE.forward">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NullMOE.entropy">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.NullMOE.entropy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu0</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span><span class="o">.</span><span class="n">device</span><span class="p">)</span></div>
+</div>
+
+
+
 <div class="viewcode-block" id="ACX">
 <a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ACX</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
@@ -510,6 +621,7 @@
         <span class="n">disc_residual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">disc_pack</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">batch_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">moe_experts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the model.</span>
 
@@ -536,6 +648,7 @@
 <span class="sd">            disc_residual: Override residual connections for the discriminator.</span>
 <span class="sd">            disc_pack: Number of samples concatenated for the discriminator.</span>
 <span class="sd">            batch_norm: Insert ``BatchNorm1d`` layers in all MLPs.</span>
+<span class="sd">            moe_experts: Number of expert pairs for the potential-outcome heads.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -562,6 +675,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_i</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim</span> <span class="o">=</span> <span class="n">rep_dim_total</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_moe</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">moe_experts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moe_experts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">moe_experts</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
             <span class="n">p</span><span class="p">,</span>
@@ -592,6 +708,18 @@
             <span class="n">residual</span><span class="o">=</span><span class="n">head_residual</span><span class="p">,</span>
             <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_moe</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moe</span> <span class="o">=</span> <span class="n">MOEHeads</span><span class="p">(</span>
+                <span class="n">head_in</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">moe_experts</span><span class="p">,</span>
+                <span class="n">hidden</span><span class="o">=</span><span class="n">head_layers</span><span class="p">,</span>
+                <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
+                <span class="n">dropout</span><span class="o">=</span><span class="n">head_dropout</span><span class="p">,</span>
+                <span class="n">residual</span><span class="o">=</span><span class="n">head_residual</span><span class="p">,</span>
+                <span class="n">batch_norm</span><span class="o">=</span><span class="n">batch_norm</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moe</span> <span class="o">=</span> <span class="n">NullMOE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span><span class="p">)</span>
         <span class="n">prop_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_i</span> <span class="k">if</span> <span class="n">disentangle</span> <span class="k">else</span> <span class="n">rep_dim_total</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prop</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
             <span class="n">prop_in</span><span class="p">,</span>
@@ -667,12 +795,10 @@
                 <span class="n">h</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_c</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim_i</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span>
             <span class="p">)</span>
             <span class="n">ha</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">zc</span><span class="p">,</span> <span class="n">za</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">m0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span><span class="p">(</span><span class="n">ha</span><span class="p">)</span>
-            <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span><span class="p">(</span><span class="n">ha</span><span class="p">)</span>
+            <span class="n">m0</span><span class="p">,</span> <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moe</span><span class="p">(</span><span class="n">ha</span><span class="p">)</span>
             <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">(</span><span class="n">ha</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">m0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu0</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
-            <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu1</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+            <span class="n">m0</span><span class="p">,</span> <span class="n">m1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moe</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
             <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">m0</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">tau</span></div>
 
@@ -759,6 +885,26 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">disentangle</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">adv_y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Model was not created with disentangle=True&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">adv_y</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">zc</span><span class="p">,</span> <span class="n">zi</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="ACX.head_parameters">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX.head_parameters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">head_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return parameters of the potential-outcome heads.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_moe</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">moe</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">moe</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu0</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mu1</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="ACX.moe_entropy">
+<a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX.moe_entropy">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">moe_entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Entropy of the gating distribution.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_moe</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">moe</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">moe</span><span class="o">.</span><span class="n">entropy</span><span class="p">()</span></div>
 </div>
 
 </pre></div>

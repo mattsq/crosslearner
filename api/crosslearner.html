@@ -219,6 +219,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
@@ -469,6 +470,8 @@
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.disc_features"><code class="docutils literal notranslate"><span class="pre">ACX.disc_features()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.discriminator"><code class="docutils literal notranslate"><span class="pre">ACX.discriminator()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.forward"><code class="docutils literal notranslate"><span class="pre">ACX.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.head_parameters"><code class="docutils literal notranslate"><span class="pre">ACX.head_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.moe_entropy"><code class="docutils literal notranslate"><span class="pre">ACX.moe_entropy()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.propensity"><code class="docutils literal notranslate"><span class="pre">ACX.propensity()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX.split"><code class="docutils literal notranslate"><span class="pre">ACX.split()</span></code></a></li>
 </ul>
@@ -476,6 +479,17 @@
 <li class="toctree-l3"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.MLP"><code class="docutils literal notranslate"><span class="pre">MLP</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.MLP.features"><code class="docutils literal notranslate"><span class="pre">MLP.features()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.MLP.forward"><code class="docutils literal notranslate"><span class="pre">MLP.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.MOEHeads"><code class="docutils literal notranslate"><span class="pre">MOEHeads</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.MOEHeads.entropy"><code class="docutils literal notranslate"><span class="pre">MOEHeads.entropy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.MOEHeads.forward"><code class="docutils literal notranslate"><span class="pre">MOEHeads.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.MOEHeads.gates"><code class="docutils literal notranslate"><span class="pre">MOEHeads.gates</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.NullMOE"><code class="docutils literal notranslate"><span class="pre">NullMOE</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.NullMOE.entropy"><code class="docutils literal notranslate"><span class="pre">NullMOE.entropy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.NullMOE.forward"><code class="docutils literal notranslate"><span class="pre">NullMOE.forward()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -531,6 +545,7 @@
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.head_dropout"><code class="docutils literal notranslate"><span class="pre">ModelConfig.head_dropout</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.head_layers"><code class="docutils literal notranslate"><span class="pre">ModelConfig.head_layers</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.head_residual"><code class="docutils literal notranslate"><span class="pre">ModelConfig.head_residual</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.moe_experts"><code class="docutils literal notranslate"><span class="pre">ModelConfig.moe_experts</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.p"><code class="docutils literal notranslate"><span class="pre">ModelConfig.p</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.phi_dropout"><code class="docutils literal notranslate"><span class="pre">ModelConfig.phi_dropout</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.ModelConfig.phi_layers"><code class="docutils literal notranslate"><span class="pre">ModelConfig.phi_layers</span></code></a></li>
@@ -580,6 +595,7 @@
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.lr_scheduler"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.lr_scheduler</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.mmd_sigma"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.mmd_sigma</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.mmd_weight"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.mmd_weight</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.moe_entropy_weight"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.moe_entropy_weight</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.noise_consistency_weight"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.noise_consistency_weight</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.noise_std"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.noise_std</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.html#crosslearner.training.TrainingConfig.nuisance_early_stop"><code class="docutils literal notranslate"><span class="pre">TrainingConfig.nuisance_early_stop</span></code></a></li>

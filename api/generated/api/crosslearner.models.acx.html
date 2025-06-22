@@ -219,6 +219,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
@@ -358,6 +359,12 @@
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../crosslearner.models.html#crosslearner.models.acx.MLP" title="crosslearner.models.acx.MLP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MLP</span></code></a>(in_dim, out_dim, hidden, *, activation, ...)</p></td>
 <td><p>Simple multi-layer perceptron used throughout the framework.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../crosslearner.models.html#crosslearner.models.acx.MOEHeads" title="crosslearner.models.acx.MOEHeads"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MOEHeads</span></code></a>(in_dim, num_experts, *, hidden, ...)</p></td>
+<td><p>Mixture-of-experts potential-outcome heads.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../crosslearner.models.html#crosslearner.models.acx.NullMOE" title="crosslearner.models.acx.NullMOE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NullMOE</span></code></a>(mu0, mu1)</p></td>
+<td><p>Fallback when <code class="docutils literal notranslate"><span class="pre">moe_experts</span></code> is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></td>
 </tr>
 </tbody>
 </table>
