@@ -221,6 +221,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../active_counterfactual_augmentation.html">Active Counterfactual Data Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../warm_start.html">Warm Start for Stable Optimisation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ttur.html">Two Time-Scale Update Rule (TTUR)</a></li>
@@ -350,7 +351,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.tensorboard</span><span class="w"> </span><span class="kn">import</span> <span class="n">SummaryWriter</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelConfig</span><span class="p">,</span> <span class="n">TrainingConfig</span>
@@ -479,6 +480,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_rep_means</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rep_vars</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_data</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_ema</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">decay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_cfg</span><span class="o">.</span><span class="n">ema_decay</span>
@@ -535,6 +537,41 @@
         <span class="k">if</span> <span class="n">mask1</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="n">neg_idx</span><span class="p">[</span><span class="n">mask1</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx0</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">num0</span><span class="p">,</span> <span class="p">(</span><span class="n">mask1</span><span class="o">.</span><span class="n">sum</span><span class="p">(),),</span> <span class="n">device</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">device</span><span class="p">)]</span>
         <span class="k">return</span> <span class="n">neg_idx</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_search_disagreement</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">lr</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">m0</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">m1</span> <span class="o">-</span> <span class="n">m0</span> <span class="o">-</span> <span class="n">tau</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">opt</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">m0</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">m0</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">bool</span><span class="p">(),</span> <span class="n">m1</span><span class="p">,</span> <span class="n">m0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">t</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_augment_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_cfg</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">active_aug_freq</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">loader</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">loader</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">TensorDataset</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">loader</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">tensors</span>
+        <span class="n">Xp</span><span class="p">,</span> <span class="n">Tp</span><span class="p">,</span> <span class="n">Yp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_data</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">TensorDataset</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">X</span><span class="p">,</span> <span class="n">Xp</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">T</span><span class="p">,</span> <span class="n">Tp</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">Y</span><span class="p">,</span> <span class="n">Yp</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_unrolled_logits</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1127,8 +1164,25 @@
             <span class="n">e_hat_val</span><span class="p">,</span> <span class="n">mu0_val</span><span class="p">,</span> <span class="n">mu1_val</span> <span class="o">=</span> <span class="n">risk_vals</span>
 
         <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">active_aug_freq</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">epoch</span> <span class="o">%</span> <span class="n">cfg</span><span class="o">.</span><span class="n">active_aug_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">new_x</span><span class="p">,</span> <span class="n">new_t</span><span class="p">,</span> <span class="n">new_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_disagreement</span><span class="p">(</span>
+                    <span class="n">cfg</span><span class="o">.</span><span class="n">active_aug_samples</span><span class="p">,</span>
+                    <span class="n">cfg</span><span class="o">.</span><span class="n">active_aug_steps</span><span class="p">,</span>
+                    <span class="n">cfg</span><span class="o">.</span><span class="n">active_aug_lr</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_x</span><span class="p">,</span> <span class="n">new_t</span><span class="p">,</span> <span class="n">new_y</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">px</span><span class="p">,</span> <span class="n">pt</span><span class="p">,</span> <span class="n">py</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_data</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_data</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">px</span><span class="p">,</span> <span class="n">new_x</span><span class="p">]),</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">pt</span><span class="p">,</span> <span class="n">new_t</span><span class="p">]),</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">py</span><span class="p">,</span> <span class="n">new_y</span><span class="p">]),</span>
+                    <span class="p">)</span>
+
+            <span class="n">loader_epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_augment_loader</span><span class="p">(</span><span class="n">loader</span><span class="p">)</span>
             <span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_train_epoch</span><span class="p">(</span>
-                <span class="n">loader</span><span class="p">,</span>
+                <span class="n">loader_epoch</span><span class="p">,</span>
                 <span class="n">epoch</span><span class="p">,</span>
                 <span class="n">opt_g</span><span class="p">,</span>
                 <span class="n">opt_d</span><span class="p">,</span>

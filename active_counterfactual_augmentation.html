@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Consistency Regularization" href="consistency_regularization.html" /><link rel="prev" title="Representation Disentanglement and Auxiliary Adversaries" href="representation_disentanglement.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Unrolled Discriminator Updates" href="unrolled_discriminator.html" /><link rel="prev" title="Discriminator Feature Augmentation" href="discriminator_augmentation.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Mixture-of-Experts Potential-Outcome Heads - crosslearner 0.1 documentation</title>
+        <title>Active Counterfactual Data Augmentation - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -178,7 +178,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -219,10 +219,10 @@
 <li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Mixture-of-Experts Potential-Outcome Heads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="active_counterfactual_augmentation.html">Active Counterfactual Data Augmentation</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Active Counterfactual Data Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="warm_start.html">Warm Start for Stable Optimisation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ttur.html">Two Time-Scale Update Rule (TTUR)</a></li>
@@ -328,7 +328,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/mixture_of_experts.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/active_counterfactual_augmentation.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -342,32 +342,51 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="mixture-of-experts-potential-outcome-heads">
-<h1>Mixture-of-Experts Potential-Outcome Heads<a class="headerlink" href="#mixture-of-experts-potential-outcome-heads" title="Link to this heading">¶</a></h1>
-<p>Setting <code class="docutils literal notranslate"><span class="pre">moe_experts</span></code> greater than <code class="docutils literal notranslate"><span class="pre">1</span></code> in <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.ModelConfig" title="crosslearner.training.ModelConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelConfig</span></code></a>
-replaces the single potential-outcome heads with a set of expert pairs. A gating
-network <code class="docutils literal notranslate"><span class="pre">g(x)</span></code> softly selects experts for each sample and the final predictions
-are the weighted sum of their outputs.</p>
-<p>This allows the model to specialise to heterogeneous sub-populations while
-sharing a common representation. To encourage sparse selections, the trainer adds
-an entropy penalty on the gating distribution controlled by <code class="docutils literal notranslate"><span class="pre">moe_entropy_weight</span></code>
-from <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>:</p>
+          <section id="active-counterfactual-data-augmentation">
+<h1>Active Counterfactual Data Augmentation<a class="headerlink" href="#active-counterfactual-data-augmentation" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">active_aug_freq</span></code> enables periodic “dreaming” of synthetic samples. During
+training the optimiser searches the covariate space for inputs that maximise the
+disagreement between the potential outcome heads and the explicit treatment
+-effect prediction. These pseudo inputs are labelled using the generator’s own
+outputs and added to the training loader.</p>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
+<p>Actively generating counterfactual pairs targets regions where the model is most
+unsure about the treatment effect. By exploring covariates that lead to large
+head disagreement the learner focuses on areas that matter for ranking effects.</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>Enable the augmentation by setting <code class="docutils literal notranslate"><span class="pre">active_aug_freq</span></code> to a positive epoch
+interval along with the search parameters <code class="docutils literal notranslate"><span class="pre">active_aug_samples</span></code>,
+<code class="docutils literal notranslate"><span class="pre">active_aug_steps</span></code> and <code class="docutils literal notranslate"><span class="pre">active_aug_lr</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
     <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">moe_entropy_weight</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">active_aug_freq</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">active_aug_samples</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+    <span class="n">active_aug_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">active_aug_lr</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">model_cfg</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">moe_experts</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">model_cfg</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Existing adversarial and consistency losses operate on the aggregated outputs so
-no other changes are required.</p>
+<p>Every <code class="docutils literal notranslate"><span class="pre">active_aug_freq</span></code> epochs the trainer optimises randomly initialised
+covariates for <code class="docutils literal notranslate"><span class="pre">active_aug_steps</span></code> steps using gradient ascent on
+<code class="docutils literal notranslate"><span class="pre">|mu1(x)</span> <span class="pre">-</span> <span class="pre">mu0(x)</span> <span class="pre">-</span> <span class="pre">tau(x)|</span></code>. The resulting samples are appended to the loader
+with generator predictions as outcomes.</p>
+</section>
+<section id="when-to-use-it">
+<h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
+<p>Use active augmentation when treatment-effect ordering on rare covariate
+regions is critical. Keep <code class="docutils literal notranslate"><span class="pre">active_aug_samples</span></code> small (tens of samples) so the
+synthetic data only gently influences training.</p>
+</section>
 </section>
 
         </article>
@@ -375,23 +394,23 @@ no other changes are required.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="consistency_regularization.html">
+          <a class="next-page" href="unrolled_discriminator.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Consistency Regularization</div>
+                <div class="title">Unrolled Discriminator Updates</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="representation_disentanglement.html">
+          <a class="prev-page" href="discriminator_augmentation.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Representation Disentanglement and Auxiliary Adversaries</div>
+                <div class="title">Discriminator Feature Augmentation</div>
                 
               </div>
             </a>
@@ -413,8 +432,29 @@ no other changes are required.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Active Counterfactual Data Augmentation</a><ul>
+<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

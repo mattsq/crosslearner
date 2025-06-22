@@ -221,6 +221,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../consistency_regularization.html">Consistency Regularization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../active_counterfactual_augmentation.html">Active Counterfactual Data Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../warm_start.html">Warm Start for Stable Optimisation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ttur.html">Two Time-Scale Update Rule (TTUR)</a></li>
@@ -503,7 +504,15 @@
     <span class="n">nuisance_early_stop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="n">patience</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">return_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+    <span class="n">return_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">active_aug_freq</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mi">0</span>
+        <span class="c1">#: Epoch interval for active counterfactual data augmentation.</span>
+        <span class="c1">#: ``0`` disables the feature.</span>
+    <span class="p">)</span>
+    <span class="n">active_aug_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">active_aug_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">active_aug_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span></div>
 
 </pre></div>
         </article>
