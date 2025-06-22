@@ -156,3 +156,11 @@ class TrainingConfig:
     patience: int = 0
     verbose: bool = True
     return_history: bool = False
+    active_aug_freq: int = (
+        0
+        #: Epoch interval for active counterfactual data augmentation.
+        #: ``0`` disables the feature.
+    )
+    active_aug_samples: int = 0
+    active_aug_steps: int = 10
+    active_aug_lr: float = 0.1

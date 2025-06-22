@@ -79,4 +79,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ``epistemic_consistency`` is enabled
 - Added ``effect_consistency_weight`` property and tests for tau head validation
 - Stopped tracking gradients for ``tau_variance`` to reduce memory usage
+- Added active counterfactual data augmentation via ``active_aug_freq`` and
+  related options
 

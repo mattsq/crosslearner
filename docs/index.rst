@@ -32,6 +32,7 @@ the training procedure, hyperparameter sweeps and available modules.
    mixture_of_experts
    consistency_regularization
    discriminator_augmentation
+   active_counterfactual_augmentation
    unrolled_discriminator
    warm_start
    ttur
