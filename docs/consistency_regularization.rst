@@ -57,7 +57,7 @@ When ``epistemic_consistency`` is enabled the consistency weight is scaled
 by the ensemble variance of the treatment effect head. This down-weights the
 penalty in regions where the model is uncertain, preventing over-regularisation
 on scarcely observed samples. Configure the number of ensemble heads via
-``ModelConfig.tau_heads``.
+``ModelConfig.tau_heads`` (must be at least ``1``).
 
 Example usage::
 

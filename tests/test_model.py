@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
+import pytest
 from crosslearner.models.acx import ACX
+from crosslearner.training.config import ModelConfig
 
 
 def test_acx_forward_shapes():
@@ -75,3 +77,8 @@ def test_acx_tau_variance():
     var = model.tau_variance
     assert var.shape == (4, 1)
     assert torch.any(var >= 0)
+
+
+def test_model_config_invalid_tau_heads():
+    with pytest.raises(ValueError):
+        ModelConfig(p=2, tau_heads=0)

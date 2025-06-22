@@ -35,6 +35,10 @@ class ModelConfig:
     moe_experts: int = 1  #: Number of expert pairs for mixture-of-experts heads.
     tau_heads: int = 1  #: Number of effect heads for epistemic ensembling.
 
+    def __post_init__(self) -> None:
+        if self.tau_heads < 1:
+            raise ValueError("tau_heads must be >= 1")
+
 
 @dataclass
 class TrainingConfig:
