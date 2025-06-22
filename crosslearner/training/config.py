@@ -32,6 +32,7 @@ class ModelConfig:
         1  #: Number of samples concatenated for PacGAN-style discriminator.
     )
     batch_norm: bool = False
+    moe_experts: int = 1  #: Number of expert pairs for mixture-of-experts heads.
 
 
 @dataclass
@@ -110,6 +111,7 @@ class TrainingConfig:
     noise_std: float = 0.0
     noise_consistency_weight: float = 0.0
     rep_consistency_weight: float = 0.0
+    moe_entropy_weight: float = 0.0  #: Weight for gating entropy regularization.
     rep_momentum: float = 0.99
     adv_t_weight: float = (
         0.0

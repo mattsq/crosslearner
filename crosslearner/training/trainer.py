@@ -92,6 +92,7 @@ class ACXTrainer:
             disc_residual=model_cfg.disc_residual,
             disc_pack=model_cfg.disc_pack,
             batch_norm=model_cfg.batch_norm,
+            moe_experts=model_cfg.moe_experts,
         ).to(self.device)
         if train_cfg.spectral_norm:
             apply_spectral_norm(self.model)
@@ -118,6 +119,7 @@ class ACXTrainer:
                 disc_residual=model_cfg.disc_residual,
                 disc_pack=model_cfg.disc_pack,
                 batch_norm=model_cfg.batch_norm,
+                moe_experts=model_cfg.moe_experts,
             ).to(self.device)
             if train_cfg.spectral_norm:
                 apply_spectral_norm(self.ema_model)
@@ -275,8 +277,7 @@ class ACXTrainer:
 
         opt_g = opt_cls(
             list(model.phi.parameters())
-            + list(model.mu0.parameters())
-            + list(model.mu1.parameters())
+            + list(model.head_parameters())
             + list(model.tau.parameters())
             + list(model.prop.parameters())
             + [model.epsilon],
@@ -663,6 +664,7 @@ class ACXTrainer:
                 + cfg.lambda_dr * loss_dr
                 + cfg.noise_consistency_weight * loss_noise
                 + cfg.rep_consistency_weight * rep_pen
+                + cfg.moe_entropy_weight * model.moe_entropy()
             )
 
             if cfg.feature_matching:
@@ -692,8 +694,7 @@ class ACXTrainer:
                         p.grad.detach().pow(2).sum()
                         for p in (
                             list(model.phi.parameters())
-                            + list(model.mu0.parameters())
-                            + list(model.mu1.parameters())
+                            + list(model.head_parameters())
                             + list(model.tau.parameters())
                             + list(model.prop.parameters())
                             + [model.epsilon]

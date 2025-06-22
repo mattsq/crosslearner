@@ -126,6 +126,98 @@ class MLP(nn.Module):
             return x
 
 
+class MOEHeads(nn.Module):
+    """Mixture-of-experts potential-outcome heads."""
+
+    def __init__(
+        self,
+        in_dim: int,
+        num_experts: int,
+        *,
+        hidden: Iterable[int] | None,
+        activation: str | Callable[[], nn.Module] = nn.ReLU,
+        dropout: float = 0.0,
+        residual: bool = False,
+        batch_norm: bool = False,
+    ) -> None:
+        super().__init__()
+        self.num_experts = int(num_experts)
+        act_fn = _get_activation(activation)
+        self.mu0 = nn.ModuleList(
+            [
+                MLP(
+                    in_dim,
+                    1,
+                    hidden=hidden,
+                    activation=act_fn,
+                    dropout=dropout,
+                    residual=residual,
+                    batch_norm=batch_norm,
+                )
+                for _ in range(self.num_experts)
+            ]
+        )
+        self.mu1 = nn.ModuleList(
+            [
+                MLP(
+                    in_dim,
+                    1,
+                    hidden=hidden,
+                    activation=act_fn,
+                    dropout=dropout,
+                    residual=residual,
+                    batch_norm=batch_norm,
+                )
+                for _ in range(self.num_experts)
+            ]
+        )
+        self.gate = MLP(
+            in_dim,
+            self.num_experts,
+            hidden=hidden,
+            activation=act_fn,
+            dropout=dropout,
+            residual=residual,
+            batch_norm=batch_norm,
+        )
+        self.softmax = nn.Softmax(dim=1)
+        self._gates: torch.Tensor | None = None
+
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        w = self.softmax(self.gate(x))
+        self._gates = w
+        m0 = torch.stack([head(x) for head in self.mu0], dim=1).squeeze(-1)
+        m1 = torch.stack([head(x) for head in self.mu1], dim=1).squeeze(-1)
+        m0 = (w * m0).sum(dim=1, keepdim=True)
+        m1 = (w * m1).sum(dim=1, keepdim=True)
+        return m0, m1
+
+    @property
+    def gates(self) -> torch.Tensor:
+        if self._gates is None:
+            raise RuntimeError("Gating weights have not been computed yet")
+        return self._gates
+
+    def entropy(self) -> torch.Tensor:
+        w = self.gates.clamp_min(1e-12)
+        return -(w * w.log()).sum(dim=1).mean()
+
+
+class NullMOE(nn.Module):
+    """Fallback when ``moe_experts`` is ``1``."""
+
+    def __init__(self, mu0: nn.Module, mu1: nn.Module) -> None:
+        super().__init__()
+        self.mu0 = mu0
+        self.mu1 = mu1
+
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        return self.mu0(x), self.mu1(x)
+
+    def entropy(self) -> torch.Tensor:
+        return torch.tensor(0.0, device=next(self.mu0.parameters()).device)
+
+
 class ACX(nn.Module):
     """Adversarial-Consistency X-learner model.
 
@@ -157,6 +249,7 @@ class ACX(nn.Module):
         disc_residual: bool | None = None,
         disc_pack: int = 1,
         batch_norm: bool = False,
+        moe_experts: int = 1,
     ) -> None:
         """Instantiate the model.
 
@@ -183,6 +276,7 @@ class ACX(nn.Module):
             disc_residual: Override residual connections for the discriminator.
             disc_pack: Number of samples concatenated for the discriminator.
             batch_norm: Insert ``BatchNorm1d`` layers in all MLPs.
+            moe_experts: Number of expert pairs for the potential-outcome heads.
         """
 
         super().__init__()
@@ -209,6 +303,9 @@ class ACX(nn.Module):
             self.rep_dim_i = 0
 
         self.rep_dim = rep_dim_total
+
+        self.use_moe = int(moe_experts) > 1
+        self.moe_experts = int(moe_experts)
 
         self.phi = MLP(
             p,
@@ -239,6 +336,18 @@ class ACX(nn.Module):
             residual=head_residual,
             batch_norm=batch_norm,
         )
+        if self.use_moe:
+            self.moe = MOEHeads(
+                head_in,
+                self.moe_experts,
+                hidden=head_layers,
+                activation=act_fn,
+                dropout=head_dropout,
+                residual=head_residual,
+                batch_norm=batch_norm,
+            )
+        else:
+            self.moe = NullMOE(self.mu0, self.mu1)
         prop_in = self.rep_dim_c + self.rep_dim_i if disentangle else rep_dim_total
         self.prop = MLP(
             prop_in,
@@ -312,12 +421,10 @@ class ACX(nn.Module):
                 h, [self.rep_dim_c, self.rep_dim_a, self.rep_dim_i], dim=1
             )
             ha = torch.cat([zc, za], dim=1)
-            m0 = self.mu0(ha)
-            m1 = self.mu1(ha)
+            m0, m1 = self.moe(ha)
             tau = self.tau(ha)
         else:
-            m0 = self.mu0(h)
-            m1 = self.mu1(h)
+            m0, m1 = self.moe(h)
             tau = self.tau(h)
         return h, m0, m1, tau
 
@@ -386,3 +493,17 @@ class ACX(nn.Module):
         if not self.disentangle or self.adv_y is None:
             raise RuntimeError("Model was not created with disentangle=True")
         return self.adv_y(torch.cat([zc, zi], dim=1))
+
+    def head_parameters(self) -> Iterable[nn.Parameter]:
+        """Return parameters of the potential-outcome heads."""
+
+        if self.use_moe and self.moe is not None:
+            return self.moe.parameters()
+        return list(self.mu0.parameters()) + list(self.mu1.parameters())
+
+    def moe_entropy(self) -> torch.Tensor:
+        """Entropy of the gating distribution."""
+
+        if not self.use_moe or self.moe is None:
+            return torch.tensor(0.0, device=self.phi.out.weight.device)
+        return self.moe.entropy()
