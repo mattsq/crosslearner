@@ -66,3 +66,12 @@ def test_acx_moe_forward():
     assert tau.shape == (2, 1)
     assert model.use_moe
     assert model.moe.gates.shape == (2, 2)
+
+
+def test_acx_tau_variance():
+    model = ACX(p=2, tau_heads=3)
+    X = torch.randn(4, 2)
+    _ = model(X)
+    var = model.tau_variance
+    assert var.shape == (4, 1)
+    assert torch.any(var >= 0)

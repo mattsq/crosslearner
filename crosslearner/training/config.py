@@ -33,6 +33,7 @@ class ModelConfig:
     )
     batch_norm: bool = False
     moe_experts: int = 1  #: Number of expert pairs for mixture-of-experts heads.
+    tau_heads: int = 1  #: Number of effect heads for epistemic ensembling.
 
 
 @dataclass
@@ -110,6 +111,7 @@ class TrainingConfig:
     lambda_dr: float = 0.0  #: Weight for the doubly robust loss term.
     noise_std: float = 0.0
     noise_consistency_weight: float = 0.0
+    epistemic_consistency: bool = False  #: Down-weight consistency loss by uncertainty.
     rep_consistency_weight: float = 0.0
     moe_entropy_weight: float = 0.0  #: Weight for gating entropy regularization.
     rep_momentum: float = 0.99
