@@ -278,7 +278,7 @@ class ACXTrainer:
         opt_g = opt_cls(
             list(model.phi.parameters())
             + list(model.head_parameters())
-            + list(model.tau.parameters())
+            + list(model.tau_parameters())
             + list(model.prop.parameters())
             + [model.epsilon],
             lr=cfg.lr_g,
@@ -587,7 +587,11 @@ class ACXTrainer:
             prop = model.propensity(hb)
             m_obs = torch.where(Tb.bool(), m1, m0)
             loss_y = mse(m_obs, Yb)
-            loss_cons = mse(tau, m1 - m0)
+            if cfg.epistemic_consistency:
+                weight = 1.0 / (1.0 + model.tau_variance.detach())
+                loss_cons = ((tau - (m1 - m0)) ** 2 * weight).mean()
+            else:
+                loss_cons = mse(tau, m1 - m0)
             loss_prop = bce(prop, Tb)
             eps = model.epsilon
             q_tilde = m_obs + eps * (Tb - prop) / (prop * (1 - prop) + 1e-8)

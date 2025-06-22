@@ -73,4 +73,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   learning rate schedules
 - Detached MOE gating weights to avoid memory leaks and added unit tests for
   ``MOEHeads`` gating behaviour
+- Added epistemic-aware consistency loss via ``epistemic_consistency`` and
+  ``tau_heads`` options
 

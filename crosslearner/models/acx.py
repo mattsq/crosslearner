@@ -250,6 +250,7 @@ class ACX(nn.Module):
         disc_pack: int = 1,
         batch_norm: bool = False,
         moe_experts: int = 1,
+        tau_heads: int = 1,
     ) -> None:
         """Instantiate the model.
 
@@ -277,6 +278,7 @@ class ACX(nn.Module):
             disc_pack: Number of samples concatenated for the discriminator.
             batch_norm: Insert ``BatchNorm1d`` layers in all MLPs.
             moe_experts: Number of expert pairs for the potential-outcome heads.
+            tau_heads: Number of parallel effect heads for ensembling.
         """
 
         super().__init__()
@@ -360,15 +362,23 @@ class ACX(nn.Module):
         )
         self.prop.net.add_module("sigmoid", nn.Sigmoid())
         self.epsilon = nn.Parameter(torch.tensor(0.0))
-        self.tau = MLP(
-            head_in,
-            1,
-            hidden=head_layers,
-            activation=act_fn,
-            dropout=head_dropout,
-            residual=head_residual,
-            batch_norm=batch_norm,
+        self.num_tau_heads = int(tau_heads)
+        self.tau_heads = nn.ModuleList(
+            [
+                MLP(
+                    head_in,
+                    1,
+                    hidden=head_layers,
+                    activation=act_fn,
+                    dropout=head_dropout,
+                    residual=head_residual,
+                    batch_norm=batch_norm,
+                )
+                for _ in range(self.num_tau_heads)
+            ]
         )
+        self.tau = self.tau_heads[0]
+        self.register_buffer("_tau_var", torch.tensor(0.0), persistent=False)
         self.disc_pack = max(1, int(disc_pack))
         self.disc = MLP(
             self.disc_pack * (rep_dim_total + 2),
@@ -422,10 +432,12 @@ class ACX(nn.Module):
             )
             ha = torch.cat([zc, za], dim=1)
             m0, m1 = self.moe(ha)
-            tau = self.tau(ha)
+            tau_samples = torch.stack([head(ha) for head in self.tau_heads], dim=2)
         else:
             m0, m1 = self.moe(h)
-            tau = self.tau(h)
+            tau_samples = torch.stack([head(h) for head in self.tau_heads], dim=2)
+        tau = tau_samples.mean(dim=2)
+        self._tau_var = tau_samples.var(dim=2, unbiased=False)
         return h, m0, m1, tau
 
     @torch.jit.export
@@ -500,6 +512,16 @@ class ACX(nn.Module):
         if self.use_moe and self.moe is not None:
             return self.moe.parameters()
         return list(self.mu0.parameters()) + list(self.mu1.parameters())
+
+    def tau_parameters(self) -> Iterable[nn.Parameter]:
+        """Return parameters of all effect heads."""
+
+        return [p for head in self.tau_heads for p in head.parameters()]
+
+    @property
+    def tau_variance(self) -> torch.Tensor:
+        """Variance of ensemble treatment effect predictions from last forward."""
+        return self._tau_var
 
     def moe_entropy(self) -> torch.Tensor:
         """Entropy of the gating distribution."""

@@ -419,6 +419,18 @@ def test_train_acx_rep_consistency():
     assert isinstance(model, ACX)
 
 
+def test_train_acx_epistemic_consistency():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4, tau_heads=3)
+    cfg = TrainingConfig(
+        epochs=1,
+        epistemic_consistency=True,
+        verbose=False,
+    )
+    model = train_acx(loader, model_cfg, cfg, device="cpu")
+    assert isinstance(model, ACX)
+
+
 def test_adaptive_regularization_updates_lambda():
     loader, _ = get_toy_dataloader(batch_size=4, n=16, p=4)
     model_cfg = ModelConfig(p=4)
