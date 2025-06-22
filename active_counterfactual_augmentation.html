@@ -382,6 +382,8 @@ covariates for <code class="docutils literal notranslate"><span class="pre">acti
 with generator predictions as outcomes. All <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> options such as
 <code class="docutils literal notranslate"><span class="pre">num_workers</span></code> and <code class="docutils literal notranslate"><span class="pre">pin_memory</span></code> are preserved when the augmented loader is
 constructed.</p>
+<p>Model parameters are frozen during this search so no gradients are stored for
+the network.</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
