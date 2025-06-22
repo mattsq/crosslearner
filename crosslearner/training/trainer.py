@@ -200,6 +200,13 @@ class ACXTrainer:
         lr: float,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         x = torch.randn(n, self.model_cfg.p, device=self.device, requires_grad=True)
+
+        was_training = self.model.training
+        grad_states = [p.requires_grad for p in self.model.parameters()]
+        for p in self.model.parameters():
+            p.requires_grad_(False)
+        self.model.eval()
+
         opt = torch.optim.SGD([x], lr=lr)
         for _ in range(steps):
             _, m0, m1, tau = self.model(x)
@@ -207,6 +214,12 @@ class ACXTrainer:
             opt.zero_grad()
             loss.backward()
             opt.step()
+
+        for p, state in zip(self.model.parameters(), grad_states):
+            p.requires_grad_(state)
+        if was_training:
+            self.model.train()
+
         with torch.no_grad():
             _, m0, m1, _ = self.model(x)
             t = torch.randint(0, 2, (n, 1), device=self.device, dtype=m0.dtype)

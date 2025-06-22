@@ -85,4 +85,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   pseudo data
 - Active augmentation now handles optional ``DataLoader`` arguments for
   compatibility with older PyTorch versions
+- Disabled gradient tracking for model parameters during active counterfactual
+  search to reduce overhead
 
