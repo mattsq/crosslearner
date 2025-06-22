@@ -494,3 +494,11 @@ def test_search_disagreement_no_param_gradients():
     trainer = ACXTrainer(model_cfg, cfg, device="cpu")
     trainer._search_disagreement(2, 1, 0.1)
     assert all(p.grad is None for p in trainer.model.parameters())
+
+
+def test_pretrain_representation():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4)
+    cfg = TrainingConfig(pretrain_epochs=1, epochs=1, verbose=False)
+    model = train_acx(loader, model_cfg, cfg, device="cpu")
+    assert isinstance(model, ACX)
