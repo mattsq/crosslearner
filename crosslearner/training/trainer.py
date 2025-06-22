@@ -7,7 +7,7 @@ from torch.func import functional_call
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 from torch.utils.tensorboard import SummaryWriter
 
 from .config import ModelConfig, TrainingConfig
@@ -134,6 +134,7 @@ class ACXTrainer:
 
         self._rep_means: dict[int, torch.Tensor] | None = None
         self._rep_vars: dict[int, torch.Tensor] | None = None
+        self._pseudo_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None = None
 
     def _update_ema(self) -> None:
         decay = self.train_cfg.ema_decay
@@ -190,6 +191,41 @@ class ACXTrainer:
         if mask1.any():
             neg_idx[mask1] = idx0[torch.randint(num0, (mask1.sum(),), device=t.device)]
         return neg_idx
+
+    def _search_disagreement(
+        self,
+        n: int,
+        steps: int,
+        lr: float,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        x = torch.randn(n, self.model_cfg.p, device=self.device, requires_grad=True)
+        opt = torch.optim.SGD([x], lr=lr)
+        for _ in range(steps):
+            _, m0, m1, tau = self.model(x)
+            loss = -(m1 - m0 - tau).abs().mean()
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+        with torch.no_grad():
+            _, m0, m1, _ = self.model(x)
+            t = torch.randint(0, 2, (n, 1), device=self.device, dtype=m0.dtype)
+            y = torch.where(t.bool(), m1, m0)
+        return x.detach().cpu(), t.cpu(), y.detach().cpu()
+
+    def _augment_loader(self, loader: DataLoader) -> DataLoader:
+        cfg = self.train_cfg
+        if cfg.active_aug_freq <= 0:
+            return loader
+        if self._pseudo_data is None:
+            return loader
+        if not isinstance(loader.dataset, TensorDataset):
+            return loader
+        X, T, Y = loader.dataset.tensors
+        Xp, Tp, Yp = self._pseudo_data
+        dataset = TensorDataset(
+            torch.cat([X, Xp]), torch.cat([T, Tp]), torch.cat([Y, Yp])
+        )
+        return DataLoader(dataset, batch_size=loader.batch_size, shuffle=True)
 
     def _unrolled_logits(
         self,
@@ -780,8 +816,25 @@ class ACXTrainer:
             e_hat_val, mu0_val, mu1_val = risk_vals
 
         for epoch in range(cfg.epochs):
+            if cfg.active_aug_freq > 0 and epoch % cfg.active_aug_freq == 0:
+                new_x, new_t, new_y = self._search_disagreement(
+                    cfg.active_aug_samples,
+                    cfg.active_aug_steps,
+                    cfg.active_aug_lr,
+                )
+                if self._pseudo_data is None:
+                    self._pseudo_data = (new_x, new_t, new_y)
+                else:
+                    px, pt, py = self._pseudo_data
+                    self._pseudo_data = (
+                        torch.cat([px, new_x]),
+                        torch.cat([pt, new_t]),
+                        torch.cat([py, new_y]),
+                    )
+
+            loader_epoch = self._augment_loader(loader)
             stats = self._train_epoch(
-                loader,
+                loader_epoch,
                 epoch,
                 opt_g,
                 opt_d,

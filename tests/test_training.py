@@ -419,6 +419,20 @@ def test_train_acx_rep_consistency():
     assert isinstance(model, ACX)
 
 
+def test_active_counterfactual_augmentation():
+    loader, _ = get_toy_dataloader(batch_size=4, n=16, p=4, seed=0)
+    model_cfg = ModelConfig(p=4)
+    cfg = TrainingConfig(
+        epochs=2,
+        active_aug_freq=1,
+        active_aug_samples=4,
+        active_aug_steps=1,
+        verbose=False,
+    )
+    model = train_acx(loader, model_cfg, cfg, device="cpu")
+    assert isinstance(model, ACX)
+
+
 def test_train_acx_epistemic_consistency():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     model_cfg = ModelConfig(p=4, tau_heads=3)
