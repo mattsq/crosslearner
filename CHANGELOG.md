@@ -75,4 +75,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ``MOEHeads`` gating behaviour
 - Added epistemic-aware consistency loss via ``epistemic_consistency`` and
   ``tau_heads`` options
+- Validated ``ModelConfig.tau_heads`` to be at least 1 and added a regression test
 
