@@ -394,6 +394,23 @@ encoder oscillates or collapses as the discriminator improves.</p>
 </pre></div>
 </div>
 </section>
+<section id="epistemic-aware-consistency">
+<h2>Epistemic-Aware Consistency<a class="headerlink" href="#epistemic-aware-consistency" title="Link to this heading">¶</a></h2>
+<p>When <code class="docutils literal notranslate"><span class="pre">epistemic_consistency</span></code> is enabled the consistency weight is scaled
+by the ensemble variance of the treatment effect head. This down-weights the
+penalty in regions where the model is uncertain, preventing over-regularisation
+on scarcely observed samples. Configure the number of ensemble heads via
+<code class="docutils literal notranslate"><span class="pre">ModelConfig.tau_heads</span></code>.</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model_cfg</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tau_heads</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">epistemic_consistency</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">model_cfg</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
 <p>Enable these penalties when training becomes unstable or when small input
@@ -476,6 +493,7 @@ inputs.</p>
 <li><a class="reference internal" href="#">Consistency Regularization</a><ul>
 <li><a class="reference internal" href="#noise-consistency">Noise Consistency</a></li>
 <li><a class="reference internal" href="#representation-drift">Representation Drift</a></li>
+<li><a class="reference internal" href="#epistemic-aware-consistency">Epistemic-Aware Consistency</a></li>
 <li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>

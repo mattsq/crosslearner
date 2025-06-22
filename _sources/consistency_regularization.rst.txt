@@ -50,6 +50,24 @@ Example usage::
    )
    model = train_acx(loader, ModelConfig(p=10), cfg)
 
+Epistemic-Aware Consistency
+--------------------------
+
+When ``epistemic_consistency`` is enabled the consistency weight is scaled
+by the ensemble variance of the treatment effect head. This down-weights the
+penalty in regions where the model is uncertain, preventing over-regularisation
+on scarcely observed samples. Configure the number of ensemble heads via
+``ModelConfig.tau_heads``.
+
+Example usage::
+
+   model_cfg = ModelConfig(p=10, tau_heads=3)
+   cfg = TrainingConfig(
+       epochs=30,
+       epistemic_consistency=True,
+   )
+   model = train_acx(loader, model_cfg, cfg)
+
 When to use it
 --------------
 
