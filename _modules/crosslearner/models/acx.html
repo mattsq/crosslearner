@@ -922,6 +922,11 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Variance of ensemble treatment effect predictions from last forward.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tau_var</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">effect_consistency_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Inverse variance weight used for epistemic consistency loss.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tau_var</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+
 <div class="viewcode-block" id="ACX.moe_entropy">
 <a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX.moe_entropy">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">moe_entropy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
