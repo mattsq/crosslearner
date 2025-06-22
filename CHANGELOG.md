@@ -78,4 +78,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Passed ``tau_heads`` from ``ModelConfig`` to ``ACX`` and validate when
   ``epistemic_consistency`` is enabled
 - Added ``effect_consistency_weight`` property and tests for tau head validation
+- Stopped tracking gradients for ``tau_variance`` to reduce memory usage
 
