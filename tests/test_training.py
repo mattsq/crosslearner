@@ -350,6 +350,14 @@ def test_train_acx_r1_r2_unrolled():
     cfg = TrainingConfig(epochs=1, r1_gamma=0.1, verbose=False)
     model = train_acx(loader, model_cfg, cfg, device="cpu")
     assert isinstance(model, ACX)
+
+
+def test_train_acx_moe_heads():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4, moe_experts=2)
+    cfg = TrainingConfig(epochs=1, moe_entropy_weight=0.1, verbose=False)
+    model = train_acx(loader, model_cfg, cfg, device="cpu")
+    assert model.use_moe
     cfg = TrainingConfig(epochs=1, r2_gamma=0.1, verbose=False)
     model = train_acx(loader, model_cfg, cfg, device="cpu")
     assert isinstance(model, ACX)

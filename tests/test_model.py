@@ -54,3 +54,15 @@ def test_acx_disc_pack():
     model = ACX(p=3, disc_pack=2)
     assert model.disc_pack == 2
     assert model.disc.net[0][0].in_features == 2 * (64 + 2)
+
+
+def test_acx_moe_forward():
+    model = ACX(p=3, moe_experts=2)
+    X = torch.randn(2, 3)
+    h, m0, m1, tau = model(X)
+    assert h.shape == (2, 64)
+    assert m0.shape == (2, 1)
+    assert m1.shape == (2, 1)
+    assert tau.shape == (2, 1)
+    assert model.use_moe
+    assert model.moe.gates.shape == (2, 2)
