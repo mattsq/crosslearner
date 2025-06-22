@@ -571,7 +571,23 @@
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">TensorDataset</span><span class="p">(</span>
             <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">X</span><span class="p">,</span> <span class="n">Xp</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">T</span><span class="p">,</span> <span class="n">Tp</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">Y</span><span class="p">,</span> <span class="n">Yp</span><span class="p">])</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">num_workers</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
+            <span class="n">collate_fn</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">collate_fn</span><span class="p">,</span>
+            <span class="n">pin_memory</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
+            <span class="n">drop_last</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">drop_last</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">worker_init_fn</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">worker_init_fn</span><span class="p">,</span>
+            <span class="n">multiprocessing_context</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">multiprocessing_context</span><span class="p">,</span>
+            <span class="n">generator</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">generator</span><span class="p">,</span>
+            <span class="n">prefetch_factor</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">prefetch_factor</span><span class="p">,</span>
+            <span class="n">persistent_workers</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">persistent_workers</span><span class="p">,</span>
+            <span class="n">pin_memory_device</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">pin_memory_device</span><span class="p">,</span>
+            <span class="n">in_order</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">in_order</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_unrolled_logits</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

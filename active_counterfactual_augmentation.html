@@ -379,7 +379,9 @@ interval along with the search parameters <code class="docutils literal notransl
 <p>Every <code class="docutils literal notranslate"><span class="pre">active_aug_freq</span></code> epochs the trainer optimises randomly initialised
 covariates for <code class="docutils literal notranslate"><span class="pre">active_aug_steps</span></code> steps using gradient ascent on
 <code class="docutils literal notranslate"><span class="pre">|mu1(x)</span> <span class="pre">-</span> <span class="pre">mu0(x)</span> <span class="pre">-</span> <span class="pre">tau(x)|</span></code>. The resulting samples are appended to the loader
-with generator predictions as outcomes.</p>
+with generator predictions as outcomes. All <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> options such as
+<code class="docutils literal notranslate"><span class="pre">num_workers</span></code> and <code class="docutils literal notranslate"><span class="pre">pin_memory</span></code> are preserved when the augmented loader is
+constructed.</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
