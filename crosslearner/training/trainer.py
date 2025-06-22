@@ -225,7 +225,23 @@ class ACXTrainer:
         dataset = TensorDataset(
             torch.cat([X, Xp]), torch.cat([T, Tp]), torch.cat([Y, Yp])
         )
-        return DataLoader(dataset, batch_size=loader.batch_size, shuffle=True)
+        return DataLoader(
+            dataset,
+            batch_size=loader.batch_size,
+            shuffle=True,
+            num_workers=loader.num_workers,
+            collate_fn=loader.collate_fn,
+            pin_memory=loader.pin_memory,
+            drop_last=loader.drop_last,
+            timeout=loader.timeout,
+            worker_init_fn=loader.worker_init_fn,
+            multiprocessing_context=loader.multiprocessing_context,
+            generator=loader.generator,
+            prefetch_factor=loader.prefetch_factor,
+            persistent_workers=loader.persistent_workers,
+            pin_memory_device=loader.pin_memory_device,
+            in_order=loader.in_order,
+        )
 
     def _unrolled_logits(
         self,

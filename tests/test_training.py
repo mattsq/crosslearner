@@ -7,6 +7,7 @@ from crosslearner.evaluation.evaluate import evaluate
 from crosslearner.models.acx import ACX
 from crosslearner.training.train_acx import train_acx
 from crosslearner.training import ModelConfig, TrainingConfig
+from crosslearner.training.trainer import ACXTrainer
 import torch.nn as nn
 import pytest
 from torch.utils.data import DataLoader, TensorDataset
@@ -431,6 +432,21 @@ def test_active_counterfactual_augmentation():
     )
     model = train_acx(loader, model_cfg, cfg, device="cpu")
     assert isinstance(model, ACX)
+
+
+def test_augment_loader_preserves_settings():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4)
+    cfg = TrainingConfig(
+        active_aug_freq=1, active_aug_samples=2, active_aug_steps=1, verbose=False
+    )
+    trainer = ACXTrainer(model_cfg, cfg, device="cpu")
+    trainer._pseudo_data = trainer._search_disagreement(2, 1, 0.1)
+    aug = trainer._augment_loader(loader)
+    assert aug.batch_size == loader.batch_size
+    assert aug.num_workers == loader.num_workers
+    assert aug.pin_memory == loader.pin_memory
+    assert aug.drop_last == loader.drop_last
 
 
 def test_train_acx_epistemic_consistency():
