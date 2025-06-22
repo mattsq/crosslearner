@@ -33,7 +33,9 @@ interval along with the search parameters ``active_aug_samples``,
 Every ``active_aug_freq`` epochs the trainer optimises randomly initialised
 covariates for ``active_aug_steps`` steps using gradient ascent on
 ``|mu1(x) - mu0(x) - tau(x)|``. The resulting samples are appended to the loader
-with generator predictions as outcomes.
+with generator predictions as outcomes. All ``DataLoader`` options such as
+``num_workers`` and ``pin_memory`` are preserved when the augmented loader is
+constructed.
 
 When to use it
 --------------
