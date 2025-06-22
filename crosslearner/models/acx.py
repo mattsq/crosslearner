@@ -437,7 +437,8 @@ class ACX(nn.Module):
             m0, m1 = self.moe(h)
             tau_samples = torch.stack([head(h) for head in self.tau_heads], dim=2)
         tau = tau_samples.mean(dim=2)
-        self._tau_var = tau_samples.var(dim=2, unbiased=False)
+        with torch.no_grad():
+            self._tau_var = tau_samples.var(dim=2, unbiased=False)
         return h, m0, m1, tau
 
     @torch.jit.export

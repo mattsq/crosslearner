@@ -75,6 +75,7 @@ def test_acx_tau_variance():
     var = model.tau_variance
     assert var.shape == (4, 1)
     assert torch.any(var >= 0)
+    assert not var.requires_grad
 
 
 def test_acx_effect_consistency_weight():
