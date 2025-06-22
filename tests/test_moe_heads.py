@@ -1,6 +1,6 @@
 import torch
 
-from crosslearner.models.acx import MOEHeads
+from crosslearner.models.acx import MOEHeads, MLP, NullMOE
 
 
 def test_moe_heads_gating_weights_sum_to_one():
@@ -22,3 +22,14 @@ def test_moe_entropy_matches_manual_computation():
     w = moe.gates
     expected = -(w.clamp_min(1e-12) * w.clamp_min(1e-12).log()).sum(dim=1).mean()
     assert torch.allclose(moe.entropy(), expected)
+
+
+def test_null_moe_delegates_to_base_heads():
+    base0 = MLP(4, 1, hidden=(8,))
+    base1 = MLP(4, 1, hidden=(8,))
+    moe = NullMOE(base0, base1)
+    x = torch.randn(2, 4)
+    m0, m1 = moe(x)
+    assert torch.allclose(m0, base0(x))
+    assert torch.allclose(m1, base1(x))
+    assert torch.allclose(moe.entropy(), torch.tensor(0.0))
