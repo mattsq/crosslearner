@@ -1,0 +1,12 @@
+crosslearner.datasets.tricks
+============================
+
+.. automodule:: crosslearner.datasets.tricks
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_tricky_dataloader
+   

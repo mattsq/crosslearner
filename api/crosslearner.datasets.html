@@ -214,6 +214,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../generated/datasets/crosslearner.datasets.get_twins_dataloader.html">crosslearner.datasets.get_twins_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../generated/datasets/crosslearner.datasets.get_lalonde_dataloader.html">crosslearner.datasets.get_lalonde_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../generated/datasets/crosslearner.datasets.get_aircraft_dataloader.html">crosslearner.datasets.get_aircraft_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../generated/datasets/crosslearner.datasets.get_tricky_dataloader.html">crosslearner.datasets.get_tricky_dataloader</a></li>
 </ul>
 </li>
 </ul>
@@ -276,6 +277,7 @@
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.masked.html">crosslearner.datasets.masked</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.synthetic.html">crosslearner.datasets.synthetic</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.toy.html">crosslearner.datasets.toy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.tricks.html">crosslearner.datasets.tricks</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.twins.html">crosslearner.datasets.twins</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.utils.html">crosslearner.datasets.utils</a></li>
 </ul>
@@ -586,6 +588,14 @@ potential outcomes.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="crosslearner.datasets.get_tricky_dataloader">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.datasets.</span></span><span class="sig-name descname"><span class="pre">get_tricky_dataloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confounding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/crosslearner/datasets/tricks.html#get_tricky_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.datasets.get_tricky_dataloader" title="Link to this definition">¶</a></dt>
+<dd><p>Return DataLoader for a small imbalanced synthetic dataset.</p>
+<p>The setup deliberately introduces strong confounding and class imbalance so
+the discriminator quickly overfits without stabilisation tricks.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="crosslearner.datasets.get_twins_dataloader">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.datasets.</span></span><span class="sig-name descname"><span class="pre">get_twins_dataloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/crosslearner/datasets.html#get_twins_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.datasets.get_twins_dataloader" title="Link to this definition">¶</a></dt>
 <dd><p>Load the Twins dataset on demand.</p>
@@ -664,6 +674,7 @@ potential outcomes.</p>
 <li><a class="reference internal" href="#crosslearner.datasets.get_jobs_dataloader"><code class="docutils literal notranslate"><span class="pre">get_jobs_dataloader()</span></code></a></li>
 <li><a class="reference internal" href="#crosslearner.datasets.get_lalonde_dataloader"><code class="docutils literal notranslate"><span class="pre">get_lalonde_dataloader()</span></code></a></li>
 <li><a class="reference internal" href="#crosslearner.datasets.get_toy_dataloader"><code class="docutils literal notranslate"><span class="pre">get_toy_dataloader()</span></code></a></li>
+<li><a class="reference internal" href="#crosslearner.datasets.get_tricky_dataloader"><code class="docutils literal notranslate"><span class="pre">get_tricky_dataloader()</span></code></a></li>
 <li><a class="reference internal" href="#crosslearner.datasets.get_twins_dataloader"><code class="docutils literal notranslate"><span class="pre">get_twins_dataloader()</span></code></a></li>
 </ul>
 </li>

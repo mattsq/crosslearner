@@ -22,6 +22,7 @@ Available loaders
    crosslearner.datasets.get_twins_dataloader
    crosslearner.datasets.get_lalonde_dataloader
    crosslearner.datasets.get_aircraft_dataloader
+   crosslearner.datasets.get_tricky_dataloader
 
 Dataset descriptions
 --------------------
@@ -49,3 +50,5 @@ The loaders cover both synthetic benchmarks and popular real-world datasets.
   Original LaLonde dataset with only the ATE available.
 ``get_aircraft_dataloader``
   Simulated aircraft performance data based on the Breguet range equation.
+``get_tricky_dataloader``
+  Small imbalanced synthetic dataset designed to highlight discriminator tricks.

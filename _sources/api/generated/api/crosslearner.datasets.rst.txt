@@ -31,5 +31,6 @@ crosslearner.datasets
    masked
    synthetic
    toy
+   tricks
    twins
    utils

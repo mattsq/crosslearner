@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="crosslearner.datasets.get_lalonde_dataloader" href="crosslearner.datasets.get_lalonde_dataloader.html" /><link rel="prev" title="crosslearner.datasets.get_acic2018_dataloader" href="crosslearner.datasets.get_acic2018_dataloader.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="ACX Architecture" href="../../acx_architecture.html" /><link rel="prev" title="crosslearner.datasets.get_aircraft_dataloader" href="crosslearner.datasets.get_aircraft_dataloader.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>crosslearner.datasets.get_twins_dataloader - crosslearner 0.1 documentation</title>
+        <title>crosslearner.datasets.get_tricky_dataloader - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
@@ -211,10 +211,10 @@
 <li class="toctree-l2"><a class="reference internal" href="crosslearner.datasets.get_jobs_dataloader.html">crosslearner.datasets.get_jobs_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="crosslearner.datasets.get_acic2016_dataloader.html">crosslearner.datasets.get_acic2016_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="crosslearner.datasets.get_acic2018_dataloader.html">crosslearner.datasets.get_acic2018_dataloader</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">crosslearner.datasets.get_twins_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crosslearner.datasets.get_twins_dataloader.html">crosslearner.datasets.get_twins_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="crosslearner.datasets.get_lalonde_dataloader.html">crosslearner.datasets.get_lalonde_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="crosslearner.datasets.get_aircraft_dataloader.html">crosslearner.datasets.get_aircraft_dataloader</a></li>
-<li class="toctree-l2"><a class="reference internal" href="crosslearner.datasets.get_tricky_dataloader.html">crosslearner.datasets.get_tricky_dataloader</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">crosslearner.datasets.get_tricky_dataloader</a></li>
 </ul>
 </li>
 </ul>
@@ -342,7 +342,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../_sources/generated/datasets/crosslearner.datasets.get_twins_dataloader.rst.txt" title="View this page">
+  <a class="muted-link" href="../../_sources/generated/datasets/crosslearner.datasets.get_tricky_dataloader.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -362,12 +362,14 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="crosslearner-datasets-get-twins-dataloader">
-<h1>crosslearner.datasets.get_twins_dataloader<a class="headerlink" href="#crosslearner-datasets-get-twins-dataloader" title="Link to this heading">¶</a></h1>
+          <section id="crosslearner-datasets-get-tricky-dataloader">
+<h1>crosslearner.datasets.get_tricky_dataloader<a class="headerlink" href="#crosslearner-datasets-get-tricky-dataloader" title="Link to this heading">¶</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="crosslearner.datasets.get_twins_dataloader">
-<span class="sig-prename descclassname"><span class="pre">crosslearner.datasets.</span></span><span class="sig-name descname"><span class="pre">get_twins_dataloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/crosslearner/datasets.html#get_twins_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.datasets.get_twins_dataloader" title="Link to this definition">¶</a></dt>
-<dd><p>Load the Twins dataset on demand.</p>
+<dt class="sig sig-object py" id="crosslearner.datasets.get_tricky_dataloader">
+<span class="sig-prename descclassname"><span class="pre">crosslearner.datasets.</span></span><span class="sig-name descname"><span class="pre">get_tricky_dataloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confounding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/crosslearner/datasets/tricks.html#get_tricky_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.datasets.get_tricky_dataloader" title="Link to this definition">¶</a></dt>
+<dd><p>Return DataLoader for a small imbalanced synthetic dataset.</p>
+<p>The setup deliberately introduces strong confounding and class imbalance so
+the discriminator quickly overfits without stabilisation tricks.</p>
 </dd></dl>
 
 </section>
@@ -377,23 +379,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="crosslearner.datasets.get_lalonde_dataloader.html">
+          <a class="next-page" href="../../acx_architecture.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">crosslearner.datasets.get_lalonde_dataloader</div>
+                <div class="title">ACX Architecture</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="crosslearner.datasets.get_acic2018_dataloader.html">
+          <a class="prev-page" href="crosslearner.datasets.get_aircraft_dataloader.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">crosslearner.datasets.get_acic2018_dataloader</div>
+                <div class="title">crosslearner.datasets.get_aircraft_dataloader</div>
                 
               </div>
             </a>
@@ -427,8 +429,8 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">crosslearner.datasets.get_twins_dataloader</a><ul>
-<li><a class="reference internal" href="#crosslearner.datasets.get_twins_dataloader"><code class="docutils literal notranslate"><span class="pre">get_twins_dataloader()</span></code></a></li>
+<li><a class="reference internal" href="#">crosslearner.datasets.get_tricky_dataloader</a><ul>
+<li><a class="reference internal" href="#crosslearner.datasets.get_tricky_dataloader"><code class="docutils literal notranslate"><span class="pre">get_tricky_dataloader()</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -1,0 +1,6 @@
+﻿crosslearner.datasets.get\_tricky\_dataloader
+=============================================
+
+.. currentmodule:: crosslearner.datasets
+
+.. autofunction:: get_tricky_dataloader

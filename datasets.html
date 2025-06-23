@@ -214,6 +214,7 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_twins_dataloader.html">crosslearner.datasets.get_twins_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_lalonde_dataloader.html">crosslearner.datasets.get_lalonde_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_aircraft_dataloader.html">crosslearner.datasets.get_aircraft_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_tricky_dataloader.html">crosslearner.datasets.get_tricky_dataloader</a></li>
 </ul>
 </li>
 </ul>
@@ -276,6 +277,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.masked.html">crosslearner.datasets.masked</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.synthetic.html">crosslearner.datasets.synthetic</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.toy.html">crosslearner.datasets.toy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.tricks.html">crosslearner.datasets.tricks</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.twins.html">crosslearner.datasets.twins</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.utils.html">crosslearner.datasets.utils</a></li>
 </ul>
@@ -401,6 +403,9 @@ truth outcomes where applicable.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_aircraft_dataloader.html#crosslearner.datasets.get_aircraft_dataloader" title="crosslearner.datasets.get_aircraft_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_aircraft_dataloader</span></code></a>([...])</p></td>
 <td><p>Return <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> with aircraft performance data.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_tricky_dataloader.html#crosslearner.datasets.get_tricky_dataloader" title="crosslearner.datasets.get_tricky_dataloader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crosslearner.datasets.get_tricky_dataloader</span></code></a>([...])</p></td>
+<td><p>Return DataLoader for a small imbalanced synthetic dataset.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -429,6 +434,8 @@ replications.</p>
 <dt><code class="docutils literal notranslate"><span class="pre">get_lalonde_dataloader</span></code></dt><dd><p>Original LaLonde dataset with only the ATE available.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">get_aircraft_dataloader</span></code></dt><dd><p>Simulated aircraft performance data based on the Breguet range equation.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">get_tricky_dataloader</span></code></dt><dd><p>Small imbalanced synthetic dataset designed to highlight discriminator tricks.</p>
 </dd>
 </dl>
 </section>
