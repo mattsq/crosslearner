@@ -35,6 +35,7 @@ the training procedure, hyperparameter sweeps and available modules.
    active_counterfactual_augmentation
    unrolled_discriminator
    warm_start
+   representation_pretraining
    ttur
    doubly_robust
    datasets

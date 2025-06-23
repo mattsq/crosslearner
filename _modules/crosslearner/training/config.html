@@ -224,6 +224,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../active_counterfactual_augmentation.html">Active Counterfactual Data Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../warm_start.html">Warm Start for Stable Optimisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../representation_pretraining.html">Representation Pretraining</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ttur.html">Two Time-Scale Update Rule (TTUR)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../datasets.html">Datasets</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -465,10 +466,26 @@
     <span class="n">rep_consistency_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">moe_entropy_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1">#: Weight for gating entropy regularization.</span>
     <span class="n">rep_momentum</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.99</span>
-    <span class="n">pretrain_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">pretrain_mask_prob</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.15</span>
-    <span class="n">pretrain_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">finetune_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">pretrain_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mi">0</span>
+        <span class="c1">#: Number of epochs to pretrain the encoder using masked feature</span>
+        <span class="c1">#: reconstruction. ``0`` disables pretraining.</span>
+    <span class="p">)</span>
+    <span class="n">pretrain_mask_prob</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.15</span>
+        <span class="c1">#: Fraction of input features randomly masked during representation</span>
+        <span class="c1">#: pretraining.</span>
+    <span class="p">)</span>
+    <span class="n">pretrain_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">None</span>
+        <span class="c1">#: Optional learning rate for the encoder during pretraining. ``None``</span>
+        <span class="c1">#: uses ``lr_g``.</span>
+    <span class="p">)</span>
+    <span class="n">finetune_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">None</span>
+        <span class="c1">#: Optional learning rate for the encoder after pretraining. ``None``</span>
+        <span class="c1">#: scales ``lr_g`` by ``0.1``.</span>
+    <span class="p">)</span>
     <span class="n">adv_t_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
         <span class="mf">0.0</span>
         <span class="c1">#: Weight for predicting treatment from the confounder and</span>
