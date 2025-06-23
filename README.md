@@ -214,6 +214,16 @@ from crosslearner.evaluation import predict_tau_mc_dropout
 mean, std = predict_tau_mc_dropout(model, X, passes=50)
 ```
 
+Alternatively you can train multiple models and average their predictions:
+
+```python
+from crosslearner.training import train_acx_ensemble
+from crosslearner.evaluation import predict_tau_ensemble
+
+models = train_acx_ensemble(loader, model_cfg, train_cfg, n_models=5)
+mean, std = predict_tau_ensemble(models, X)
+```
+
 ## Documentation
 
 Hosted documentation is available at [https://mattsq.github.io/crosslearner/](https://mattsq.github.io/crosslearner/).

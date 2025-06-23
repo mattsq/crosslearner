@@ -11,9 +11,18 @@ Example usage::
 
     from crosslearner.evaluation import predict_tau_mc_dropout
 
-    mean, std = predict_tau_mc_dropout(model, X, passes=50)
-    lower = mean - 1.96 * std
-    upper = mean + 1.96 * std
+   mean, std = predict_tau_mc_dropout(model, X, passes=50)
+   lower = mean - 1.96 * std
+   upper = mean + 1.96 * std
+
+Ensembles of independently trained models provide an alternative estimate of
+epistemic uncertainty::
+
+    from crosslearner.training import train_acx_ensemble
+    from crosslearner.evaluation import predict_tau_ensemble
+
+    models = train_acx_ensemble(loader, model_cfg, train_cfg, n_models=5)
+    mean, std = predict_tau_ensemble(models, X)
 
 This approximates a Bayesian posterior over the model weights and yields
 pointwise credible intervals for the CATE.
