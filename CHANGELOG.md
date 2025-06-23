@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added mixture-of-experts heads via ``moe_experts`` and ``moe_entropy_weight``
 - Baseline MLPRegressors now train until convergence
 - Added hinge and least-squares GAN losses via `adv_loss` option
+- Exposed `train_acx_ensemble` in `crosslearner.training`
 - Added exponential moving average (`ema_decay`) for generator parameters
 - Added R1/R2 regularization and unrolled discriminator updates
 - Refactored unrolled discriminator logic to use stateless functional calls
