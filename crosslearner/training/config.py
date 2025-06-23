@@ -115,6 +115,10 @@ class TrainingConfig:
     rep_consistency_weight: float = 0.0
     moe_entropy_weight: float = 0.0  #: Weight for gating entropy regularization.
     rep_momentum: float = 0.99
+    pretrain_epochs: int = 0
+    pretrain_mask_prob: float = 0.15
+    pretrain_lr: float | None = None
+    finetune_lr: float | None = None
     adv_t_weight: float = (
         0.0
         #: Weight for predicting treatment from the confounder and

@@ -4,6 +4,7 @@ from .toy import get_toy_dataloader
 from .complex import get_complex_dataloader
 from .synthetic import get_confounding_dataloader
 from .aircraft import get_aircraft_dataloader
+from .masked import MaskedFeatureDataset
 
 
 def get_ihdp_dataloader(*args, **kwargs):
@@ -59,4 +60,5 @@ __all__ = [
     "get_lalonde_dataloader",
     "get_confounding_dataloader",
     "get_aircraft_dataloader",
+    "MaskedFeatureDataset",
 ]

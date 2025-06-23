@@ -14,6 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 from .config import ModelConfig, TrainingConfig
 from .history import EpochStats, History
 from ..models.acx import ACX, _get_activation
+from ..datasets.masked import MaskedFeatureDataset
 from ..training.nuisance import estimate_nuisances
 from ..evaluation.evaluate import evaluate
 from ..utils import set_seed, default_device, apply_spectral_norm
@@ -136,6 +137,34 @@ class ACXTrainer:
         self._rep_means: dict[int, torch.Tensor] | None = None
         self._rep_vars: dict[int, torch.Tensor] | None = None
         self._pseudo_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None = None
+
+    def _pretrain_representation(self, loader: DataLoader) -> None:
+        cfg = self.train_cfg
+        if cfg.pretrain_epochs <= 0:
+            return
+        dataset = MaskedFeatureDataset(loader.dataset, cfg.pretrain_mask_prob)
+        pre_loader = DataLoader(
+            dataset,
+            batch_size=loader.batch_size,
+            shuffle=True,
+        )
+        recon = nn.Linear(self.model.rep_dim, self.model_cfg.p).to(self.device)
+        opt = torch.optim.Adam(
+            list(self.model.phi.parameters()) + list(recon.parameters()),
+            lr=cfg.pretrain_lr or cfg.lr_g,
+        )
+        mse = nn.MSELoss()
+        for _ in range(cfg.pretrain_epochs):
+            for x_m, x in pre_loader:
+                x_m = x_m.to(self.device)
+                x = x.to(self.device)
+                h = self.model.phi(x_m)
+                out = recon(h)
+                loss = mse(out, x)
+                opt.zero_grad(set_to_none=True)
+                loss.backward()
+                opt.step()
+        cfg.lr_g = cfg.finetune_lr or cfg.lr_g * 0.1
 
     def _update_ema(self) -> None:
         decay = self.train_cfg.ema_decay
@@ -832,6 +861,8 @@ class ACXTrainer:
         device = self.device
 
         self._validate_inputs(loader)
+
+        self._pretrain_representation(loader)
 
         opt_g, opt_d = self._make_optimizers()
         sched_g, sched_d = self._make_schedulers(opt_g, opt_d)
