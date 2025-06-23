@@ -487,6 +487,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_data</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_pretrain_representation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Warm-up the encoder by reconstructing masked inputs.&quot;&quot;&quot;</span>
         <span class="n">cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_cfg</span>
         <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pretrain_epochs</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
@@ -502,6 +503,8 @@
             <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">pretrain_lr</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">lr_g</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">mse</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+        <span class="n">was_training</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">training</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">pretrain_epochs</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">x_m</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pre_loader</span><span class="p">:</span>
                 <span class="n">x_m</span> <span class="o">=</span> <span class="n">x_m</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
@@ -513,6 +516,8 @@
                 <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
                 <span class="n">opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
         <span class="n">cfg</span><span class="o">.</span><span class="n">lr_g</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">finetune_lr</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">lr_g</span> <span class="o">*</span> <span class="mf">0.1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">was_training</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_ema</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">decay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_cfg</span><span class="o">.</span><span class="n">ema_decay</span>
