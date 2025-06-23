@@ -115,10 +115,26 @@ class TrainingConfig:
     rep_consistency_weight: float = 0.0
     moe_entropy_weight: float = 0.0  #: Weight for gating entropy regularization.
     rep_momentum: float = 0.99
-    pretrain_epochs: int = 0
-    pretrain_mask_prob: float = 0.15
-    pretrain_lr: float | None = None
-    finetune_lr: float | None = None
+    pretrain_epochs: int = (
+        0
+        #: Number of epochs to pretrain the encoder using masked feature
+        #: reconstruction. ``0`` disables pretraining.
+    )
+    pretrain_mask_prob: float = (
+        0.15
+        #: Fraction of input features randomly masked during representation
+        #: pretraining.
+    )
+    pretrain_lr: float | None = (
+        None
+        #: Optional learning rate for the encoder during pretraining. ``None``
+        #: uses ``lr_g``.
+    )
+    finetune_lr: float | None = (
+        None
+        #: Optional learning rate for the encoder after pretraining. ``None``
+        #: scales ``lr_g`` by ``0.1``.
+    )
     adv_t_weight: float = (
         0.0
         #: Weight for predicting treatment from the confounder and
