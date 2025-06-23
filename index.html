@@ -198,36 +198,11 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="acx_architecture.html">ACX Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="theory.html">Theoretical Background</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hyperparameter_sweeps.html">Hyperparameter Sweeps with Optuna</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fitting_acx_model.html">Fitting AC-X Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="feature_matching.html">Feature Matching for Stable GAN Training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="label_smoothing.html">Label Smoothing for the Discriminator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="exponential_moving_average.html">Exponential Moving Average of Generator Parameters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="optimizer_kwargs.html">Custom Optimizer Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="weight_clipping.html">Weight Clipping for Wasserstein Training</a></li>
-<li class="toctree-l1"><a class="reference internal" href="wgan_gp.html">Wasserstein Gradient Penalty</a></li>
-<li class="toctree-l1"><a class="reference internal" href="r1_r2_regularization.html">R1 and R2 Gradient Penalties</a></li>
-<li class="toctree-l1"><a class="reference internal" href="instance_noise.html">Instance Noise for Robust Discriminator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
-<li class="toctree-l1"><a class="reference internal" href="consistency_regularization.html">Consistency Regularization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="active_counterfactual_augmentation.html">Active Counterfactual Data Augmentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
-<li class="toctree-l1"><a class="reference internal" href="warm_start.html">Warm Start for Stable Optimisation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="representation_pretraining.html">Representation Pretraining</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ttur.html">Two Time-Scale Update Rule (TTUR)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fitting_acx_model.html">Fitting AC-X Models</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="datasets.html">Datasets</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_toy_dataloader.html">crosslearner.datasets.get_toy_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_complex_dataloader.html">crosslearner.datasets.get_complex_dataloader</a></li>
@@ -241,10 +216,44 @@
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_aircraft_dataloader.html">crosslearner.datasets.get_aircraft_dataloader</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="uncertainty.html">Uncertainty Estimation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture and Theory</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="acx_architecture.html">ACX Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory.html">Theoretical Background</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Training Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="hyperparameter_sweeps.html">Hyperparameter Sweeps with Optuna</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimizer_kwargs.html">Custom Optimizer Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="warm_start.html">Warm Start for Stable Optimisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ttur.html">Two Time-Scale Update Rule (TTUR)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="risk_early_stopping.html">Orthogonal Risk for Early Stopping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="training_history.html">Tracking Training History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tensorboard_logging.html">Monitoring Training with TensorBoard</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Regularization and Tricks</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="feature_matching.html">Feature Matching for Stable GAN Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="label_smoothing.html">Label Smoothing for the Discriminator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exponential_moving_average.html">Exponential Moving Average of Generator Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="weight_clipping.html">Weight Clipping for Wasserstein Training</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wgan_gp.html">Wasserstein Gradient Penalty</a></li>
+<li class="toctree-l1"><a class="reference internal" href="r1_r2_regularization.html">R1 and R2 Gradient Penalties</a></li>
+<li class="toctree-l1"><a class="reference internal" href="instance_noise.html">Instance Noise for Robust Discriminator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mmd_regularization.html">MMD Regularization for Balanced Representations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="consistency_regularization.html">Consistency Regularization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="discriminator_augmentation.html">Discriminator Feature Augmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="active_counterfactual_augmentation.html">Active Counterfactual Data Augmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="representation_pretraining.html">Representation Pretraining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
+<li class="toctree-l1"><a class="reference internal" href="uncertainty.html">Uncertainty Estimation</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
@@ -356,7 +365,7 @@
 API reference for the AC‑X implementation. Follow the links below to learn about
 the training procedure, hyperparameter sweeps and available modules.</p>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html#prerequisites">Prerequisites</a></li>
@@ -365,6 +374,31 @@ the training procedure, hyperparameter sweeps and available modules.</p>
 <li class="toctree-l2"><a class="reference internal" href="quickstart.html#testing">Testing</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#training-from-the-command-line">Training from the command line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#running-benchmarks">Running benchmarks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#programmatic-training">Programmatic training</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#step-by-step-notebook">Step-by-step notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#experiment-manager">Experiment manager</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#exporting-models">Exporting models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fitting_acx_model.html">Fitting AC-X Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fitting_acx_model.html#selecting-hyperparameters">Selecting hyperparameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fitting_acx_model.html#diagnosing-training-pathologies">Diagnosing training pathologies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fitting_acx_model.html#generating-and-interpreting-results">Generating and interpreting results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="datasets.html">Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html#available-loaders">Available loaders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html#dataset-descriptions">Dataset descriptions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Architecture and Theory</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="acx_architecture.html">ACX Architecture</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="acx_architecture.html#configuration-options">Configuration options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="acx_architecture.html#new-features">New features</a></li>
@@ -379,22 +413,56 @@ the training procedure, hyperparameter sweeps and available modules.</p>
 <li class="toctree-l2"><a class="reference internal" href="theory.html#representation-drift-regularization">Representation Drift Regularization</a></li>
 </ul>
 </li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Training Configuration</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="hyperparameter_sweeps.html">Hyperparameter Sweeps with Optuna</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fitting_acx_model.html">Fitting AC-X Models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="fitting_acx_model.html#selecting-hyperparameters">Selecting hyperparameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="fitting_acx_model.html#diagnosing-training-pathologies">Diagnosing training pathologies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="fitting_acx_model.html#generating-and-interpreting-results">Generating and interpreting results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimizer_kwargs.html">Custom Optimizer Arguments</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_kwargs.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_kwargs.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_kwargs.html#when-to-use-it">When to use it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_kwargs.html#references">References</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#training-from-the-command-line">Training from the command line</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#running-benchmarks">Running benchmarks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#programmatic-training">Programmatic training</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#step-by-step-notebook">Step-by-step notebook</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#experiment-manager">Experiment manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="usage_examples.html#exporting-models">Exporting models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="warm_start.html">Warm Start for Stable Optimisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="warm_start.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="warm_start.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="warm_start.html#when-to-use-it">When to use it</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="ttur.html">Two Time-Scale Update Rule (TTUR)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ttur.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ttur.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ttur.html#when-to-use-it">When to use it</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="risk_early_stopping.html">Orthogonal Risk for Early Stopping</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="risk_early_stopping.html#example-usage">Example usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="risk_early_stopping.html#tips">Tips</a></li>
+<li class="toctree-l2"><a class="reference internal" href="risk_early_stopping.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="training_history.html">Tracking Training History</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="training_history.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training_history.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training_history.html#when-to-use-it">When to use it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="training_history.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tensorboard_logging.html">Monitoring Training with TensorBoard</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tensorboard_logging.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensorboard_logging.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensorboard_logging.html#when-to-use-it">When to use it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tensorboard_logging.html#references">References</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Regularization and Tricks</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="gradient_reversal.html#motivation">Motivation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="gradient_reversal.html#usage">Usage</a></li>
@@ -428,13 +496,6 @@ the training procedure, hyperparameter sweeps and available modules.</p>
 <li class="toctree-l2"><a class="reference internal" href="exponential_moving_average.html#usage">Usage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exponential_moving_average.html#when-to-use-it">When to use it</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exponential_moving_average.html#references">References</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="optimizer_kwargs.html">Custom Optimizer Arguments</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="optimizer_kwargs.html#motivation">Motivation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="optimizer_kwargs.html#usage">Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="optimizer_kwargs.html#when-to-use-it">When to use it</a></li>
-<li class="toctree-l2"><a class="reference internal" href="optimizer_kwargs.html#references">References</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="weight_clipping.html">Weight Clipping for Wasserstein Training</a><ul>
@@ -480,14 +541,6 @@ the training procedure, hyperparameter sweeps and available modules.</p>
 <li class="toctree-l2"><a class="reference internal" href="mmd_regularization.html#references">References</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="representation_disentanglement.html#motivation">Motivation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="representation_disentanglement.html#usage">Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="representation_disentanglement.html#when-to-use-it">When to use it</a></li>
-<li class="toctree-l2"><a class="reference internal" href="representation_disentanglement.html#references">References</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="consistency_regularization.html">Consistency Regularization</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="consistency_regularization.html#noise-consistency">Noise Consistency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="consistency_regularization.html#representation-drift">Representation Drift</a></li>
@@ -516,17 +569,13 @@ the training procedure, hyperparameter sweeps and available modules.</p>
 <li class="toctree-l2"><a class="reference internal" href="unrolled_discriminator.html#references">References</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="warm_start.html">Warm Start for Stable Optimisation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="warm_start.html#motivation">Motivation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="warm_start.html#usage">Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="warm_start.html#when-to-use-it">When to use it</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representation_pretraining.html">Representation Pretraining</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ttur.html">Two Time-Scale Update Rule (TTUR)</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ttur.html#motivation">Motivation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ttur.html#usage">Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ttur.html#when-to-use-it">When to use it</a></li>
+<li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="representation_disentanglement.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="representation_disentanglement.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="representation_disentanglement.html#when-to-use-it">When to use it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="representation_disentanglement.html#references">References</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="doubly_robust.html">Doubly Robust Objective and Propensity Head</a><ul>
@@ -535,33 +584,8 @@ the training procedure, hyperparameter sweeps and available modules.</p>
 <li class="toctree-l2"><a class="reference internal" href="doubly_robust.html#when-to-use-it">When to use it</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="datasets.html">Datasets</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html#available-loaders">Available loaders</a></li>
-<li class="toctree-l2"><a class="reference internal" href="datasets.html#dataset-descriptions">Dataset descriptions</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="uncertainty.html">Uncertainty Estimation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="uncertainty.html#references">References</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="risk_early_stopping.html">Orthogonal Risk for Early Stopping</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="risk_early_stopping.html#example-usage">Example usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="risk_early_stopping.html#tips">Tips</a></li>
-<li class="toctree-l2"><a class="reference internal" href="risk_early_stopping.html#references">References</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="training_history.html">Tracking Training History</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="training_history.html#motivation">Motivation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="training_history.html#usage">Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="training_history.html#when-to-use-it">When to use it</a></li>
-<li class="toctree-l2"><a class="reference internal" href="training_history.html#references">References</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="tensorboard_logging.html">Monitoring Training with TensorBoard</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tensorboard_logging.html#motivation">Motivation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tensorboard_logging.html#usage">Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tensorboard_logging.html#when-to-use-it">When to use it</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tensorboard_logging.html#references">References</a></li>
 </ul>
 </li>
 </ul>
