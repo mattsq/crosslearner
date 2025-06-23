@@ -261,6 +261,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.datasets.ihdp.html">crosslearner.datasets.ihdp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.datasets.jobs.html">crosslearner.datasets.jobs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.datasets.lalonde.html">crosslearner.datasets.lalonde</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.datasets.masked.html">crosslearner.datasets.masked</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.datasets.synthetic.html">crosslearner.datasets.synthetic</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.datasets.toy.html">crosslearner.datasets.toy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.datasets.twins.html">crosslearner.datasets.twins</a></li>
@@ -464,6 +465,10 @@
     <span class="n">rep_consistency_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">moe_entropy_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1">#: Weight for gating entropy regularization.</span>
     <span class="n">rep_momentum</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.99</span>
+    <span class="n">pretrain_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">pretrain_mask_prob</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.15</span>
+    <span class="n">pretrain_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">finetune_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">adv_t_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
         <span class="mf">0.0</span>
         <span class="c1">#: Weight for predicting treatment from the confounder and</span>

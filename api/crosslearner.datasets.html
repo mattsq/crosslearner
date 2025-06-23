@@ -262,6 +262,7 @@
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.ihdp.html">crosslearner.datasets.ihdp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.jobs.html">crosslearner.datasets.jobs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.lalonde.html">crosslearner.datasets.lalonde</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.masked.html">crosslearner.datasets.masked</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.synthetic.html">crosslearner.datasets.synthetic</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.toy.html">crosslearner.datasets.toy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="generated/api/crosslearner.datasets.twins.html">crosslearner.datasets.twins</a></li>
@@ -469,6 +470,13 @@ equation.</p>
 <section id="module-crosslearner.datasets">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-crosslearner.datasets" title="Link to this heading">¶</a></h2>
 <p>Dataset loading helpers.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="crosslearner.datasets.MaskedFeatureDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">crosslearner.datasets.</span></span><span class="sig-name descname"><span class="pre">MaskedFeatureDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v2.7)"><span class="pre">Dataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_prob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/crosslearner/datasets/masked.html#MaskedFeatureDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.datasets.MaskedFeatureDataset" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.pytorch.org/docs/stable/data.html#torch.utils.data.Dataset" title="(in PyTorch v2.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a></p>
+<p>Dataset that returns randomly masked features and the original inputs.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="crosslearner.datasets.get_acic2016_dataloader">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.datasets.</span></span><span class="sig-name descname"><span class="pre">get_acic2016_dataloader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/crosslearner/datasets.html#get_acic2016_dataloader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.datasets.get_acic2016_dataloader" title="Link to this definition">¶</a></dt>
@@ -635,6 +643,7 @@ potential outcomes.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-crosslearner.datasets">Module contents</a><ul>
+<li><a class="reference internal" href="#crosslearner.datasets.MaskedFeatureDataset"><code class="docutils literal notranslate"><span class="pre">MaskedFeatureDataset</span></code></a></li>
 <li><a class="reference internal" href="#crosslearner.datasets.get_acic2016_dataloader"><code class="docutils literal notranslate"><span class="pre">get_acic2016_dataloader()</span></code></a></li>
 <li><a class="reference internal" href="#crosslearner.datasets.get_acic2018_dataloader"><code class="docutils literal notranslate"><span class="pre">get_acic2018_dataloader()</span></code></a></li>
 <li><a class="reference internal" href="#crosslearner.datasets.get_aircraft_dataloader"><code class="docutils literal notranslate"><span class="pre">get_aircraft_dataloader()</span></code></a></li>

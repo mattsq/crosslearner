@@ -28,6 +28,7 @@ crosslearner.datasets
    ihdp
    jobs
    lalonde
+   masked
    synthetic
    toy
    twins

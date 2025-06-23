@@ -260,6 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.ihdp.html">crosslearner.datasets.ihdp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.jobs.html">crosslearner.datasets.jobs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.lalonde.html">crosslearner.datasets.lalonde</a></li>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.masked.html">crosslearner.datasets.masked</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.synthetic.html">crosslearner.datasets.synthetic</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.toy.html">crosslearner.datasets.toy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.datasets.twins.html">crosslearner.datasets.twins</a></li>
@@ -518,6 +519,13 @@
 </li>
         </ul></li>
         <li>
+    crosslearner.datasets.masked
+
+        <ul>
+          <li><a href="api/generated/api/crosslearner.datasets.masked.html#module-crosslearner.datasets.masked">module</a>
+</li>
+        </ul></li>
+        <li>
     crosslearner.datasets.synthetic
 
         <ul>
@@ -566,6 +574,8 @@
           <li><a href="api/crosslearner.evaluation.html#module-crosslearner.evaluation.metrics">module</a>, <a href="api/generated/api/crosslearner.evaluation.metrics.html#module-crosslearner.evaluation.metrics">[1]</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     crosslearner.evaluation.propensity
 
@@ -573,8 +583,6 @@
           <li><a href="api/crosslearner.evaluation.html#module-crosslearner.evaluation.propensity">module</a>, <a href="api/generated/api/crosslearner.evaluation.propensity.html#module-crosslearner.evaluation.propensity">[1]</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     crosslearner.evaluation.uncertainty
 
@@ -849,6 +857,8 @@
 </li>
         <li><a href="api/crosslearner.models.html#crosslearner.models.acx.MLP.features">features() (crosslearner.models.acx.MLP method)</a>
 </li>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.finetune_lr">finetune_lr (crosslearner.training.TrainingConfig attribute)</a>
+</li>
         <li><a href="api/crosslearner.models.baselines.html#crosslearner.models.baselines.DRLearner.fit">fit() (crosslearner.models.baselines.DRLearner method)</a>
 
         <ul>
@@ -1079,6 +1089,8 @@
 </li>
         <li><a href="api/crosslearner.benchmarks.html#crosslearner.benchmarks.run_benchmarks.main_baselines">main_baselines() (in module crosslearner.benchmarks.run_benchmarks)</a>
 </li>
+        <li><a href="api/crosslearner.datasets.html#crosslearner.datasets.MaskedFeatureDataset">MaskedFeatureDataset (class in crosslearner.datasets)</a>
+</li>
         <li><a href="api/crosslearner.models.html#crosslearner.models.acx.MLP">MLP (class in crosslearner.models.acx)</a>
 </li>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.mmd_sigma">mmd_sigma (crosslearner.training.TrainingConfig attribute)</a>
@@ -1114,6 +1126,8 @@
           <li><a href="api/crosslearner.datasets.html#module-crosslearner.datasets.jobs">crosslearner.datasets.jobs</a>, <a href="api/generated/api/crosslearner.datasets.jobs.html#module-crosslearner.datasets.jobs">[1]</a>
 </li>
           <li><a href="api/generated/api/crosslearner.datasets.lalonde.html#module-crosslearner.datasets.lalonde">crosslearner.datasets.lalonde</a>
+</li>
+          <li><a href="api/generated/api/crosslearner.datasets.masked.html#module-crosslearner.datasets.masked">crosslearner.datasets.masked</a>
 </li>
           <li><a href="api/generated/api/crosslearner.datasets.synthetic.html#module-crosslearner.datasets.synthetic">crosslearner.datasets.synthetic</a>
 </li>
@@ -1286,14 +1300,14 @@
           <li><a href="api/crosslearner.html#crosslearner.visualization.plot_losses">(in module crosslearner.visualization)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.html#crosslearner.plot_partial_dependence">plot_partial_dependence() (in module crosslearner)</a>
 
         <ul>
           <li><a href="api/crosslearner.html#crosslearner.visualization.plot_partial_dependence">(in module crosslearner.visualization)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.html#crosslearner.plot_propensity_overlap">plot_propensity_overlap() (in module crosslearner)</a>
 
         <ul>
@@ -1336,6 +1350,12 @@
           <li><a href="api/crosslearner.evaluation.html#crosslearner.evaluation.uncertainty.predict_tau_mc_dropout">(in module crosslearner.evaluation.uncertainty)</a>
 </li>
         </ul></li>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.pretrain_epochs">pretrain_epochs (crosslearner.training.TrainingConfig attribute)</a>
+</li>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.pretrain_lr">pretrain_lr (crosslearner.training.TrainingConfig attribute)</a>
+</li>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.pretrain_mask_prob">pretrain_mask_prob (crosslearner.training.TrainingConfig attribute)</a>
+</li>
         <li><a href="api/crosslearner.models.html#crosslearner.models.acx.ACX.propensity">propensity() (crosslearner.models.acx.ACX method)</a>
 </li>
     </ul></td>
