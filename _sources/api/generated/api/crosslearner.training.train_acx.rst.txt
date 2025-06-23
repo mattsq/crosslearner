@@ -1,13 +1,6 @@
 crosslearner.training.train\_acx
 ================================
 
-.. automodule:: crosslearner.training.train_acx
+.. currentmodule:: crosslearner.training
 
-   
-   .. rubric:: Functions
-
-   .. autosummary::
-   
-      train_acx
-      train_acx_ensemble
-   
+.. autofunction:: train_acx
