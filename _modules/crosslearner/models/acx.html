@@ -249,6 +249,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../active_counterfactual_augmentation.html">Active Counterfactual Data Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tau_head_bias.html">Effect Head Bias</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../representation_pretraining.html">Representation Pretraining</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
@@ -635,6 +636,7 @@
         <span class="n">batch_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">moe_experts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">tau_heads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">tau_bias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the model.</span>
 
@@ -663,6 +665,7 @@
 <span class="sd">            batch_norm: Insert ``BatchNorm1d`` layers in all MLPs.</span>
 <span class="sd">            moe_experts: Number of expert pairs for the potential-outcome heads.</span>
 <span class="sd">            tau_heads: Number of parallel effect heads for ensembling.</span>
+<span class="sd">            tau_bias: If ``False`` freeze effect head biases at zero.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -761,6 +764,11 @@
                 <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_tau_heads</span><span class="p">)</span>
             <span class="p">]</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tau_bias</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">tau_bias</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_bias</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">head</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_heads</span><span class="p">:</span>
+                <span class="n">head</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">zero_</span><span class="p">()</span>
+                <span class="n">head</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">bias</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tau</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_heads</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;_tau_var&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">persistent</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disc_pack</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">disc_pack</span><span class="p">))</span>

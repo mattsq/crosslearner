@@ -249,6 +249,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../active_counterfactual_augmentation.html">Active Counterfactual Data Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tau_head_bias.html">Effect Head Bias</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../representation_pretraining.html">Representation Pretraining</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
@@ -453,6 +454,7 @@
             <span class="n">batch_norm</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">,</span>
             <span class="n">moe_experts</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">moe_experts</span><span class="p">,</span>
             <span class="n">tau_heads</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">tau_heads</span><span class="p">,</span>
+            <span class="n">tau_bias</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">tau_bias</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">train_cfg</span><span class="o">.</span><span class="n">epistemic_consistency</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">num_tau_heads</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;epistemic_consistency requires ModelConfig.tau_heads &gt; 1&quot;</span><span class="p">)</span>
@@ -483,6 +485,7 @@
                 <span class="n">batch_norm</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">,</span>
                 <span class="n">moe_experts</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">moe_experts</span><span class="p">,</span>
                 <span class="n">tau_heads</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">tau_heads</span><span class="p">,</span>
+                <span class="n">tau_bias</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">tau_bias</span><span class="p">,</span>
             <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">train_cfg</span><span class="o">.</span><span class="n">spectral_norm</span><span class="p">:</span>
                 <span class="n">apply_spectral_norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ema_model</span><span class="p">)</span>

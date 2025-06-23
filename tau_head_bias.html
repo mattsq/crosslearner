@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Datasets" href="datasets.html" /><link rel="prev" title="Usage Examples" href="usage_examples.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Representation Pretraining" href="representation_pretraining.html" /><link rel="prev" title="Mixture-of-Experts Potential-Outcome Heads" href="mixture_of_experts.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Fitting AC-X Models - crosslearner 0.1 documentation</title>
+        <title>Effect Head Bias - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -199,10 +199,10 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage_examples.html">Usage Examples</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Fitting AC-X Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fitting_acx_model.html">Fitting AC-X Models</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="datasets.html">Datasets</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Datasets</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_toy_dataloader.html">crosslearner.datasets.get_toy_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="generated/datasets/crosslearner.datasets.get_complex_dataloader.html">crosslearner.datasets.get_complex_dataloader</a></li>
@@ -233,7 +233,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tensorboard_logging.html">Monitoring Training with TensorBoard</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Regularization and Tricks</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_matching.html">Feature Matching for Stable GAN Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="label_smoothing.html">Label Smoothing for the Discriminator</a></li>
@@ -250,7 +250,7 @@
 <li class="toctree-l1"><a class="reference internal" href="active_counterfactual_augmentation.html">Active Counterfactual Data Augmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tau_head_bias.html">Effect Head Bias</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Effect Head Bias</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representation_pretraining.html">Representation Pretraining</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
@@ -340,7 +340,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/fitting_acx_model.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/tau_head_bias.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -360,67 +360,33 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="fitting-ac-x-models">
-<h1>Fitting AC-X Models<a class="headerlink" href="#fitting-ac-x-models" title="Link to this heading">¶</a></h1>
-<p>This page provides a high level guide for training AC-X models. It covers
-selecting sensible hyperparameters, diagnosing common training issues and
-interpreting model outputs.</p>
-<section id="selecting-hyperparameters">
-<h2>Selecting hyperparameters<a class="headerlink" href="#selecting-hyperparameters" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">crosslearner</span></code> exposes two configuration dataclasses:
-<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.ModelConfig" title="crosslearner.training.ModelConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelConfig</span></code></a> controls the architecture while
-<a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a> handles optimisation. The
-following guidelines help choose good defaults.</p>
-<ul class="simple">
-<li><p><strong>Representation size</strong> <code class="docutils literal notranslate"><span class="pre">rep_dim</span></code> – start small (<code class="docutils literal notranslate"><span class="pre">32</span></code> or <code class="docutils literal notranslate"><span class="pre">64</span></code>) for toy
-datasets and increase to <code class="docutils literal notranslate"><span class="pre">128</span></code> or larger as the number of covariates grows.</p></li>
-<li><p><strong>Hidden layers</strong> <code class="docutils literal notranslate"><span class="pre">phi_layers</span></code> and <code class="docutils literal notranslate"><span class="pre">head_layers</span></code> – one or two layers with
-<code class="docutils literal notranslate"><span class="pre">relu</span></code> activations often suffice. Add depth only when the dataset is
-complex or highly nonlinear.</p></li>
-<li><p><strong>Dropout and residual connections</strong> – use dropout on small datasets to
-prevent overfitting. Residual connections can stabilise deep networks.</p></li>
-<li><p><strong>Learning rates</strong> <code class="docutils literal notranslate"><span class="pre">lr_g</span></code> and <code class="docutils literal notranslate"><span class="pre">lr_d</span></code> – the generator and discriminator
-often use similar rates around <code class="docutils literal notranslate"><span class="pre">1e-3</span></code>. If the discriminator overwhelms the
-generator, lower <code class="docutils literal notranslate"><span class="pre">lr_d</span></code> or enable <a class="reference internal" href="ttur.html"><span class="doc">Two Time-Scale Update Rule (TTUR)</span></a>.</p></li>
-<li><p><strong>Regularisation weights</strong> – penalties such as <code class="docutils literal notranslate"><span class="pre">lambda_gp</span></code> and
-<code class="docutils literal notranslate"><span class="pre">r1_gamma</span></code> help when the discriminator loss diverges. Increase them
-gradually until training stabilises.</p></li>
-</ul>
-<p>For a systematic search refer to <a class="reference internal" href="hyperparameter_sweeps.html"><span class="doc">Hyperparameter Sweeps with Optuna</span></a> which integrates
-<code class="docutils literal notranslate"><span class="pre">optuna</span></code> for automated tuning.</p>
+          <section id="effect-head-bias">
+<h1>Effect Head Bias<a class="headerlink" href="#effect-head-bias" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">tau_bias</span></code> controls whether the effect heads learn a separate bias term.
+When set to <code class="docutils literal notranslate"><span class="pre">False</span></code> all biases are fixed at <code class="docutils literal notranslate"><span class="pre">0</span></code> so the model’s treatment</p>
+<p>effect predictions rely purely on the learned features. This can reduce
+run-to-run variance in small data regimes where a constantly shifting offset
+can destabilise training.</p>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
+<p>Set <code class="docutils literal notranslate"><span class="pre">tau_bias=False</span></code> in <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.ModelConfig" title="crosslearner.training.ModelConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelConfig</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model_cfg</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tau_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">ACX</span><span class="p">(</span>
+    <span class="n">model_cfg</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>
+    <span class="n">tau_bias</span><span class="o">=</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">tau_bias</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Alternatively, create a <code class="xref py py-class docutils literal notranslate"><span class="pre">ACX</span></code> instance directly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">ACX</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">tau_bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
-<section id="diagnosing-training-pathologies">
-<h2>Diagnosing training pathologies<a class="headerlink" href="#diagnosing-training-pathologies" title="Link to this heading">¶</a></h2>
-<p>Monitoring losses and metrics during training is essential. Enable
-<code class="docutils literal notranslate"><span class="pre">return_history=True</span></code> in the training configuration to obtain a list of loss
-values per epoch. <a class="reference internal" href="training_history.html"><span class="doc">Tracking Training History</span></a> details how to visualise this data.</p>
-<p>Typical symptoms and fixes include:</p>
-<ul class="simple">
-<li><p><strong>Discriminator loss near zero</strong> – the discriminator dominates. Reduce its
-learning rate, add dropout or increase the gradient penalty.</p></li>
-<li><p><strong>Generator loss stagnates</strong> – try higher <code class="docutils literal notranslate"><span class="pre">lr_g</span></code> or apply
-<a class="reference internal" href="warm_start.html"><span class="doc">Warm Start for Stable Optimisation</span></a> so adversarial objectives kick in later.</p></li>
-<li><p><strong>Noisy metrics</strong> – log to TensorBoard via <code class="docutils literal notranslate"><span class="pre">tensorboard_logdir</span></code> and smooth
-the curves. Increase batch size if possible.</p></li>
-<li><p><strong>Divergence</strong> – check that inputs are normalised and consider enabling
-<a class="reference internal" href="spectral_norm.html"><span class="doc">Spectral Normalisation for Stable Training</span></a> or <a class="reference internal" href="instance_noise.html"><span class="doc">Instance Noise for Robust Discriminator</span></a>.</p></li>
-</ul>
-</section>
-<section id="generating-and-interpreting-results">
-<h2>Generating and interpreting results<a class="headerlink" href="#generating-and-interpreting-results" title="Link to this heading">¶</a></h2>
-<p>After training, pass a tensor of covariates <code class="docutils literal notranslate"><span class="pre">X</span></code> through the model to obtain
-three outputs <code class="docutils literal notranslate"><span class="pre">(mu0_hat,</span> <span class="pre">mu1_hat,</span> <span class="pre">tau_hat)</span></code>. The treatment effect
-<code class="docutils literal notranslate"><span class="pre">tau_hat</span></code> can be evaluated with <a class="reference internal" href="api/generated/api/crosslearner.evaluation.evaluate.html#crosslearner.evaluation.evaluate" title="crosslearner.evaluation.evaluate"><code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.evaluation.evaluate()</span></code></a>
-when ground truth counterfactuals are known. For observational data use
-<a class="reference internal" href="api/crosslearner.evaluation.html#crosslearner.evaluation.evaluate_ipw" title="crosslearner.evaluation.evaluate_ipw"><code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.evaluation.evaluate_ipw()</span></code></a> or
-<a class="reference internal" href="api/crosslearner.evaluation.html#crosslearner.evaluation.evaluate_dr" title="crosslearner.evaluation.evaluate_dr"><code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.evaluation.evaluate_dr()</span></code></a>.</p>
-<p>The outcome heads <code class="docutils literal notranslate"><span class="pre">mu0</span></code> and <code class="docutils literal notranslate"><span class="pre">mu1</span></code> predict potential outcomes under control
-and treatment. Subtracting them also yields the CATE. The estimates can be
-exported to TorchScript or ONNX using <code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.export.export_model()</span></code>
-for deployment or further analysis.</p>
-<p>Interpreting the effect estimates in context requires domain knowledge.
-Inspect distributions of <code class="docutils literal notranslate"><span class="pre">tau_hat</span></code> across subgroups and compare against known
-benchmarks or randomised data if available.</p>
+<section id="when-to-use-it">
+<h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
+<p>Disable the bias when the effect head tends to learn a large constant offset
+across different runs. Fixing the bias to <code class="docutils literal notranslate"><span class="pre">0</span></code> forces the model to learn the
+scaling from the covariates instead of relying on a free parameter.</p>
 </section>
 </section>
 
@@ -429,23 +395,23 @@ benchmarks or randomised data if available.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="datasets.html">
+          <a class="next-page" href="representation_pretraining.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Datasets</div>
+                <div class="title">Representation Pretraining</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="usage_examples.html">
+          <a class="prev-page" href="mixture_of_experts.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Usage Examples</div>
+                <div class="title">Mixture-of-Experts Potential-Outcome Heads</div>
                 
               </div>
             </a>
@@ -479,10 +445,9 @@ benchmarks or randomised data if available.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Fitting AC-X Models</a><ul>
-<li><a class="reference internal" href="#selecting-hyperparameters">Selecting hyperparameters</a></li>
-<li><a class="reference internal" href="#diagnosing-training-pathologies">Diagnosing training pathologies</a></li>
-<li><a class="reference internal" href="#generating-and-interpreting-results">Generating and interpreting results</a></li>
+<li><a class="reference internal" href="#">Effect Head Bias</a><ul>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
 </ul>
 </li>
 </ul>
