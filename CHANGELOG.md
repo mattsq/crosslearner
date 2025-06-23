@@ -92,4 +92,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added ``tau_bias`` flag to freeze effect head biases for more stable training
 - Added ``train_acx_ensemble`` and ``predict_tau_ensemble`` helpers for model
   ensembling
+- Added ``get_tricky_dataloader`` providing a small imbalanced dataset for
+  testing discriminator stabilisation tricks
 
