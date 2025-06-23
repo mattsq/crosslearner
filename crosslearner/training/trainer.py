@@ -139,6 +139,7 @@ class ACXTrainer:
         self._pseudo_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None = None
 
     def _pretrain_representation(self, loader: DataLoader) -> None:
+        """Warm-up the encoder by reconstructing masked inputs."""
         cfg = self.train_cfg
         if cfg.pretrain_epochs <= 0:
             return
@@ -154,6 +155,8 @@ class ACXTrainer:
             lr=cfg.pretrain_lr or cfg.lr_g,
         )
         mse = nn.MSELoss()
+        was_training = self.model.training
+        self.model.train()
         for _ in range(cfg.pretrain_epochs):
             for x_m, x in pre_loader:
                 x_m = x_m.to(self.device)
@@ -165,6 +168,8 @@ class ACXTrainer:
                 loss.backward()
                 opt.step()
         cfg.lr_g = cfg.finetune_lr or cfg.lr_g * 0.1
+        if not was_training:
+            self.model.eval()
 
     def _update_ema(self) -> None:
         decay = self.train_cfg.ema_decay
