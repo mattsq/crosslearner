@@ -8,41 +8,57 @@ the training procedure, hyperparameter sweeps and available modules.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Getting Started
 
    quickstart
+   usage_examples
+   fitting_acx_model
+   datasets
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Architecture and Theory
+
    acx_architecture
    theory
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Training Configuration
+
    hyperparameter_sweeps
-   fitting_acx_model
-   usage_examples
+   optimizer_kwargs
+   warm_start
+   ttur
+   risk_early_stopping
+   training_history
+   tensorboard_logging
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Regularization and Tricks
+
    gradient_reversal
    feature_matching
    label_smoothing
    spectral_norm
    exponential_moving_average
-   optimizer_kwargs
    weight_clipping
    wgan_gp
    r1_r2_regularization
    instance_noise
    contrastive_loss
    mmd_regularization
-   representation_disentanglement
-   mixture_of_experts
    consistency_regularization
    discriminator_augmentation
    active_counterfactual_augmentation
    unrolled_discriminator
-   warm_start
+   mixture_of_experts
    representation_pretraining
-   ttur
+   representation_disentanglement
    doubly_robust
-   datasets
    uncertainty
-   risk_early_stopping
-   training_history
-   tensorboard_logging
+
 
 
 .. toctree::
