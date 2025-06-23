@@ -8,7 +8,7 @@ import inspect
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, Dataset, TensorDataset
 from torch.utils.tensorboard import SummaryWriter
 
 from .config import ModelConfig, TrainingConfig
@@ -138,17 +138,43 @@ class ACXTrainer:
         self._rep_vars: dict[int, torch.Tensor] | None = None
         self._pseudo_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None = None
 
+    def _clone_loader(
+        self, loader: DataLoader, dataset: Dataset, *, shuffle: bool = True
+    ) -> DataLoader:
+        """Return a ``DataLoader`` mirroring ``loader`` but with ``dataset``."""
+
+        kwargs = dict(
+            batch_size=loader.batch_size,
+            shuffle=shuffle,
+            num_workers=loader.num_workers,
+            collate_fn=loader.collate_fn,
+            pin_memory=loader.pin_memory,
+            drop_last=loader.drop_last,
+            timeout=loader.timeout,
+            worker_init_fn=loader.worker_init_fn,
+            multiprocessing_context=loader.multiprocessing_context,
+            generator=loader.generator,
+        )
+
+        sig = inspect.signature(DataLoader.__init__)
+        for attr in (
+            "prefetch_factor",
+            "persistent_workers",
+            "pin_memory_device",
+            "in_order",
+        ):
+            if attr in sig.parameters:
+                kwargs[attr] = getattr(loader, attr)
+
+        return DataLoader(dataset, **kwargs)
+
     def _pretrain_representation(self, loader: DataLoader) -> None:
         """Warm-up the encoder by reconstructing masked inputs."""
         cfg = self.train_cfg
         if cfg.pretrain_epochs <= 0:
             return
         dataset = MaskedFeatureDataset(loader.dataset, cfg.pretrain_mask_prob)
-        pre_loader = DataLoader(
-            dataset,
-            batch_size=loader.batch_size,
-            shuffle=True,
-        )
+        pre_loader = self._clone_loader(loader, dataset, shuffle=True)
         recon = nn.Linear(self.model.rep_dim, self.model_cfg.p).to(self.device)
         opt = torch.optim.Adam(
             list(self.model.phi.parameters()) + list(recon.parameters()),
