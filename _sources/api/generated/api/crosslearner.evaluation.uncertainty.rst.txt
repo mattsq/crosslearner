@@ -8,5 +8,6 @@ crosslearner.evaluation.uncertainty
 
    .. autosummary::
    
+      predict_tau_ensemble
       predict_tau_mc_dropout
    

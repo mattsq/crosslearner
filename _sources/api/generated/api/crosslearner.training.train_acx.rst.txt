@@ -9,4 +9,5 @@ crosslearner.training.train\_acx
    .. autosummary::
    
       train_acx
+      train_acx_ensemble
    
