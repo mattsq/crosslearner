@@ -96,6 +96,7 @@ class ACXTrainer:
             batch_norm=model_cfg.batch_norm,
             moe_experts=model_cfg.moe_experts,
             tau_heads=model_cfg.tau_heads,
+            tau_bias=model_cfg.tau_bias,
         ).to(self.device)
         if train_cfg.epistemic_consistency and self.model.num_tau_heads <= 1:
             raise ValueError("epistemic_consistency requires ModelConfig.tau_heads > 1")
@@ -126,6 +127,7 @@ class ACXTrainer:
                 batch_norm=model_cfg.batch_norm,
                 moe_experts=model_cfg.moe_experts,
                 tau_heads=model_cfg.tau_heads,
+                tau_bias=model_cfg.tau_bias,
             ).to(self.device)
             if train_cfg.spectral_norm:
                 apply_spectral_norm(self.ema_model)

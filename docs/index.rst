@@ -54,6 +54,7 @@ the training procedure, hyperparameter sweeps and available modules.
    active_counterfactual_augmentation
    unrolled_discriminator
    mixture_of_experts
+   tau_head_bias
    representation_pretraining
    representation_disentanglement
    doubly_robust

@@ -34,6 +34,7 @@ class ModelConfig:
     batch_norm: bool = False
     moe_experts: int = 1  #: Number of expert pairs for mixture-of-experts heads.
     tau_heads: int = 1  #: Number of effect heads for epistemic ensembling.
+    tau_bias: bool = True  #: If ``False`` freeze the effect head biases at zero.
 
 
 @dataclass

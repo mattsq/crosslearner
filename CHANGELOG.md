@@ -89,4 +89,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   search to reduce overhead
 - Added optional representation pre-training via masked feature reconstruction
 - Documented representation pretraining options and updated config comments
+- Added ``tau_bias`` flag to freeze effect head biases for more stable training
 
