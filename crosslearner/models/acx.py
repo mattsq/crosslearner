@@ -251,6 +251,7 @@ class ACX(nn.Module):
         batch_norm: bool = False,
         moe_experts: int = 1,
         tau_heads: int = 1,
+        tau_bias: bool = True,
     ) -> None:
         """Instantiate the model.
 
@@ -279,6 +280,7 @@ class ACX(nn.Module):
             batch_norm: Insert ``BatchNorm1d`` layers in all MLPs.
             moe_experts: Number of expert pairs for the potential-outcome heads.
             tau_heads: Number of parallel effect heads for ensembling.
+            tau_bias: If ``False`` freeze effect head biases at zero.
         """
 
         super().__init__()
@@ -377,6 +379,11 @@ class ACX(nn.Module):
                 for _ in range(self.num_tau_heads)
             ]
         )
+        self.tau_bias = bool(tau_bias)
+        if not self.tau_bias:
+            for head in self.tau_heads:
+                head.out.bias.data.zero_()
+                head.out.bias.requires_grad_(False)
         self.tau = self.tau_heads[0]
         self.register_buffer("_tau_var", torch.tensor(0.0), persistent=False)
         self.disc_pack = max(1, int(disc_pack))

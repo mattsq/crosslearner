@@ -85,3 +85,10 @@ def test_acx_effect_consistency_weight():
     weight = model.effect_consistency_weight
     expected = 1.0 / (1.0 + model.tau_variance)
     assert torch.allclose(weight, expected)
+
+
+def test_acx_zero_tau_bias():
+    model = ACX(p=3, tau_bias=False)
+    for head in model.tau_heads:
+        assert torch.all(head.out.bias == 0)
+        assert not head.out.bias.requires_grad
