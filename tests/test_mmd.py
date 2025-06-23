@@ -15,12 +15,14 @@ def _mmd_rbf_manual(
     n_x = x.size(0)
     n_y = y.size(0)
     if n_x > 1:
-        k_xx.fill_diagonal_(0)
+        eye_x = torch.eye(n_x, dtype=torch.bool)
+        k_xx = k_xx.masked_fill(eye_x, 0)
         term_x = k_xx.sum() / (n_x * (n_x - 1))
     else:
         term_x = 0.0
     if n_y > 1:
-        k_yy.fill_diagonal_(0)
+        eye_y = torch.eye(n_y, dtype=torch.bool)
+        k_yy = k_yy.masked_fill(eye_y, 0)
         term_y = k_yy.sum() / (n_y * (n_y - 1))
     else:
         term_y = 0.0
