@@ -1,3 +1,5 @@
+"""Dataset utilities for random feature masking."""
+
 import torch
 from torch.utils.data import Dataset
 

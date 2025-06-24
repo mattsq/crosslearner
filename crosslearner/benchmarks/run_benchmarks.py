@@ -300,6 +300,7 @@ def _parse_args(include_baselines_flag: bool) -> argparse.Namespace:
 
 
 def main() -> None:
+    """Run benchmarks for the implemented models."""
     args = _parse_args(True)
     run(
         args.dataset,
@@ -310,6 +311,7 @@ def main() -> None:
 
 
 def main_baselines() -> None:
+    """Run the baselines comparison benchmarks."""
     args = _parse_args(False)
     run(args.dataset, args.replicates, args.epochs, baselines=True)
 

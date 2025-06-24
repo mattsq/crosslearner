@@ -170,7 +170,6 @@ def plot_cate_calibration(
     tau_hat: torch.Tensor, tau_true: torch.Tensor, bins: int = 10
 ) -> plt.Figure:
     """Return a calibration curve for CATE estimates."""
-
     tau_hat = tau_hat.view(-1)
     tau_true = tau_true.view(-1)
     edges = torch.linspace(tau_hat.min(), tau_hat.max(), bins + 1)
@@ -201,7 +200,6 @@ def plot_partial_dependence(
     grid_points: int = 20,
 ) -> plt.Figure:
     """Return a partial dependence plot for the CATE predictions."""
-
     device = model_device(model)
     X = X.to(device)
     vals = torch.linspace(X[:, feature].min(), X[:, feature].max(), grid_points)
@@ -232,7 +230,6 @@ def plot_ice(
     sample_limit: int | None = None,
 ) -> plt.Figure:
     """Return an Individual Conditional Expectation (ICE) plot for the CATE."""
-
     device = model_device(model)
     X = X.to(device)
     vals = torch.linspace(X[:, feature].min(), X[:, feature].max(), grid_points)
@@ -259,7 +256,6 @@ def plot_ice(
 
 def plot_grad_norms(history: History) -> plt.Figure:
     """Return a matplotlib Figure with gradient norm curves."""
-
     epochs = [h.epoch for h in history]
     fig, ax = plt.subplots()
     if any(h.grad_norm_g is not None for h in history):
@@ -275,7 +271,6 @@ def plot_grad_norms(history: History) -> plt.Figure:
 
 def plot_learning_rates(history: History) -> plt.Figure:
     """Return a matplotlib Figure with learning rate schedules."""
-
     epochs = [h.epoch for h in history]
     fig, ax = plt.subplots()
     if any(h.lr_g is not None for h in history):

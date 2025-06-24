@@ -23,7 +23,6 @@ from .grl import grad_reverse
 
 def _mmd_rbf(x: torch.Tensor, y: torch.Tensor, sigma: float = 1.0) -> torch.Tensor:
     """Return the (unbiased) RBF Maximum Mean Discrepancy between two samples."""
-
     if x.numel() == 0 or y.numel() == 0:
         return torch.tensor(0.0, device=x.device)
 
@@ -150,7 +149,6 @@ class ACXTrainer:
         self, loader: DataLoader, dataset: Dataset, *, shuffle: bool = True
     ) -> DataLoader:
         """Return a ``DataLoader`` mirroring ``loader`` but with ``dataset``."""
-
         kwargs = dict(
             batch_size=loader.batch_size,
             shuffle=shuffle,
@@ -967,6 +965,7 @@ class ACXTrainer:
         return float(loss_y.item()), float(loss_cons.item()), float(loss_adv.item())
 
     def train(self, loader: DataLoader) -> ACX | Tuple[ACX, History]:
+        """Train the model using ``loader`` and return it when finished."""
         cfg = self.train_cfg
         model = self.model
         eval_model = self.ema_model if self.ema_model is not None else self.model
