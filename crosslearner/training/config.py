@@ -12,6 +12,8 @@ class ModelConfig:
     """Configuration for the :class:`ACX` architecture."""
 
     p: int
+    cat_dims: Iterable[int] | None = None  #: Cardinalities of categorical features.
+    embed_dim: int = 8  #: Embedding dimension for each categorical variable.
     rep_dim: int = 64
     disentangle: bool = False
     rep_dim_c: int | None = None
