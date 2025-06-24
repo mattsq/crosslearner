@@ -618,6 +618,8 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
+        <span class="n">cat_dims</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
         <span class="n">rep_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
         <span class="n">disentangle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">rep_dim_c</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -643,7 +645,9 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate the model.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            p: Number of covariates.</span>
+<span class="sd">            p: Number of continuous covariates.</span>
+<span class="sd">            cat_dims: Optional cardinalities of categorical features.</span>
+<span class="sd">            embed_dim: Dimensionality of each categorical embedding.</span>
 <span class="sd">            rep_dim: Dimensionality of the shared representation ``phi`` when</span>
 <span class="sd">                ``disentangle`` is ``False``. Ignored otherwise.</span>
 <span class="sd">            disentangle: If ``True`` split the representation into three parts</span>
@@ -695,11 +699,20 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">rep_dim</span> <span class="o">=</span> <span class="n">rep_dim_total</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">cat_dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="n">cat_dims</span> <span class="ow">or</span> <span class="p">[]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embed_dim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">embed_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cat_embeddings</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">embed_dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cat_dims</span>
+        <span class="p">)</span>
+        <span class="n">cat_dim_total</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embed_dim</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cat_embeddings</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">phi_in_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">+</span> <span class="n">cat_dim_total</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">use_moe</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">moe_experts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">moe_experts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">moe_experts</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">phi</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span>
-            <span class="n">p</span><span class="p">,</span>
+            <span class="n">phi_in_dim</span><span class="p">,</span>
             <span class="n">rep_dim_total</span><span class="p">,</span>
             <span class="n">hidden</span><span class="o">=</span><span class="n">phi_layers</span><span class="p">,</span>
             <span class="n">activation</span><span class="o">=</span><span class="n">act_fn</span><span class="p">,</span>
@@ -809,18 +822,27 @@
 <div class="viewcode-block" id="ACX.forward">
 <a class="viewcode-back" href="../../../api/crosslearner.models.html#crosslearner.models.acx.ACX.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">x_cat</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward pass.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            x: Input covariates of shape ``(batch, p)``.</span>
+<span class="sd">            x: Continuous covariates of shape ``(batch, p)``.</span>
+<span class="sd">            x_cat: Optional categorical features of shape ``(batch, len(cat_dims))``.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple ``(h, mu0, mu1, tau)`` containing the shared</span>
 <span class="sd">            representation and head outputs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cat_embeddings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x_cat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Categorical features must be provided&quot;</span><span class="p">)</span>
+            <span class="n">emb</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">emb_layer</span><span class="p">(</span><span class="n">x_cat</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">emb_layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cat_embeddings</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">x</span><span class="p">]</span> <span class="o">+</span> <span class="n">emb</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">disentangle</span><span class="p">:</span>
             <span class="n">zc</span><span class="p">,</span> <span class="n">za</span><span class="p">,</span> <span class="n">zi</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
