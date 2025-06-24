@@ -359,6 +359,7 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
 
@@ -398,14 +399,17 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ACX</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">ACX</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">History</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Train ``n_models`` independent ACX models.</span>
 
-<span class="sd">    Each model is trained with the same configuration but with incremented</span>
-<span class="sd">    random seeds for reproducibility.</span>
+<span class="sd">    Each model is trained with the same configuration.  When ``seed`` is</span>
+<span class="sd">    provided, subsequent models are initialised with ``seed + i``.  If ``seed``</span>
+<span class="sd">    is ``None``, a random base seed is drawn and incremented so that each model</span>
+<span class="sd">    still receives a distinct seed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">base_seed</span> <span class="o">=</span> <span class="n">seed</span> <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">)</span>
     <span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ACX</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">histories</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">History</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_models</span><span class="p">):</span>
-        <span class="n">model_seed</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">seed</span> <span class="o">+</span> <span class="n">i</span>
+        <span class="n">model_seed</span> <span class="o">=</span> <span class="n">base_seed</span> <span class="o">+</span> <span class="n">i</span>
         <span class="n">trainer</span> <span class="o">=</span> <span class="n">ACXTrainer</span><span class="p">(</span>
             <span class="n">model_config</span><span class="p">,</span>
             <span class="n">training_config</span><span class="p">,</span>
