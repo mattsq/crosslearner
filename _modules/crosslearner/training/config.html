@@ -372,6 +372,8 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for the :class:`ACX` architecture.&quot;&quot;&quot;</span>
 
     <span class="n">p</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">cat_dims</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Cardinalities of categorical features.</span>
+    <span class="n">embed_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1">#: Embedding dimension for each categorical variable.</span>
     <span class="n">rep_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span>
     <span class="n">disentangle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">rep_dim_c</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
