@@ -9,7 +9,11 @@ from .metrics import (
     att_error,
     bootstrap_ci,
 )
-from .uncertainty import predict_tau_mc_dropout, predict_tau_ensemble
+from .uncertainty import (
+    predict_tau_mc_dropout,
+    predict_tau_ensemble,
+    predict_tau_mc_ensemble,
+)
 
 __all__ = [
     "evaluate",
@@ -22,5 +26,6 @@ __all__ = [
     "bootstrap_ci",
     "predict_tau_mc_dropout",
     "predict_tau_ensemble",
+    "predict_tau_mc_ensemble",
     "estimate_propensity",
 ]

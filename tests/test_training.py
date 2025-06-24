@@ -5,6 +5,7 @@ from crosslearner.benchmarks import run_benchmarks
 from crosslearner.datasets.toy import get_toy_dataloader
 from crosslearner.evaluation.evaluate import evaluate
 from crosslearner.models.acx import ACX
+from crosslearner.models.stochastic import DropConnectLinear
 from crosslearner.training.train_acx import train_acx
 from crosslearner.training import ModelConfig, TrainingConfig
 from crosslearner.training.trainer import ACXTrainer
@@ -321,6 +322,18 @@ def test_train_acx_dropout_options():
     assert any(isinstance(m, nn.Dropout) for m in model.phi.net.modules())
     assert any(isinstance(m, nn.Dropout) for m in model.mu0.net.modules())
     assert any(isinstance(m, nn.Dropout) for m in model.disc.net.modules())
+
+
+def test_train_acx_dropconnect_options():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(
+        p=4, phi_dropconnect=0.1, head_dropconnect=0.1, disc_dropconnect=0.1
+    )
+    train_cfg = TrainingConfig(epochs=1, verbose=False)
+    model = train_acx(loader, model_cfg, train_cfg, device="cpu")
+    assert any(isinstance(m, DropConnectLinear) for m in model.phi.net.modules())
+    assert any(isinstance(m, DropConnectLinear) for m in model.mu0.net.modules())
+    assert any(isinstance(m, DropConnectLinear) for m in model.disc.net.modules())
 
 
 def test_train_acx_batch_norm_option():

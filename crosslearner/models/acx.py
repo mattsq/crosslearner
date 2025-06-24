@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 from typing import Callable, Iterable
 
+from .stochastic import DropConnectLinear
+
 
 def _get_activation(act: str | Callable[[], nn.Module]) -> Callable[[], nn.Module]:
     """Return an activation constructor from string or callable.
@@ -48,6 +50,7 @@ class MLP(nn.Module):
         hidden: Iterable with hidden layer sizes.
         activation: Activation function to apply between layers.
         dropout: Dropout probability applied after each hidden layer.
+        dropconnect: DropConnect probability for linear layers.
         residual: If ``True`` add skip connections between blocks when the
             dimensions match.
         batch_norm: If ``True`` add ``BatchNorm1d`` after each hidden linear
@@ -62,6 +65,7 @@ class MLP(nn.Module):
         *,
         activation: str | Callable[[], nn.Module] = nn.ReLU,
         dropout: float = 0.0,
+        dropconnect: float = 0.0,
         residual: bool = False,
         batch_norm: bool = False,
     ) -> None:
@@ -72,10 +76,15 @@ class MLP(nn.Module):
         hidden = tuple(hidden or [])
         act_fn = _get_activation(activation)
         dropout = float(dropout)
+        dropconnect = float(dropconnect)
         if not (0 <= dropout < 1):
             raise ValueError(f"Dropout must be in the range [0, 1), but got {dropout}.")
+        if not (0 <= dropconnect < 1):
+            raise ValueError(
+                f"DropConnect must be in the range [0, 1), but got {dropconnect}."
+            )
         for h in hidden:
-            block = [nn.Linear(d, h)]
+            block = [DropConnectLinear(d, h, dropconnect_prob=dropconnect)]
             if batch_norm:
                 block.append(nn.BatchNorm1d(h))
             block.append(act_fn())
@@ -83,7 +92,7 @@ class MLP(nn.Module):
                 block.append(nn.Dropout(dropout))
             self.blocks.append(nn.Sequential(*block))
             d = h
-        self.out = nn.Linear(d, out_dim)
+        self.out = DropConnectLinear(d, out_dim, dropconnect_prob=dropconnect)
         self.net = nn.Sequential(*self.blocks, self.out)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -137,6 +146,7 @@ class MOEHeads(nn.Module):
         hidden: Iterable[int] | None,
         activation: str | Callable[[], nn.Module] = nn.ReLU,
         dropout: float = 0.0,
+        dropconnect: float = 0.0,
         residual: bool = False,
         batch_norm: bool = False,
     ) -> None:
@@ -151,6 +161,7 @@ class MOEHeads(nn.Module):
                     hidden=hidden,
                     activation=act_fn,
                     dropout=dropout,
+                    dropconnect=dropconnect,
                     residual=residual,
                     batch_norm=batch_norm,
                 )
@@ -165,6 +176,7 @@ class MOEHeads(nn.Module):
                     hidden=hidden,
                     activation=act_fn,
                     dropout=dropout,
+                    dropconnect=dropconnect,
                     residual=residual,
                     batch_norm=batch_norm,
                 )
@@ -177,6 +189,7 @@ class MOEHeads(nn.Module):
             hidden=hidden,
             activation=act_fn,
             dropout=dropout,
+            dropconnect=dropconnect,
             residual=residual,
             batch_norm=batch_norm,
         )
@@ -241,8 +254,11 @@ class ACX(nn.Module):
         disc_layers: Iterable[int] | None = (64,),
         activation: str | Callable[[], nn.Module] = nn.ReLU,
         phi_dropout: float = 0.0,
+        phi_dropconnect: float = 0.0,
         head_dropout: float = 0.0,
+        head_dropconnect: float = 0.0,
         disc_dropout: float = 0.0,
+        disc_dropconnect: float = 0.0,
         residual: bool = False,
         phi_residual: bool | None = None,
         head_residual: bool | None = None,
@@ -269,8 +285,11 @@ class ACX(nn.Module):
             disc_layers: Hidden layers for the discriminator.
             activation: Activation function used in all networks.
             phi_dropout: Dropout probability for the representation MLP.
+            phi_dropconnect: DropConnect probability for the representation MLP.
             head_dropout: Dropout probability for the outcome and effect heads.
+            head_dropconnect: DropConnect probability for the outcome and effect heads.
             disc_dropout: Dropout probability for the discriminator.
+            disc_dropconnect: DropConnect probability for the discriminator.
             residual: Enable residual connections in all MLPs.
             phi_residual: Override residual connections just for ``phi``.
             head_residual: Override residual connections for outcome and effect
@@ -317,6 +336,7 @@ class ACX(nn.Module):
             hidden=phi_layers,
             activation=act_fn,
             dropout=phi_dropout,
+            dropconnect=phi_dropconnect,
             residual=phi_residual,
             batch_norm=batch_norm,
         )
@@ -328,6 +348,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
+            dropconnect=head_dropconnect,
             residual=head_residual,
             batch_norm=batch_norm,
         )
@@ -337,6 +358,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
+            dropconnect=head_dropconnect,
             residual=head_residual,
             batch_norm=batch_norm,
         )
@@ -347,6 +369,7 @@ class ACX(nn.Module):
                 hidden=head_layers,
                 activation=act_fn,
                 dropout=head_dropout,
+                dropconnect=head_dropconnect,
                 residual=head_residual,
                 batch_norm=batch_norm,
             )
@@ -359,6 +382,7 @@ class ACX(nn.Module):
             hidden=head_layers,
             activation=act_fn,
             dropout=head_dropout,
+            dropconnect=head_dropconnect,
             residual=head_residual,
             batch_norm=batch_norm,
         )
@@ -373,6 +397,7 @@ class ACX(nn.Module):
                     hidden=head_layers,
                     activation=act_fn,
                     dropout=head_dropout,
+                    dropconnect=head_dropconnect,
                     residual=head_residual,
                     batch_norm=batch_norm,
                 )
@@ -393,6 +418,7 @@ class ACX(nn.Module):
             hidden=disc_layers,
             activation=act_fn,
             dropout=disc_dropout,
+            dropconnect=disc_dropconnect,
             residual=disc_residual,
             batch_norm=batch_norm,
         )
@@ -403,6 +429,7 @@ class ACX(nn.Module):
                 hidden=disc_layers,
                 activation=act_fn,
                 dropout=disc_dropout,
+                dropconnect=disc_dropconnect,
                 residual=disc_residual,
                 batch_norm=batch_norm,
             )
@@ -412,6 +439,7 @@ class ACX(nn.Module):
                 hidden=disc_layers,
                 activation=act_fn,
                 dropout=disc_dropout,
+                dropconnect=disc_dropconnect,
                 residual=disc_residual,
                 batch_norm=batch_norm,
             )
