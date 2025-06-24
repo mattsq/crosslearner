@@ -434,6 +434,35 @@ Use <code class="xref py py-func docutils literal notranslate"><span class="pre"
 </pre></div>
 </div>
 </section>
+<section id="additional-metrics">
+<h2>Additional metrics<a class="headerlink" href="#additional-metrics" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">crosslearner</span></code> ships several helpers to analyse the quality of treatment
+effect predictions.  After computing <code class="docutils literal notranslate"><span class="pre">tau_hat</span></code> you can evaluate policy risk
+and aggregate estimation errors:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">policy_risk</span><span class="p">,</span>
+    <span class="n">ate_error</span><span class="p">,</span>
+    <span class="n">att_error</span><span class="p">,</span>
+    <span class="n">bootstrap_ci</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">risk</span> <span class="o">=</span> <span class="n">policy_risk</span><span class="p">(</span><span class="n">tau_hat</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">mu1</span><span class="p">)</span>
+<span class="n">ate_err</span> <span class="o">=</span> <span class="n">ate_error</span><span class="p">(</span><span class="n">tau_hat</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">mu1</span><span class="p">)</span>
+<span class="n">att_err</span> <span class="o">=</span> <span class="n">att_error</span><span class="p">(</span><span class="n">tau_hat</span><span class="p">,</span> <span class="n">mu0</span><span class="p">,</span> <span class="n">mu1</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+<span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">bootstrap_ci</span><span class="p">(</span><span class="n">tau_hat</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="propensity-estimation">
+<h2>Propensity estimation<a class="headerlink" href="#propensity-estimation" title="Link to this heading">¶</a></h2>
+<p>For observational datasets use <a class="reference internal" href="api/crosslearner.evaluation.html#crosslearner.evaluation.estimate_propensity" title="crosslearner.evaluation.estimate_propensity"><code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.evaluation.estimate_propensity()</span></code></a>
+to obtain cross-fitted treatment probabilities:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">crosslearner.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">estimate_propensity</span>
+
+<span class="n">propensity</span> <span class="o">=</span> <span class="n">estimate_propensity</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 </section>
 
         </article>
@@ -498,6 +527,8 @@ Use <code class="xref py py-func docutils literal notranslate"><span class="pre"
 <li><a class="reference internal" href="#step-by-step-notebook">Step-by-step notebook</a></li>
 <li><a class="reference internal" href="#experiment-manager">Experiment manager</a></li>
 <li><a class="reference internal" href="#exporting-models">Exporting models</a></li>
+<li><a class="reference internal" href="#additional-metrics">Additional metrics</a></li>
+<li><a class="reference internal" href="#propensity-estimation">Propensity estimation</a></li>
 </ul>
 </li>
 </ul>
