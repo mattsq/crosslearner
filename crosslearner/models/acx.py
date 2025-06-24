@@ -231,6 +231,8 @@ class ACX(nn.Module):
         self,
         p: int,
         *,
+        cat_dims: Iterable[int] | None = None,
+        embed_dim: int = 8,
         rep_dim: int = 64,
         disentangle: bool = False,
         rep_dim_c: int | None = None,
@@ -256,7 +258,9 @@ class ACX(nn.Module):
         """Instantiate the model.
 
         Args:
-            p: Number of covariates.
+            p: Number of continuous covariates.
+            cat_dims: Optional cardinalities of categorical features.
+            embed_dim: Dimensionality of each categorical embedding.
             rep_dim: Dimensionality of the shared representation ``phi`` when
                 ``disentangle`` is ``False``. Ignored otherwise.
             disentangle: If ``True`` split the representation into three parts
@@ -308,11 +312,20 @@ class ACX(nn.Module):
 
         self.rep_dim = rep_dim_total
 
+        self.cat_dims = tuple(int(c) for c in (cat_dims or []))
+        self.embed_dim = int(embed_dim)
+        self.cat_embeddings = nn.ModuleList(
+            nn.Embedding(c, self.embed_dim) for c in self.cat_dims
+        )
+        cat_dim_total = self.embed_dim * len(self.cat_embeddings)
+        self.p = int(p)
+        phi_in_dim = self.p + cat_dim_total
+
         self.use_moe = int(moe_experts) > 1
         self.moe_experts = int(moe_experts)
 
         self.phi = MLP(
-            p,
+            phi_in_dim,
             rep_dim_total,
             hidden=phi_layers,
             activation=act_fn,
@@ -420,18 +433,27 @@ class ACX(nn.Module):
             self.adv_y = None
 
     def forward(
-        self, x: torch.Tensor
+        self, x: torch.Tensor, x_cat: torch.Tensor | None = None
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass.
 
         Args:
-            x: Input covariates of shape ``(batch, p)``.
+            x: Continuous covariates of shape ``(batch, p)``.
+            x_cat: Optional categorical features of shape ``(batch, len(cat_dims))``.
 
         Returns:
             Tuple ``(h, mu0, mu1, tau)`` containing the shared
             representation and head outputs.
         """
 
+        if len(self.cat_embeddings) > 0:
+            if x_cat is None:
+                raise ValueError("Categorical features must be provided")
+            emb = [
+                emb_layer(x_cat[:, i])
+                for i, emb_layer in enumerate(self.cat_embeddings)
+            ]
+            x = torch.cat([x] + emb, dim=1)
         h = self.phi(x)
         if self.disentangle:
             zc, za, zi = torch.split(
