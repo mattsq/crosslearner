@@ -19,10 +19,14 @@ Ensembles of independently trained models provide an alternative estimate of
 epistemic uncertainty::
 
     from crosslearner.training import train_acx_ensemble
-    from crosslearner.evaluation import predict_tau_ensemble
+    from crosslearner.evaluation import predict_tau_ensemble, predict_tau_mc_ensemble
 
     models = train_acx_ensemble(loader, model_cfg, train_cfg, n_models=5)
     mean, std = predict_tau_ensemble(models, X)
+
+You can also combine the two approaches::
+
+    mean, std = predict_tau_mc_ensemble(models, X, passes=20)
 
 This approximates a Bayesian posterior over the model weights and yields
 pointwise credible intervals for the CATE.

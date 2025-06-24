@@ -218,10 +218,12 @@ Alternatively you can train multiple models and average their predictions:
 
 ```python
 from crosslearner.training import train_acx_ensemble
-from crosslearner.evaluation import predict_tau_ensemble
+from crosslearner.evaluation import predict_tau_ensemble, predict_tau_mc_ensemble
 
 models = train_acx_ensemble(loader, model_cfg, train_cfg, n_models=5)
 mean, std = predict_tau_ensemble(models, X)
+
+mean, std = predict_tau_mc_ensemble(models, X, passes=20)
 ```
 
 ## Documentation

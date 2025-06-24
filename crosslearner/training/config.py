@@ -22,8 +22,11 @@ class ModelConfig:
     disc_layers: Iterable[int] | None = (64,)
     activation: str | Callable[[], nn.Module] = "relu"
     phi_dropout: float = 0.0
+    phi_dropconnect: float = 0.0
     head_dropout: float = 0.0
+    head_dropconnect: float = 0.0
     disc_dropout: float = 0.0
+    disc_dropconnect: float = 0.0
     residual: bool = False
     phi_residual: bool | None = None
     head_residual: bool | None = None

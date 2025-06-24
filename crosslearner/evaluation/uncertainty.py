@@ -51,3 +51,23 @@ def predict_tau_ensemble(
     mean = stacked.mean(dim=0)
     std = stacked.std(dim=0)
     return mean, std
+
+
+@torch.no_grad()
+def predict_tau_mc_ensemble(
+    models: Tuple[ACX, ...] | list[ACX], X: torch.Tensor, *, passes: int = 100
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Return mean and standard deviation combining dropout and ensembling."""
+
+    samples = []
+    for model in models:
+        device = model_device(model)
+        model.train()
+        for _ in range(passes):
+            _, _, _, tau = model(X.to(device))
+            samples.append(tau.cpu())
+        model.eval()
+    stacked = torch.stack(samples)
+    mean = stacked.mean(dim=0)
+    std = stacked.std(dim=0)
+    return mean, std
