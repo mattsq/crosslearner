@@ -666,6 +666,7 @@
 <div class="viewcode-block" id="main">
 <a class="viewcode-back" href="../../../api/crosslearner.benchmarks.html#crosslearner.benchmarks.run_benchmarks.main">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run benchmarks for the implemented models.&quot;&quot;&quot;</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">_parse_args</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">run</span><span class="p">(</span>
         <span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span>
@@ -679,6 +680,7 @@
 <div class="viewcode-block" id="main_baselines">
 <a class="viewcode-back" href="../../../api/crosslearner.benchmarks.html#crosslearner.benchmarks.run_benchmarks.main_baselines">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">main_baselines</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the baselines comparison benchmarks.&quot;&quot;&quot;</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">_parse_args</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">run</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">replicates</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">epochs</span><span class="p">,</span> <span class="n">baselines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
