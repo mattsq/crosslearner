@@ -15,7 +15,16 @@ URL_2016 = "https://raw.githubusercontent.com/py-why/BenchmarkDatasets/master/ac
 def get_acic2016_dataloader(
     seed: int = 0, batch_size: int = 256, *, data_dir: str | None = None
 ) -> Tuple[DataLoader, Tuple[torch.Tensor, torch.Tensor]]:
-    """Return ACIC 2016 dataloader for the given replication index."""
+    """Return ACIC 2016 dataloader for the given replication index.
+
+    Args:
+        seed: Replication index from the benchmark dataset.
+        batch_size: Mini-batch size.
+        data_dir: Optional directory to cache the file.
+
+    Returns:
+        Tuple ``(loader, (mu0, mu1))`` with the dataloader and counterfactuals.
+    """
     data_dir = data_dir or os.path.join(os.path.dirname(__file__), "_data")
     os.makedirs(data_dir, exist_ok=True)
     fpath = download_if_missing(URL_2016, os.path.join(data_dir, "acic2016.npz"))

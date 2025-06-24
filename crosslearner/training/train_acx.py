@@ -19,7 +19,19 @@ def train_acx(
     device: Optional[str] = None,
     seed: int | None = None,
 ) -> ACX | tuple[ACX, History]:
-    """Train an ACX model using configuration objects."""
+    """Train an ACX model using configuration objects.
+
+    Args:
+        loader: Training data loader.
+        model_config: Configuration for the ``ACX`` architecture.
+        training_config: Hyperparameters controlling training.
+        device: Optional device string.
+        seed: Optional random seed.
+
+    Returns:
+        The trained model or ``(model, history)`` when ``return_history`` is
+        enabled.
+    """
 
     trainer = ACXTrainer(model_config, training_config, device=device, seed=seed)
     return trainer.train(loader)
@@ -36,10 +48,21 @@ def train_acx_ensemble(
 ) -> list[ACX] | tuple[list[ACX], list[History]]:
     """Train ``n_models`` independent ACX models.
 
-    Each model is trained with the same configuration.  When ``seed`` is
-    provided, subsequent models are initialised with ``seed + i``.  If ``seed``
+    Args:
+        loader: Training data loader.
+        model_config: Configuration for the ``ACX`` architecture.
+        training_config: Hyperparameters controlling training.
+        n_models: Number of models to train.
+        device: Optional device string.
+        seed: Optional base random seed. Different seeds are derived from it.
+
+    Returns:
+        List of trained models or additionally their histories when requested.
+
+    Each model is trained with the same configuration. When ``seed`` is
+    provided, subsequent models are initialised with ``seed + i``. If ``seed``
     is ``None``, a random base seed is drawn and incremented so that each model
-    still receives a distinct seed.
+    receives a distinct seed.
     """
 
     base_seed = seed if seed is not None else random.randrange(2**32)

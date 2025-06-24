@@ -11,7 +11,19 @@ def get_confounding_dataloader(
     confounding: float = 0.0,
     seed: int | None = None,
 ):
-    """Return synthetic dataloader with adjustable confounding strength."""
+    """Return synthetic dataloader with adjustable confounding strength.
+
+    Args:
+        batch_size: Size of each mini-batch.
+        n: Number of samples to generate.
+        p: Number of covariates.
+        confounding: Strength of the unobserved confounder.
+        seed: Optional random seed for reproducibility.
+
+    Returns:
+        Tuple ``(loader, (mu0, mu1))`` with the ``DataLoader`` and true
+        potential outcomes.
+    """
     gen = torch.Generator().manual_seed(seed) if seed is not None else None
     X = torch.randn(n, p, generator=gen)
     U = torch.randn(n, generator=gen)

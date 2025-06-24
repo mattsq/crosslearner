@@ -10,7 +10,15 @@ from crosslearner.utils import set_seed
 
 
 def _make_regressor(inp: int, hid: Iterable[int] = (64, 64)) -> nn.Sequential:
-    """Return a simple fully connected regressor."""
+    """Return a simple fully connected regressor.
+
+    Args:
+        inp: Input dimension.
+        hid: Sizes of hidden layers.
+
+    Returns:
+        A sequential ``nn.Module`` implementing the regressor.
+    """
     layers: list[nn.Module] = []
     d = inp
     for h in hid:
@@ -21,7 +29,15 @@ def _make_regressor(inp: int, hid: Iterable[int] = (64, 64)) -> nn.Sequential:
 
 
 def _make_propensity_net(inp: int, hid: Iterable[int] = (64, 64)) -> nn.Sequential:
-    """Return a sigmoid-activated regressor for propensity scores."""
+    """Return a sigmoid-activated regressor for propensity scores.
+
+    Args:
+        inp: Input dimension.
+        hid: Sizes of hidden layers.
+
+    Returns:
+        A sequential network ending with a sigmoid layer.
+    """
     net = _make_regressor(inp, hid)
     net.add_module("sigmoid", nn.Sigmoid())
     return net
@@ -41,7 +57,24 @@ def estimate_nuisances(
     device: str,
     seed: int = 0,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Return cross-fitted propensity and outcome predictions."""
+    """Return cross-fitted propensity and outcome predictions.
+
+    Args:
+        X: Covariate matrix ``(n, p)``.
+        T: Treatment indicators ``(n, 1)`` or ``(n,)``.
+        Y: Observed outcomes ``(n, 1)``.
+        folds: Number of cross-fitting folds.
+        lr: Learning rate for all networks.
+        batch: Mini-batch size.
+        propensity_epochs: Training epochs for the propensity model.
+        outcome_epochs: Training epochs for the outcome models.
+        early_stop: Patience for early stopping.
+        device: Device on which to train the networks.
+        seed: Random seed for reproducibility.
+
+    Returns:
+        Tuple ``(e_hat, mu0_hat, mu1_hat)`` with cross-fitted predictions.
+    """
     bce = nn.BCELoss()
     mse = nn.MSELoss()
 

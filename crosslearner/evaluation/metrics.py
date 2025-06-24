@@ -22,8 +22,13 @@ def pehe(tau_hat: torch.Tensor, tau_true: torch.Tensor) -> float:
 def policy_risk(tau_hat: torch.Tensor, mu0: torch.Tensor, mu1: torch.Tensor) -> float:
     """Return the policy risk of using ``tau_hat`` for treatment decisions.
 
-    The function compares the outcome under the policy implied by ``tau_hat``
-    against always choosing the best potential outcome.
+    Args:
+        tau_hat: Predicted treatment effects.
+        mu0: Potential outcome under control.
+        mu1: Potential outcome under treatment.
+
+    Returns:
+        Expected regret of the policy implied by ``tau_hat``.
     """
 
     opt_outcome = torch.max(mu0, mu1)
@@ -33,7 +38,16 @@ def policy_risk(tau_hat: torch.Tensor, mu0: torch.Tensor, mu1: torch.Tensor) -> 
 
 
 def ate_error(tau_hat: torch.Tensor, mu0: torch.Tensor, mu1: torch.Tensor) -> float:
-    """Return estimation error for the Average Treatment Effect (ATE)."""
+    """Return estimation error for the Average Treatment Effect (ATE).
+
+    Args:
+        tau_hat: Predicted treatment effects.
+        mu0: Potential outcome under control.
+        mu1: Potential outcome under treatment.
+
+    Returns:
+        Difference between estimated and true ATE.
+    """
 
     ate_hat = torch.mean(tau_hat)
     ate_true = torch.mean(mu1 - mu0)
@@ -43,7 +57,17 @@ def ate_error(tau_hat: torch.Tensor, mu0: torch.Tensor, mu1: torch.Tensor) -> fl
 def att_error(
     tau_hat: torch.Tensor, mu0: torch.Tensor, mu1: torch.Tensor, t: torch.Tensor
 ) -> float:
-    """Return estimation error for the ATT (Average Treatment effect on Treated)."""
+    """Return estimation error for the ATT (Average Treatment effect on Treated).
+
+    Args:
+        tau_hat: Predicted treatment effects.
+        mu0: Potential outcome under control.
+        mu1: Potential outcome under treatment.
+        t: Binary treatment assignments.
+
+    Returns:
+        Difference between estimated and true ATT.
+    """
 
     mask = t.view(-1).bool()
     att_hat = torch.mean(tau_hat.view(-1)[mask])
@@ -54,7 +78,16 @@ def att_error(
 def bootstrap_ci(
     values: torch.Tensor, *, level: float = 0.95, n_boot: int = 1000
 ) -> tuple[float, float]:
-    """Return a bootstrap confidence interval for the mean of ``values``."""
+    """Return a bootstrap confidence interval for the mean of ``values``.
+
+    Args:
+        values: Sample of values to average.
+        level: Confidence level of the interval.
+        n_boot: Number of bootstrap replicates.
+
+    Returns:
+        Tuple ``(lower, upper)`` bounds of the confidence interval.
+    """
 
     arr = values.view(-1).cpu().numpy()
     samples = np.random.choice(arr, size=(n_boot, arr.size), replace=True)

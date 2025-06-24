@@ -7,8 +7,15 @@ import urllib.request
 def download_if_missing(url: str, path: str) -> str:
     """Download ``url`` to ``path`` if the file does not already exist.
 
-    Raises a ``RuntimeError`` when the download fails so users can fetch the
-    file manually.
+    Args:
+        url: Remote location to download.
+        path: Destination file path.
+
+    Returns:
+        Local path to the downloaded file.
+
+    Raises:
+        RuntimeError: If the download fails.
     """
     if os.path.exists(path):
         return path
