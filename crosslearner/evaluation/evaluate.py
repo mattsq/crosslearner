@@ -8,7 +8,6 @@ from crosslearner.utils import model_device
 
 def _model_outputs(model: ACX, X: torch.Tensor) -> tuple[torch.Tensor, ...]:
     """Run ``model`` on ``X`` placed on the correct device."""
-
     device = model_device(model)
     X = X.to(device)
     model.eval()
@@ -18,7 +17,6 @@ def _model_outputs(model: ACX, X: torch.Tensor) -> tuple[torch.Tensor, ...]:
 
 def _predict_tau(model: ACX, X: torch.Tensor) -> torch.Tensor:
     """Return CATE predictions for ``X`` placed on the model's device."""
-
     return _model_outputs(model, X)[2]
 
 
@@ -36,7 +34,6 @@ def evaluate(
     Returns:
         The square-root PEHE value.
     """
-
     device = model_device(model)
     mu0 = mu0.to(device)
     mu1 = mu1.to(device)
@@ -69,7 +66,6 @@ def evaluate_ipw(
     Returns:
         Estimated square-root PEHE using IPW pseudo-outcomes.
     """
-
     device = model_device(model)
     T = T.to(device)
     Y = Y.to(device)
@@ -104,7 +100,6 @@ def evaluate_dr(
     Returns:
         Estimated square-root PEHE using the doubly robust pseudo-outcomes.
     """
-
     device = model_device(model)
     T = T.to(device)
     Y = Y.to(device)

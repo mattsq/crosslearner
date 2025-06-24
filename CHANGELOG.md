@@ -106,3 +106,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Extended ``ModelConfig`` with ``cat_dims`` and ``embed_dim`` fields and
   enabled representation pretraining with categorical inputs
 
+- Added missing docstrings across several modules to improve code clarity

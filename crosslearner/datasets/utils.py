@@ -1,3 +1,5 @@
+"""Helper functions for downloading datasets."""
+
 import os
 import urllib.request
 

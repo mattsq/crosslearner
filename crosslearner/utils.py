@@ -1,3 +1,5 @@
+"""Utility helpers for reproducibility and PyTorch model handling."""
+
 import os
 import random
 
@@ -22,13 +24,11 @@ def set_seed(seed: int, *, deterministic: bool = False) -> None:
 
 def default_device() -> str:
     """Return the best available device string."""
-
     return "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def apply_spectral_norm(model: nn.Module) -> None:
     """Apply spectral normalization to all linear layers in ``model``."""
-
     for module in model.modules():
         if isinstance(module, nn.Linear):
             nn.utils.spectral_norm(module)
@@ -36,7 +36,6 @@ def apply_spectral_norm(model: nn.Module) -> None:
 
 def model_device(model: nn.Module) -> torch.device:
     """Return the device of ``model`` or CPU if no parameters."""
-
     try:
         return next(model.parameters()).device
     except StopIteration:  # pragma: no cover - unlikely
