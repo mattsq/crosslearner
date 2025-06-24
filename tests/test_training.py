@@ -56,6 +56,7 @@ def test_early_stopping():
         epochs=5,
         val_data=val_data,
         patience=1,
+        early_stop_metric="pehe",
         return_history=True,
     )
     _, history = train_acx(loader, model_cfg, train_cfg, device="cpu")
@@ -74,6 +75,7 @@ def test_risk_early_stopping():
         risk_data=(X, T_all, Y_all),
         risk_folds=2,
         patience=1,
+        early_stop_metric="risk",
         return_history=True,
         verbose=False,
     )
@@ -136,6 +138,7 @@ def test_train_acx_options():
         weight_clip=0.1,
         val_data=val_data,
         patience=1,
+        early_stop_metric="pehe",
         ema_decay=0.5,
         verbose=False,
     )

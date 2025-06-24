@@ -889,6 +889,66 @@ class ACXTrainer:
             stats.grad_norm_d = grad_norm_d_sum / batch_count
         return stats
 
+    def _validation_losses(
+        self,
+        x: torch.Tensor,
+        *,
+        t: Optional[torch.Tensor] = None,
+        y: Optional[torch.Tensor] = None,
+        mu0: Optional[torch.Tensor] = None,
+        mu1: Optional[torch.Tensor] = None,
+    ) -> tuple[float, float, float]:
+        bce = nn.BCEWithLogitsLoss()
+        mse = nn.MSELoss()
+        model = self.ema_model if self.ema_model is not None else self.model
+        h, m0_pred, m1_pred, tau_pred = model(x)
+        loss_adv = torch.tensor(0.0, device=x.device)
+        if t is not None and y is not None:
+            if t.ndim == 1:
+                t = t.unsqueeze(-1)
+            if y.ndim == 1:
+                y = y.unsqueeze(-1)
+            m_obs = torch.where(t.bool(), m1_pred, m0_pred)
+            loss_y = mse(m_obs, y)
+            y_cf = torch.where(t.bool(), m0_pred, m1_pred)
+            adv = (self.train_cfg.adv_loss or "bce").lower()
+            use_wgan = self.train_cfg.use_wgan_gp or adv == "wgan-gp"
+            use_hinge = adv == "hinge"
+            use_ls = adv == "lsgan"
+            fake_logits, _ = self._unrolled_logits(
+                h, y, y_cf, t, bce, use_wgan, use_hinge, use_ls
+            )
+            if use_wgan or use_hinge:
+                loss_adv = -fake_logits.mean()
+            elif use_ls:
+                mse_adv = nn.MSELoss()
+                loss_adv = mse_adv(fake_logits, torch.ones_like(fake_logits))
+            else:
+                real_lbl = torch.ones_like(fake_logits)
+                if self.train_cfg.label_smoothing:
+                    real_lbl = real_lbl * 0.9
+                loss_adv = bce(fake_logits, real_lbl)
+        else:
+            if mu0 is not None and mu1 is not None:
+                if mu0.ndim == 1:
+                    mu0 = mu0.unsqueeze(-1)
+                if mu1.ndim == 1:
+                    mu1 = mu1.unsqueeze(-1)
+                loss_y = 0.5 * (mse(m0_pred, mu0) + mse(m1_pred, mu1))
+            else:
+                loss_y = torch.tensor(0.0, device=x.device)
+
+        if mu0 is not None and mu1 is not None:
+            if mu0.ndim == 1:
+                mu0 = mu0.unsqueeze(-1)
+            if mu1.ndim == 1:
+                mu1 = mu1.unsqueeze(-1)
+            loss_cons = mse(tau_pred, mu1 - mu0)
+        else:
+            loss_cons = mse(tau_pred, m1_pred - m0_pred)
+
+        return float(loss_y.item()), float(loss_cons.item()), float(loss_adv.item())
+
     def train(self, loader: DataLoader) -> ACX | Tuple[ACX, History]:
         cfg = self.train_cfg
         model = self.model
@@ -945,6 +1005,9 @@ class ACXTrainer:
                 mse,
                 freeze_d=freeze_d,
             )
+            val_losses = (0.0, 0.0, 0.0)
+            val_pehe = None
+            val_risk = None
             if cfg.val_data is not None:
                 Xv, mu0v, mu1v = (v.to(device) for v in cfg.val_data)
                 if mu0v.ndim == 1:
@@ -952,18 +1015,32 @@ class ACXTrainer:
                 if mu1v.ndim == 1:
                     mu1v = mu1v.unsqueeze(-1)
                 val_pehe = evaluate(eval_model, Xv, mu0v, mu1v)
+                val_losses = self._validation_losses(Xv, mu0=mu0v, mu1=mu1v)
                 stats.val_pehe = val_pehe
                 if writer:
                     writer.add_scalar("val_pehe", val_pehe, epoch)
-                metric = val_pehe
-            elif cfg.risk_data is not None:
+            if cfg.risk_data is not None:
                 Xr, Tr, Yr = (v.to(device) for v in cfg.risk_data)
                 with torch.no_grad():
                     _, _, _, tau_r = eval_model(Xr)
-                metric = _orthogonal_risk(tau_r, Yr, Tr, e_hat_val, mu0_val, mu1_val)
-                stats.val_pehe = metric
+                val_risk = _orthogonal_risk(tau_r, Yr, Tr, e_hat_val, mu0_val, mu1_val)
+                val_losses = self._validation_losses(Xr, t=Tr, y=Yr)
+                stats.val_pehe = val_risk if val_pehe is None else val_pehe
                 if writer:
-                    writer.add_scalar("val_risk", metric, epoch)
+                    writer.add_scalar("val_risk", val_risk, epoch)
+            stats.val_loss_y, stats.val_loss_cons, stats.val_loss_adv = val_losses
+            metric_choice = cfg.early_stop_metric.lower()
+            if metric_choice == "pehe" and val_pehe is not None:
+                metric = val_pehe
+            elif metric_choice == "risk" and val_risk is not None:
+                metric = val_risk
+            elif metric_choice == "auto":
+                if val_pehe is not None:
+                    metric = val_pehe
+                elif val_risk is not None:
+                    metric = val_risk
+                else:
+                    metric = stats.loss_g
             else:
                 metric = stats.loss_g
 
@@ -998,13 +1075,13 @@ class ACXTrainer:
                         writer.add_histogram(name, param, epoch)
 
             metric_g = (
-                stats.val_pehe
+                metric
                 if (cfg.val_data is not None or cfg.risk_data is not None)
                 else stats.loss_g
             )
             _scheduler_step(sched_g, metric_g)
             metric_d = (
-                stats.val_pehe
+                metric
                 if (cfg.val_data is not None or cfg.risk_data is not None)
                 else stats.loss_d
             )
@@ -1019,10 +1096,16 @@ class ACXTrainer:
                     f"epoch {epoch:2d} Ly={stats.loss_y:.3f} "
                     f"Lcons={stats.loss_cons:.3f} Ladv={stats.loss_adv:.3f}"
                 )
-                if cfg.val_data is not None:
-                    msg += f" val_pehe={stats.val_pehe:.3f}"
-                elif cfg.risk_data is not None:
-                    msg += f" val_risk={stats.val_pehe:.3f}"
+                if cfg.val_data is not None or cfg.risk_data is not None:
+                    msg += (
+                        f" Vy={stats.val_loss_y:.3f}"
+                        f" Vcons={stats.val_loss_cons:.3f}"
+                        f" Vadv={stats.val_loss_adv:.3f}"
+                    )
+                if cfg.val_data is not None and val_pehe is not None:
+                    msg += f" val_pehe={val_pehe:.3f}"
+                if cfg.risk_data is not None and val_risk is not None:
+                    msg += f" val_risk={val_risk:.3f}"
                 print(msg)
 
             if cfg.patience > 0 and epochs_no_improve >= cfg.patience:

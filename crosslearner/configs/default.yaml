@@ -48,3 +48,4 @@ log_learning_rate: false
 log_weight_histograms: false
 weight_clip: null
 patience: 0
+early_stop_metric: auto

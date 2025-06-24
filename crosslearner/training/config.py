@@ -175,6 +175,13 @@ class TrainingConfig:
     nuisance_outcome_epochs: int = 3
     nuisance_early_stop: int = 10
     patience: int = 0
+    early_stop_metric: str = (
+        "auto"
+        #: Metric for early stopping.
+        #: ``auto`` uses validation PEHE when ``val_data`` is provided,
+        #: orthogonal risk when ``risk_data`` is provided and the generator
+        #: loss otherwise. Set to ``pehe`` or ``risk`` to override.
+    )
     verbose: bool = True
     return_history: bool = False
     active_aug_freq: int = (
