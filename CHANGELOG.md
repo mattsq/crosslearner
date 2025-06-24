@@ -101,4 +101,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   data is provided
 - Added ``early_stop_metric`` option to ``TrainingConfig`` for choosing the
   validation metric used for early stopping
+- Documented ``pehe`` evaluation helper in usage examples
 
