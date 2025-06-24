@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import pytest
 from crosslearner.models.acx import ACX
 
 
@@ -92,3 +93,19 @@ def test_acx_zero_tau_bias():
     for head in model.tau_heads:
         assert torch.all(head.out.bias == 0)
         assert not head.out.bias.requires_grad
+
+
+def test_acx_with_embeddings():
+    model = ACX(p=2, cat_dims=(3, 4), embed_dim=2)
+    X = torch.randn(4, 2)
+    X_cat = torch.stack([torch.randint(0, 3, (4,)), torch.randint(0, 4, (4,))], dim=1)
+    h, m0, m1, tau = model(X, X_cat)
+    assert h.shape == (4, 64)
+    assert model.phi.net[0][0].in_features == 2 + 2 * 2
+
+
+def test_acx_missing_embeddings():
+    model = ACX(p=2, cat_dims=(2,))
+    X = torch.randn(2, 2)
+    with pytest.raises(ValueError):
+        model(X)
