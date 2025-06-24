@@ -5,6 +5,7 @@ from .complex import get_complex_dataloader
 from .synthetic import get_confounding_dataloader
 from .aircraft import get_aircraft_dataloader
 from .tricks import get_tricky_dataloader
+from .random_dag import get_random_dag_dataloader
 from .masked import MaskedFeatureDataset
 
 
@@ -62,5 +63,6 @@ __all__ = [
     "get_confounding_dataloader",
     "get_aircraft_dataloader",
     "get_tricky_dataloader",
+    "get_random_dag_dataloader",
     "MaskedFeatureDataset",
 ]
