@@ -505,3 +505,17 @@ def test_pretrain_representation():
     cfg = TrainingConfig(pretrain_epochs=1, epochs=1, verbose=False)
     train_acx(loader, model_cfg, cfg, device="cpu")
     assert cfg.lr_g < 1e-3
+
+
+def test_pretrain_with_embeddings():
+    X = torch.randn(8, 2)
+    X_cat = torch.randint(0, 3, (8, 1))
+    T = torch.randint(0, 2, (8, 1)).float()
+    mu0 = X[:, :1]
+    mu1 = mu0 + 1.0
+    Y = torch.where(T.bool(), mu1, mu0) + 0.1 * torch.randn(8, 1)
+    loader = DataLoader(TensorDataset(X, X_cat, T, Y), batch_size=4)
+    model_cfg = ModelConfig(p=2, cat_dims=(3,), embed_dim=2)
+    cfg = TrainingConfig(pretrain_epochs=1, epochs=1, verbose=False)
+    train_acx(loader, model_cfg, cfg, device="cpu")
+    assert cfg.lr_g < 1e-3

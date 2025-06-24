@@ -78,6 +78,8 @@ class ACXTrainer:
         act_fn = _get_activation(model_cfg.activation)
         self.model = ACX(
             model_cfg.p,
+            cat_dims=model_cfg.cat_dims,
+            embed_dim=model_cfg.embed_dim,
             rep_dim=model_cfg.rep_dim,
             disentangle=model_cfg.disentangle,
             rep_dim_c=model_cfg.rep_dim_c,
@@ -109,6 +111,8 @@ class ACXTrainer:
         if train_cfg.ema_decay is not None:
             self.ema_model = ACX(
                 model_cfg.p,
+                cat_dims=model_cfg.cat_dims,
+                embed_dim=model_cfg.embed_dim,
                 rep_dim=model_cfg.rep_dim,
                 disentangle=model_cfg.disentangle,
                 rep_dim_c=model_cfg.rep_dim_c,
@@ -188,10 +192,16 @@ class ACXTrainer:
         was_training = self.model.training
         self.model.train()
         for _ in range(cfg.pretrain_epochs):
-            for x_m, x in pre_loader:
+            for batch in pre_loader:
+                if len(batch) == 3:
+                    x_m, x_cat, x = batch
+                    x_cat = x_cat.to(self.device)
+                else:
+                    x_m, x = batch
+                    x_cat = None
                 x_m = x_m.to(self.device)
                 x = x.to(self.device)
-                h = self.model.phi(x_m)
+                h, *_ = self.model(x_m, x_cat)
                 out = recon(h)
                 loss = mse(out, x)
                 opt.zero_grad(set_to_none=True)
@@ -552,7 +562,13 @@ class ACXTrainer:
         }
         rep_counts = {0: 0, 1: 0}
 
-        for Xb, Tb, Yb in loader:
+        for batch in loader:
+            if len(batch) == 4:
+                Xb, Xcb, Tb, Yb = batch
+                Xcb = Xcb.to(device)
+            else:
+                Xb, Tb, Yb = batch
+                Xcb = None
             Xb, Tb, Yb = Xb.to(device), Tb.to(device), Yb.to(device)
             if Tb.ndim == 1:
                 Tb = Tb.unsqueeze(-1)
@@ -560,7 +576,7 @@ class ACXTrainer:
                 Yb = Yb.unsqueeze(-1)
             Tb = Tb.float()
             Yb = Yb.float()
-            hb, m0, m1, tau = model(Xb)
+            hb, m0, m1, tau = model(Xb, Xcb)
             hb_det = hb.detach()
             m0_det = m0.detach()
             m1_det = m1.detach()
@@ -740,7 +756,7 @@ class ACXTrainer:
             loss_noise = zero_tensor
             if cfg.noise_consistency_weight > 0 and cfg.noise_std > 0:
                 Xn = Xb + torch.randn_like(Xb) * cfg.noise_std
-                _, m0_n, m1_n, tau_n = model(Xn)
+                _, m0_n, m1_n, tau_n = model(Xn, Xcb)
                 loss_noise = mse(m0_n, m0) + mse(m1_n, m1) + mse(tau_n, tau)
             Ycf = torch.where(Tb.bool(), m0, m1)
             loss_adv = zero_tensor
@@ -790,7 +806,7 @@ class ACXTrainer:
                     if cfg.contrastive_noise > 0
                     else 0.0
                 )
-                h_pos = model.phi(Xb + noise)
+                h_pos, _, _, _ = model(Xb + noise, Xcb)
                 neg_idx = self._sample_negatives(Tb.view(-1))
                 h_neg = hb[neg_idx].detach()
                 loss_contrast = F.triplet_margin_loss(
@@ -892,6 +908,7 @@ class ACXTrainer:
     def _validation_losses(
         self,
         x: torch.Tensor,
+        x_cat: torch.Tensor | None = None,
         *,
         t: Optional[torch.Tensor] = None,
         y: Optional[torch.Tensor] = None,
@@ -901,7 +918,7 @@ class ACXTrainer:
         bce = nn.BCEWithLogitsLoss()
         mse = nn.MSELoss()
         model = self.ema_model if self.ema_model is not None else self.model
-        h, m0_pred, m1_pred, tau_pred = model(x)
+        h, m0_pred, m1_pred, tau_pred = model(x, x_cat)
         loss_adv = torch.tensor(0.0, device=x.device)
         if t is not None and y is not None:
             if t.ndim == 1:

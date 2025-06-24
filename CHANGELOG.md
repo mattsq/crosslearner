@@ -103,4 +103,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   validation metric used for early stopping
 - Documented ``pehe`` evaluation helper in usage examples
 - Added optional categorical embeddings via ``cat_dims`` and ``embed_dim`` parameters to ``ACX``
+- Extended ``ModelConfig`` with ``cat_dims`` and ``embed_dim`` fields and
+  enabled representation pretraining with categorical inputs
 
