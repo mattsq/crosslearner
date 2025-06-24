@@ -82,16 +82,18 @@ Additional metrics
 ------------------
 
 ``crosslearner`` ships several helpers to analyse the quality of treatment
-effect predictions.  After computing ``tau_hat`` you can evaluate policy risk
-and aggregate estimation errors::
+effect predictions.  After computing ``tau_hat`` you can compute the PEHE
+directly, evaluate policy risk and aggregate estimation errors::
 
    from crosslearner.evaluation import (
+       pehe,
        policy_risk,
        ate_error,
        att_error,
        bootstrap_ci,
    )
 
+   sqrt_pehe = pehe(tau_hat, mu1 - mu0)
    risk = policy_risk(tau_hat, mu0, mu1)
    ate_err = ate_error(tau_hat, mu0, mu1)
    att_err = att_error(tau_hat, mu0, mu1, T)
