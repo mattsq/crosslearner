@@ -78,3 +78,32 @@ Use :func:`crosslearner.export.export_model`:
    export_model(model, x, "acx.pt")           # TorchScript
    export_model(model, x, "acx.onnx", onnx=True)
 
+Additional metrics
+------------------
+
+``crosslearner`` ships several helpers to analyse the quality of treatment
+effect predictions.  After computing ``tau_hat`` you can evaluate policy risk
+and aggregate estimation errors::
+
+   from crosslearner.evaluation import (
+       policy_risk,
+       ate_error,
+       att_error,
+       bootstrap_ci,
+   )
+
+   risk = policy_risk(tau_hat, mu0, mu1)
+   ate_err = ate_error(tau_hat, mu0, mu1)
+   att_err = att_error(tau_hat, mu0, mu1, T)
+   lower, upper = bootstrap_ci(tau_hat)
+
+Propensity estimation
+---------------------
+
+For observational datasets use :func:`crosslearner.evaluation.estimate_propensity`
+to obtain cross-fitted treatment probabilities::
+
+   from crosslearner.evaluation import estimate_propensity
+
+   propensity = estimate_propensity(X, T)
+
