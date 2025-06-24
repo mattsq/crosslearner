@@ -397,6 +397,7 @@ estimates and the training loop stops if the risk fails to improve for
     <span class="n">risk_data</span><span class="o">=</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">Y</span><span class="p">),</span>
     <span class="n">risk_folds</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
     <span class="n">patience</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">early_stop_metric</span><span class="o">=</span><span class="s2">&quot;risk&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">model_cfg</span><span class="p">,</span> <span class="n">train_cfg</span><span class="p">)</span>
 </pre></div>
@@ -409,6 +410,8 @@ estimates and the training loop stops if the risk fails to improve for
 <li><p><code class="docutils literal notranslate"><span class="pre">nuisance_propensity_epochs</span></code> and <code class="docutils literal notranslate"><span class="pre">nuisance_outcome_epochs</span></code> control the
 training length of the nuisance models.</p></li>
 <li><p>Combine <code class="docutils literal notranslate"><span class="pre">risk_data</span></code> with <code class="docutils literal notranslate"><span class="pre">tensorboard_logdir</span></code> to plot the risk over time.</p></li>
+<li><p>Select <code class="docutils literal notranslate"><span class="pre">early_stop_metric=&quot;risk&quot;</span></code> to explicitly monitor the orthogonal risk
+instead of validation PEHE when both metrics are available.</p></li>
 <li><p>If you have ground-truth potential outcomes prefer <code class="docutils literal notranslate"><span class="pre">val_data</span></code> to monitor
 PEHE directly.</p></li>
 </ul>

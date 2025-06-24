@@ -538,6 +538,13 @@
     <span class="n">nuisance_outcome_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
     <span class="n">nuisance_early_stop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="n">patience</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">early_stop_metric</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;auto&quot;</span>
+        <span class="c1">#: Metric for early stopping.</span>
+        <span class="c1">#: ``auto`` uses validation PEHE when ``val_data`` is provided,</span>
+        <span class="c1">#: orthogonal risk when ``risk_data`` is provided and the generator</span>
+        <span class="c1">#: loss otherwise. Set to ``pehe`` or ``risk`` to override.</span>
+    <span class="p">)</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">return_history</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">active_aug_freq</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
