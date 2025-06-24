@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
+import random
 
 from torch.utils.data import DataLoader
 
@@ -35,14 +36,17 @@ def train_acx_ensemble(
 ) -> list[ACX] | tuple[list[ACX], list[History]]:
     """Train ``n_models`` independent ACX models.
 
-    Each model is trained with the same configuration but with incremented
-    random seeds for reproducibility.
+    Each model is trained with the same configuration.  When ``seed`` is
+    provided, subsequent models are initialised with ``seed + i``.  If ``seed``
+    is ``None``, a random base seed is drawn and incremented so that each model
+    still receives a distinct seed.
     """
 
+    base_seed = seed if seed is not None else random.randrange(2**32)
     models: list[ACX] = []
     histories: list[History] = []
     for i in range(n_models):
-        model_seed = None if seed is None else seed + i
+        model_seed = base_seed + i
         trainer = ACXTrainer(
             model_config,
             training_config,
