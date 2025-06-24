@@ -380,7 +380,16 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_mmd_rbf</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the (unbiased) RBF Maximum Mean Discrepancy between two samples.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the (unbiased) RBF Maximum Mean Discrepancy between two samples.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x: First sample ``(n_x, d)``.</span>
+<span class="sd">        y: Second sample ``(n_y, d)``.</span>
+<span class="sd">        sigma: Bandwidth of the RBF kernel.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Scalar tensor with the unbiased MMD estimate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
 
@@ -508,7 +517,16 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_clone_loader</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a ``DataLoader`` mirroring ``loader`` but with ``dataset``.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a ``DataLoader`` mirroring ``loader`` but with ``dataset``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            loader: Existing dataloader to copy settings from.</span>
+<span class="sd">            dataset: Replacement dataset.</span>
+<span class="sd">            shuffle: Whether to shuffle the new loader.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A new ``DataLoader`` configured like ``loader``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
             <span class="n">batch_size</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
             <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
@@ -535,7 +553,14 @@
         <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_pretrain_representation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Warm-up the encoder by reconstructing masked inputs.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Warm-up the encoder by reconstructing masked inputs.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            loader: Data loader providing the training data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``None``. The model weights are updated in-place.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cfg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_cfg</span>
         <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pretrain_epochs</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
@@ -595,6 +620,16 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_pack_inputs</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Concatenate inputs for the discriminator if ``disc_pack`` &gt; 1.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            h: Representation tensor from ``phi``.</span>
+<span class="sd">            y: Outcome tensor.</span>
+<span class="sd">            t: Treatment tensor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Packed versions of ``(h, y, t)``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pack</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disc_pack</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">pack</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">t</span>
@@ -605,7 +640,14 @@
         <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">t</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_sample_negatives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return indices of negative samples from the opposite treatment group.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return indices of negative samples from the opposite treatment group.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            t: Binary treatment indicators ``(n,)``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Indices of samples with the opposite treatment for each element.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">n</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">idx0</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">t</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>

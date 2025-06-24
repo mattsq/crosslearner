@@ -444,18 +444,55 @@ model predictions and this pseudo-outcome.</p>
 <dt class="sig sig-object py" id="crosslearner.evaluation.metrics.ate_error">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">ate_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/metrics.html#ate_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.metrics.ate_error" title="Link to this definition">¶</a></dt>
 <dd><p>Return estimation error for the Average Treatment Effect (ATE).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tau_hat</strong> – Predicted treatment effects.</p></li>
+<li><p><strong>mu0</strong> – Potential outcome under control.</p></li>
+<li><p><strong>mu1</strong> – Potential outcome under treatment.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Difference between estimated and true ATE.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="crosslearner.evaluation.metrics.att_error">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">att_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/metrics.html#att_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.metrics.att_error" title="Link to this definition">¶</a></dt>
 <dd><p>Return estimation error for the ATT (Average Treatment effect on Treated).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tau_hat</strong> – Predicted treatment effects.</p></li>
+<li><p><strong>mu0</strong> – Potential outcome under control.</p></li>
+<li><p><strong>mu1</strong> – Potential outcome under treatment.</p></li>
+<li><p><strong>t</strong> – Binary treatment assignments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Difference between estimated and true ATT.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="crosslearner.evaluation.metrics.bootstrap_ci">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">bootstrap_ci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_boot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/metrics.html#bootstrap_ci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.metrics.bootstrap_ci" title="Link to this definition">¶</a></dt>
 <dd><p>Return a bootstrap confidence interval for the mean of <code class="docutils literal notranslate"><span class="pre">values</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> – Sample of values to average.</p></li>
+<li><p><strong>level</strong> – Confidence level of the interval.</p></li>
+<li><p><strong>n_boot</strong> – Number of bootstrap replicates.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple <code class="docutils literal notranslate"><span class="pre">(lower,</span> <span class="pre">upper)</span></code> bounds of the confidence interval.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -479,8 +516,18 @@ model predictions and this pseudo-outcome.</p>
 <dt class="sig sig-object py" id="crosslearner.evaluation.metrics.policy_risk">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">policy_risk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/metrics.html#policy_risk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.metrics.policy_risk" title="Link to this definition">¶</a></dt>
 <dd><p>Return the policy risk of using <code class="docutils literal notranslate"><span class="pre">tau_hat</span></code> for treatment decisions.</p>
-<p>The function compares the outcome under the policy implied by <code class="docutils literal notranslate"><span class="pre">tau_hat</span></code>
-against always choosing the best potential outcome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tau_hat</strong> – Predicted treatment effects.</p></li>
+<li><p><strong>mu0</strong> – Potential outcome under control.</p></li>
+<li><p><strong>mu1</strong> – Potential outcome under treatment.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Expected regret of the policy implied by <code class="docutils literal notranslate"><span class="pre">tau_hat</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -514,16 +561,35 @@ against always choosing the best potential outcome.</p>
 <dt class="sig sig-object py" id="crosslearner.evaluation.uncertainty.predict_tau_ensemble">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.uncertainty.</span></span><span class="sig-name descname"><span class="pre">predict_tau_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/uncertainty.html#predict_tau_ensemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.uncertainty.predict_tau_ensemble" title="Link to this definition">¶</a></dt>
 <dd><p>Return mean and standard deviation of ensemble CATE predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> – Sequence of trained <code class="docutils literal notranslate"><span class="pre">ACX</span></code> models.</p></li>
+<li><p><strong>X</strong> – Covariates <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code> used for prediction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple <code class="docutils literal notranslate"><span class="pre">(mean,</span> <span class="pre">std)</span></code> over the ensemble predictions.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="crosslearner.evaluation.uncertainty.predict_tau_mc_dropout">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.uncertainty.</span></span><span class="sig-name descname"><span class="pre">predict_tau_mc_dropout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/uncertainty.html#predict_tau_mc_dropout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.uncertainty.predict_tau_mc_dropout" title="Link to this definition">¶</a></dt>
 <dd><p>Return mean and standard deviation of MC dropout predictions.</p>
-<p>The model is temporarily set to training mode so that dropout layers
-remain active during the forward passes. Predictions are collected over
-<code class="docutils literal notranslate"><span class="pre">passes</span></code> runs and aggregated to obtain an approximate posterior
-mean and standard deviation for the treatment effect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – Trained <code class="docutils literal notranslate"><span class="pre">ACX</span></code> model with dropout layers.</p></li>
+<li><p><strong>X</strong> – Input covariates <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p></li>
+<li><p><strong>passes</strong> – Number of stochastic forward passes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple <code class="docutils literal notranslate"><span class="pre">(mean,</span> <span class="pre">std)</span></code> with aggregated predictions.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -534,18 +600,55 @@ mean and standard deviation for the treatment effect.</p>
 <dt class="sig sig-object py" id="crosslearner.evaluation.ate_error">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">ate_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/metrics.html#ate_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.ate_error" title="Link to this definition">¶</a></dt>
 <dd><p>Return estimation error for the Average Treatment Effect (ATE).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tau_hat</strong> – Predicted treatment effects.</p></li>
+<li><p><strong>mu0</strong> – Potential outcome under control.</p></li>
+<li><p><strong>mu1</strong> – Potential outcome under treatment.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Difference between estimated and true ATE.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="crosslearner.evaluation.att_error">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">att_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/metrics.html#att_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.att_error" title="Link to this definition">¶</a></dt>
 <dd><p>Return estimation error for the ATT (Average Treatment effect on Treated).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tau_hat</strong> – Predicted treatment effects.</p></li>
+<li><p><strong>mu0</strong> – Potential outcome under control.</p></li>
+<li><p><strong>mu1</strong> – Potential outcome under treatment.</p></li>
+<li><p><strong>t</strong> – Binary treatment assignments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Difference between estimated and true ATT.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="crosslearner.evaluation.bootstrap_ci">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">bootstrap_ci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_boot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/metrics.html#bootstrap_ci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.bootstrap_ci" title="Link to this definition">¶</a></dt>
 <dd><p>Return a bootstrap confidence interval for the mean of <code class="docutils literal notranslate"><span class="pre">values</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> – Sample of values to average.</p></li>
+<li><p><strong>level</strong> – Confidence level of the interval.</p></li>
+<li><p><strong>n_boot</strong> – Number of bootstrap replicates.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple <code class="docutils literal notranslate"><span class="pre">(lower,</span> <span class="pre">upper)</span></code> bounds of the confidence interval.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -654,24 +757,53 @@ model predictions and this pseudo-outcome.</p>
 <dt class="sig sig-object py" id="crosslearner.evaluation.policy_risk">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">policy_risk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_hat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/metrics.html#policy_risk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.policy_risk" title="Link to this definition">¶</a></dt>
 <dd><p>Return the policy risk of using <code class="docutils literal notranslate"><span class="pre">tau_hat</span></code> for treatment decisions.</p>
-<p>The function compares the outcome under the policy implied by <code class="docutils literal notranslate"><span class="pre">tau_hat</span></code>
-against always choosing the best potential outcome.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tau_hat</strong> – Predicted treatment effects.</p></li>
+<li><p><strong>mu0</strong> – Potential outcome under control.</p></li>
+<li><p><strong>mu1</strong> – Potential outcome under treatment.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Expected regret of the policy implied by <code class="docutils literal notranslate"><span class="pre">tau_hat</span></code>.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="crosslearner.evaluation.predict_tau_ensemble">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">predict_tau_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/uncertainty.html#predict_tau_ensemble"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.predict_tau_ensemble" title="Link to this definition">¶</a></dt>
 <dd><p>Return mean and standard deviation of ensemble CATE predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>models</strong> – Sequence of trained <code class="docutils literal notranslate"><span class="pre">ACX</span></code> models.</p></li>
+<li><p><strong>X</strong> – Covariates <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code> used for prediction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple <code class="docutils literal notranslate"><span class="pre">(mean,</span> <span class="pre">std)</span></code> over the ensemble predictions.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="crosslearner.evaluation.predict_tau_mc_dropout">
 <span class="sig-prename descclassname"><span class="pre">crosslearner.evaluation.</span></span><span class="sig-name descname"><span class="pre">predict_tau_mc_dropout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="crosslearner.models.html#crosslearner.models.acx.ACX" title="crosslearner.models.acx.ACX"><span class="pre">ACX</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.7)"><span class="pre">Tensor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/crosslearner/evaluation/uncertainty.html#predict_tau_mc_dropout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#crosslearner.evaluation.predict_tau_mc_dropout" title="Link to this definition">¶</a></dt>
 <dd><p>Return mean and standard deviation of MC dropout predictions.</p>
-<p>The model is temporarily set to training mode so that dropout layers
-remain active during the forward passes. Predictions are collected over
-<code class="docutils literal notranslate"><span class="pre">passes</span></code> runs and aggregated to obtain an approximate posterior
-mean and standard deviation for the treatment effect.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – Trained <code class="docutils literal notranslate"><span class="pre">ACX</span></code> model with dropout layers.</p></li>
+<li><p><strong>X</strong> – Input covariates <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">p)</span></code>.</p></li>
+<li><p><strong>passes</strong> – Number of stochastic forward passes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple <code class="docutils literal notranslate"><span class="pre">(mean,</span> <span class="pre">std)</span></code> with aggregated predictions.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

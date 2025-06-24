@@ -369,7 +369,15 @@
 <div class="viewcode-block" id="set_seed">
 <a class="viewcode-back" href="../../api/crosslearner.html#crosslearner.set_seed">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">set_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">deterministic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set random seed for Python, NumPy and PyTorch.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set random seed for Python, NumPy and PyTorch.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        seed: Seed value used for all RNGs.</span>
+<span class="sd">        deterministic: If ``True`` enable deterministic CUDA operations.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``None``. The global random state is modified in-place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
     <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
@@ -386,20 +394,38 @@
 <div class="viewcode-block" id="default_device">
 <a class="viewcode-back" href="../../api/crosslearner.html#crosslearner.default_device">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">default_device</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the best available device string.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the best available device string.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``&quot;cuda&quot;`` when a GPU is available, otherwise ``&quot;cpu&quot;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">apply_spectral_norm</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply spectral normalization to all linear layers in ``model``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply spectral normalization to all linear layers in ``model``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model: Module whose ``nn.Linear`` layers should be normalised.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``None``. ``model`` is modified in-place.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">modules</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">):</span>
             <span class="n">nn</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">spectral_norm</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">model_device</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the device of ``model`` or CPU if no parameters.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the device of ``model`` or CPU if no parameters.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model: Neural network whose parameter device should be inspected.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Device of the first parameter or ``cpu`` when the model has none.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span><span class="o">.</span><span class="n">device</span>
     <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>  <span class="c1"># pragma: no cover - unlikely</span>

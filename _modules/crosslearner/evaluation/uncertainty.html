@@ -376,10 +376,13 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return mean and standard deviation of MC dropout predictions.</span>
 
-<span class="sd">    The model is temporarily set to training mode so that dropout layers</span>
-<span class="sd">    remain active during the forward passes. Predictions are collected over</span>
-<span class="sd">    ``passes`` runs and aggregated to obtain an approximate posterior</span>
-<span class="sd">    mean and standard deviation for the treatment effect.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        model: Trained ``ACX`` model with dropout layers.</span>
+<span class="sd">        X: Input covariates ``(n, p)``.</span>
+<span class="sd">        passes: Number of stochastic forward passes.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple ``(mean, std)`` with aggregated predictions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">device</span> <span class="o">=</span> <span class="n">model_device</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -403,7 +406,15 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">predict_tau_ensemble</span><span class="p">(</span>
     <span class="n">models</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ACX</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">ACX</span><span class="p">],</span> <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return mean and standard deviation of ensemble CATE predictions.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return mean and standard deviation of ensemble CATE predictions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        models: Sequence of trained ``ACX`` models.</span>
+<span class="sd">        X: Covariates ``(n, p)`` used for prediction.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple ``(mean, std)`` over the ensemble predictions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>

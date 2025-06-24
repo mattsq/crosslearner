@@ -366,10 +366,15 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_activation</span><span class="p">(</span><span class="n">act</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an activation constructor from string or callable.</span>
 
-<span class="sd">    The function accepts either a string identifier or a callable returning a</span>
-<span class="sd">    fresh ``nn.Module`` instance.  Passing an ``nn.Module`` instance is a common</span>
-<span class="sd">    mistake that leads to cryptic runtime errors, therefore it is explicitly</span>
-<span class="sd">    disallowed.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        act: Name of the activation or a callable returning a module.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A callable that creates a new activation module.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: If ``act`` is not a string or callable.</span>
+<span class="sd">        ValueError: If ``act`` is an unknown string identifier.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">act</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>

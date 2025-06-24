@@ -370,7 +370,16 @@
 <a class="viewcode-back" href="../../../api/crosslearner.training.html#crosslearner.training.grl.GradReverse.forward">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lambd</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward pass that stores ``lambd`` for the backward step.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward pass that stores ``lambd`` for the backward step.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ctx: Autograd context provided by PyTorch.</span>
+<span class="sd">            x: Input tensor.</span>
+<span class="sd">            lambd: Scaling factor for the reversed gradient.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The input ``x`` unchanged.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ctx</span><span class="o">.</span><span class="n">lambd</span> <span class="o">=</span> <span class="n">lambd</span>
         <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">view_as</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
@@ -379,7 +388,15 @@
 <a class="viewcode-back" href="../../../api/crosslearner.training.html#crosslearner.training.grl.GradReverse.backward">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reverse the gradient multiplied by ``lambd``.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reverse the gradient multiplied by ``lambd``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ctx: Autograd context with ``lambd`` saved from ``forward``.</span>
+<span class="sd">            grad_output: Upstream gradient tensor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple containing the modified gradient and ``None`` for ``lambd``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">grad_output</span><span class="o">.</span><span class="n">neg</span><span class="p">()</span> <span class="o">*</span> <span class="n">ctx</span><span class="o">.</span><span class="n">lambd</span><span class="p">,</span> <span class="kc">None</span></div>
 </div>
 
@@ -388,7 +405,15 @@
 <div class="viewcode-block" id="grad_reverse">
 <a class="viewcode-back" href="../../../api/crosslearner.training.html#crosslearner.training.grl.grad_reverse">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">grad_reverse</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lambd</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for the gradient reversal function.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for the gradient reversal function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x: Input tensor.</span>
+<span class="sd">        lambd: Scaling factor for the reversed gradient.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``x`` as a gradient-reversing autograd variable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">GradReverse</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">lambd</span><span class="p">)</span></div>
 

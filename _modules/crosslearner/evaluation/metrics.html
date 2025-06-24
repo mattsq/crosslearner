@@ -385,8 +385,13 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">policy_risk</span><span class="p">(</span><span class="n">tau_hat</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">mu0</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">mu1</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the policy risk of using ``tau_hat`` for treatment decisions.</span>
 
-<span class="sd">    The function compares the outcome under the policy implied by ``tau_hat``</span>
-<span class="sd">    against always choosing the best potential outcome.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        tau_hat: Predicted treatment effects.</span>
+<span class="sd">        mu0: Potential outcome under control.</span>
+<span class="sd">        mu1: Potential outcome under treatment.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Expected regret of the policy implied by ``tau_hat``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">opt_outcome</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">mu0</span><span class="p">,</span> <span class="n">mu1</span><span class="p">)</span>
@@ -399,7 +404,16 @@
 <div class="viewcode-block" id="ate_error">
 <a class="viewcode-back" href="../../../api/crosslearner.evaluation.html#crosslearner.evaluation.metrics.ate_error">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">ate_error</span><span class="p">(</span><span class="n">tau_hat</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">mu0</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">mu1</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return estimation error for the Average Treatment Effect (ATE).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return estimation error for the Average Treatment Effect (ATE).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tau_hat: Predicted treatment effects.</span>
+<span class="sd">        mu0: Potential outcome under control.</span>
+<span class="sd">        mu1: Potential outcome under treatment.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Difference between estimated and true ATE.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ate_hat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">tau_hat</span><span class="p">)</span>
     <span class="n">ate_true</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">mu1</span> <span class="o">-</span> <span class="n">mu0</span><span class="p">)</span>
@@ -412,7 +426,17 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">att_error</span><span class="p">(</span>
     <span class="n">tau_hat</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">mu0</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">mu1</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return estimation error for the ATT (Average Treatment effect on Treated).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return estimation error for the ATT (Average Treatment effect on Treated).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tau_hat: Predicted treatment effects.</span>
+<span class="sd">        mu0: Potential outcome under control.</span>
+<span class="sd">        mu1: Potential outcome under treatment.</span>
+<span class="sd">        t: Binary treatment assignments.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Difference between estimated and true ATT.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">mask</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span>
     <span class="n">att_hat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">tau_hat</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="n">mask</span><span class="p">])</span>
@@ -426,7 +450,16 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">bootstrap_ci</span><span class="p">(</span>
     <span class="n">values</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span> <span class="n">n_boot</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a bootstrap confidence interval for the mean of ``values``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a bootstrap confidence interval for the mean of ``values``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: Sample of values to average.</span>
+<span class="sd">        level: Confidence level of the interval.</span>
+<span class="sd">        n_boot: Number of bootstrap replicates.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple ``(lower, upper)`` bounds of the confidence interval.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">arr</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
     <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">n_boot</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
