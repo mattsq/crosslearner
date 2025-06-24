@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Added `get_random_dag_dataloader` for generating random DAG-based synthetic datasets
 - Initial creation of CHANGELOG
 - Added `crosslearner-benchmark` command comparing ACX to baseline models
 - Added PacGAN-style discriminator packing via `disc_pack` configuration
