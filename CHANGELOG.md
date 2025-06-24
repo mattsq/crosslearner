@@ -95,4 +95,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ensembling
 - Added ``get_tricky_dataloader`` providing a small imbalanced dataset for
   testing discriminator stabilisation tricks
+- Logged validation outcome, consistency and adversarial losses when validation
+  data is provided
+- Added ``early_stop_metric`` option to ``TrainingConfig`` for choosing the
+  validation metric used for early stopping
 

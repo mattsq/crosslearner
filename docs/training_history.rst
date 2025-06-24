@@ -5,7 +5,9 @@ The ``return_history`` option of :class:`~crosslearner.training.TrainingConfig`
 determines whether :func:`~crosslearner.training.train_acx` returns a
 ``History`` object alongside the trained model.  ``History`` is a list of
 :class:`~crosslearner.training.EpochStats` dataclasses recording losses,
-gradient norms and learning rates for each epoch.
+gradient norms and learning rates for each epoch.  When ``val_data`` or
+``risk_data`` are supplied the history additionally stores outcome,
+consistency and adversarial losses on the validation set.
 
 Motivation
 ----------

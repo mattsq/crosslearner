@@ -39,6 +39,7 @@ Example usage
        risk_data=(X, T, Y),
        risk_folds=3,
        patience=5,
+       early_stop_metric="risk",
    )
    model = train_acx(loader, model_cfg, train_cfg)
 
@@ -49,6 +50,8 @@ Tips
 * ``nuisance_propensity_epochs`` and ``nuisance_outcome_epochs`` control the
   training length of the nuisance models.
 * Combine ``risk_data`` with ``tensorboard_logdir`` to plot the risk over time.
+* Select ``early_stop_metric="risk"`` to explicitly monitor the orthogonal risk
+  instead of validation PEHE when both metrics are available.
 * If you have ground-truth potential outcomes prefer ``val_data`` to monitor
   PEHE directly.
 
