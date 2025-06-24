@@ -16,10 +16,13 @@ def predict_tau_mc_dropout(
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Return mean and standard deviation of MC dropout predictions.
 
-    The model is temporarily set to training mode so that dropout layers
-    remain active during the forward passes. Predictions are collected over
-    ``passes`` runs and aggregated to obtain an approximate posterior
-    mean and standard deviation for the treatment effect.
+    Args:
+        model: Trained ``ACX`` model with dropout layers.
+        X: Input covariates ``(n, p)``.
+        passes: Number of stochastic forward passes.
+
+    Returns:
+        Tuple ``(mean, std)`` with aggregated predictions.
     """
 
     device = model_device(model)
@@ -40,7 +43,15 @@ def predict_tau_mc_dropout(
 def predict_tau_ensemble(
     models: Tuple[ACX, ...] | list[ACX], X: torch.Tensor
 ) -> Tuple[torch.Tensor, torch.Tensor]:
-    """Return mean and standard deviation of ensemble CATE predictions."""
+    """Return mean and standard deviation of ensemble CATE predictions.
+
+    Args:
+        models: Sequence of trained ``ACX`` models.
+        X: Covariates ``(n, p)`` used for prediction.
+
+    Returns:
+        Tuple ``(mean, std)`` over the ensemble predictions.
+    """
 
     samples = []
     for model in models:

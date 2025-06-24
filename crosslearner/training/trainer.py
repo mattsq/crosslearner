@@ -22,7 +22,16 @@ from .grl import grad_reverse
 
 
 def _mmd_rbf(x: torch.Tensor, y: torch.Tensor, sigma: float = 1.0) -> torch.Tensor:
-    """Return the (unbiased) RBF Maximum Mean Discrepancy between two samples."""
+    """Return the (unbiased) RBF Maximum Mean Discrepancy between two samples.
+
+    Args:
+        x: First sample ``(n_x, d)``.
+        y: Second sample ``(n_y, d)``.
+        sigma: Bandwidth of the RBF kernel.
+
+    Returns:
+        Scalar tensor with the unbiased MMD estimate.
+    """
     if x.numel() == 0 or y.numel() == 0:
         return torch.tensor(0.0, device=x.device)
 
@@ -148,7 +157,16 @@ class ACXTrainer:
     def _clone_loader(
         self, loader: DataLoader, dataset: Dataset, *, shuffle: bool = True
     ) -> DataLoader:
-        """Return a ``DataLoader`` mirroring ``loader`` but with ``dataset``."""
+        """Return a ``DataLoader`` mirroring ``loader`` but with ``dataset``.
+
+        Args:
+            loader: Existing dataloader to copy settings from.
+            dataset: Replacement dataset.
+            shuffle: Whether to shuffle the new loader.
+
+        Returns:
+            A new ``DataLoader`` configured like ``loader``.
+        """
         kwargs = dict(
             batch_size=loader.batch_size,
             shuffle=shuffle,
@@ -175,7 +193,14 @@ class ACXTrainer:
         return DataLoader(dataset, **kwargs)
 
     def _pretrain_representation(self, loader: DataLoader) -> None:
-        """Warm-up the encoder by reconstructing masked inputs."""
+        """Warm-up the encoder by reconstructing masked inputs.
+
+        Args:
+            loader: Data loader providing the training data.
+
+        Returns:
+            ``None``. The model weights are updated in-place.
+        """
         cfg = self.train_cfg
         if cfg.pretrain_epochs <= 0:
             return
@@ -235,6 +260,16 @@ class ACXTrainer:
     def _pack_inputs(
         self, h: torch.Tensor, y: torch.Tensor, t: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Concatenate inputs for the discriminator if ``disc_pack`` > 1.
+
+        Args:
+            h: Representation tensor from ``phi``.
+            y: Outcome tensor.
+            t: Treatment tensor.
+
+        Returns:
+            Packed versions of ``(h, y, t)``.
+        """
         pack = max(1, int(self.model_cfg.disc_pack))
         if pack <= 1:
             return h, y, t
@@ -245,7 +280,14 @@ class ACXTrainer:
         return h, y, t
 
     def _sample_negatives(self, t: torch.Tensor) -> torch.Tensor:
-        """Return indices of negative samples from the opposite treatment group."""
+        """Return indices of negative samples from the opposite treatment group.
+
+        Args:
+            t: Binary treatment indicators ``(n,)``.
+
+        Returns:
+            Indices of samples with the opposite treatment for each element.
+        """
         t = t.view(-1)
         n = t.size(0)
         idx0 = torch.where(t == 0)[0]

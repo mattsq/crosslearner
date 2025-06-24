@@ -8,10 +8,15 @@ from typing import Callable, Iterable
 def _get_activation(act: str | Callable[[], nn.Module]) -> Callable[[], nn.Module]:
     """Return an activation constructor from string or callable.
 
-    The function accepts either a string identifier or a callable returning a
-    fresh ``nn.Module`` instance.  Passing an ``nn.Module`` instance is a common
-    mistake that leads to cryptic runtime errors, therefore it is explicitly
-    disallowed.
+    Args:
+        act: Name of the activation or a callable returning a module.
+
+    Returns:
+        A callable that creates a new activation module.
+
+    Raises:
+        TypeError: If ``act`` is not a string or callable.
+        ValueError: If ``act`` is an unknown string identifier.
     """
 
     if isinstance(act, str):
