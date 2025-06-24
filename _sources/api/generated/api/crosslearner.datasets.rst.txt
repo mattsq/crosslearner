@@ -29,6 +29,7 @@ crosslearner.datasets
    jobs
    lalonde
    masked
+   random_dag
    synthetic
    toy
    tricks
