@@ -7,6 +7,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from .scheduler import MutableBatchSampler, GNSBatchScheduler
+
 
 def set_seed(seed: int, *, deterministic: bool = False) -> None:
     """Set random seed for Python, NumPy and PyTorch.
@@ -68,4 +70,11 @@ def model_device(model: nn.Module) -> torch.device:
         return torch.device("cpu")
 
 
-from .scheduler import MutableBatchSampler, GNSBatchScheduler
+__all__ = [
+    "set_seed",
+    "default_device",
+    "apply_spectral_norm",
+    "model_device",
+    "MutableBatchSampler",
+    "GNSBatchScheduler",
+]

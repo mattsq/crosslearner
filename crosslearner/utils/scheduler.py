@@ -7,7 +7,7 @@ import math
 from typing import Iterable, Optional
 
 import torch
-from torch.utils.data import BatchSampler, DataLoader, RandomSampler, SequentialSampler
+from torch.utils.data import BatchSampler, DataLoader
 from torch.cuda.amp import autocast
 
 
