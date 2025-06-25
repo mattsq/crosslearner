@@ -206,7 +206,13 @@ class ACXTrainer:
         return DataLoader(dataset, **kwargs)
 
     def _mutable_loader(self, loader: DataLoader) -> DataLoader:
-        """Return a ``DataLoader`` with a mutable batch sampler."""
+        """Clone ``loader`` with a batch sampler that allows resizing.
+
+        ``GNSBatchScheduler`` requires a sampler whose ``batch_size`` attribute
+        can be updated during training.  This helper recreates the input loader
+        with :class:`~crosslearner.utils.MutableBatchSampler` while preserving
+        all other options such as ``num_workers`` and ``pin_memory``.
+        """
 
         shuffle = isinstance(loader.sampler, torch.utils.data.RandomSampler)
         sampler = (
@@ -1058,7 +1064,12 @@ class ACXTrainer:
         return float(loss_y.item()), float(loss_cons.item()), float(loss_adv.item())
 
     def _scheduler_loss(self, model: ACX, batch) -> torch.Tensor:
-        """Loss function used for the adaptive batch scheduler."""
+        """Return the reconstruction loss for GNS evaluation.
+
+        The adaptive batch scheduler only needs a scalar loss that reflects the
+        current optimisation noise.  This helper computes the mean squared error
+        between the observed outcomes and the model predictions for a batch.
+        """
 
         if len(batch) == 4:
             x, x_cat, t, y = batch
