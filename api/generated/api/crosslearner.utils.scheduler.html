@@ -232,6 +232,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../risk_early_stopping.html">Orthogonal Risk for Early Stopping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../training_history.html">Tracking Training History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tensorboard_logging.html">Monitoring Training with TensorBoard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../adaptive_batch_size.html">Adaptive Batch Scheduling</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Regularization and Tricks</span></p>
 <ul>
@@ -368,16 +369,21 @@
         <article role="main" id="furo-main-content">
           <section id="module-crosslearner.utils.scheduler">
 <span id="crosslearner-utils-scheduler"></span><h1>crosslearner.utils.scheduler<a class="headerlink" href="#module-crosslearner.utils.scheduler" title="Link to this heading">¶</a></h1>
-<p>Adaptive batch-size scheduler using gradient noise scale.</p>
+<p>Adaptive batch-size scheduler using the gradient noise scale.</p>
+<p>The utilities in this module allow adjusting the <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> batch size
+during training.  <code class="docutils literal notranslate"><span class="pre">GNSBatchScheduler</span></code> monitors the gradient noise scale (GNS)
+and grows the batch once the optimisation noise drops below a threshold.
+<code class="docutils literal notranslate"><span class="pre">MutableBatchSampler</span></code> is a <code class="docutils literal notranslate"><span class="pre">BatchSampler</span></code> whose <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> attribute can
+be changed on-the-fly by the scheduler.</p>
 <p class="rubric">Classes</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">GNSBatchScheduler</span></code>(model, loss_fn, ...[, ...])</p></td>
-<td><p>Grow the batch size when the gradient noise scale is low.</p></td>
+<td><p>Dynamically increase batch size based on the gradient noise scale.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">MutableBatchSampler</span></code>(sampler, batch_size, ...)</p></td>
-<td><p>Batch sampler whose batch size can be modified at runtime.</p></td>
+<td><p>Batch sampler whose <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> can be changed on the fly.</p></td>
 </tr>
 </tbody>
 </table>

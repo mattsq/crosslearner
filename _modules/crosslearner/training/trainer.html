@@ -231,6 +231,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../risk_early_stopping.html">Orthogonal Risk for Early Stopping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../training_history.html">Tracking Training History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tensorboard_logging.html">Monitoring Training with TensorBoard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../adaptive_batch_size.html">Adaptive Batch Scheduling</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Regularization and Tricks</span></p>
 <ul>
@@ -570,7 +571,13 @@
         <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_mutable_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a ``DataLoader`` with a mutable batch sampler.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clone ``loader`` with a batch sampler that allows resizing.</span>
+
+<span class="sd">        ``GNSBatchScheduler`` requires a sampler whose ``batch_size`` attribute</span>
+<span class="sd">        can be updated during training.  This helper recreates the input loader</span>
+<span class="sd">        with :class:`~crosslearner.utils.MutableBatchSampler` while preserving</span>
+<span class="sd">        all other options such as ``num_workers`` and ``pin_memory``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">shuffle</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loader</span><span class="o">.</span><span class="n">sampler</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">RandomSampler</span><span class="p">)</span>
         <span class="n">sampler</span> <span class="o">=</span> <span class="p">(</span>
@@ -1422,7 +1429,12 @@
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">loss_y</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="nb">float</span><span class="p">(</span><span class="n">loss_cons</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="nb">float</span><span class="p">(</span><span class="n">loss_adv</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_scheduler_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ACX</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loss function used for the adaptive batch scheduler.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the reconstruction loss for GNS evaluation.</span>
+
+<span class="sd">        The adaptive batch scheduler only needs a scalar loss that reflects the</span>
+<span class="sd">        current optimisation noise.  This helper computes the mean squared error</span>
+<span class="sd">        between the observed outcomes and the model predictions for a batch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
             <span class="n">x</span><span class="p">,</span> <span class="n">x_cat</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">batch</span>
