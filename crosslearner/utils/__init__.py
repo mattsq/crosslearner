@@ -66,3 +66,6 @@ def model_device(model: nn.Module) -> torch.device:
         return next(model.parameters()).device
     except StopIteration:  # pragma: no cover - unlikely
         return torch.device("cpu")
+
+
+from .scheduler import MutableBatchSampler, GNSBatchScheduler

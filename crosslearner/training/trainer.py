@@ -17,7 +17,13 @@ from ..models.acx import ACX, _get_activation
 from ..datasets.masked import MaskedFeatureDataset
 from ..training.nuisance import estimate_nuisances
 from ..evaluation.evaluate import evaluate
-from ..utils import set_seed, default_device, apply_spectral_norm
+from ..utils import (
+    set_seed,
+    default_device,
+    apply_spectral_norm,
+    MutableBatchSampler,
+    GNSBatchScheduler,
+)
 from .grl import grad_reverse
 
 
@@ -153,6 +159,7 @@ class ACXTrainer:
         self._rep_means: dict[int, torch.Tensor] | None = None
         self._rep_vars: dict[int, torch.Tensor] | None = None
         self._pseudo_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None = None
+        self.scheduler: GNSBatchScheduler | None = None
 
     def _clone_loader(
         self, loader: DataLoader, dataset: Dataset, *, shuffle: bool = True
@@ -191,6 +198,44 @@ class ACXTrainer:
                 kwargs[attr] = getattr(loader, attr)
 
         return DataLoader(dataset, **kwargs)
+
+    def _mutable_loader(self, loader: DataLoader) -> DataLoader:
+        """Return a ``DataLoader`` with a mutable batch sampler."""
+
+        shuffle = isinstance(loader.sampler, torch.utils.data.RandomSampler)
+        sampler = (
+            RandomSampler(loader.dataset)
+            if shuffle
+            else SequentialSampler(loader.dataset)
+        )
+        batch_sampler = MutableBatchSampler(
+            sampler,
+            loader.batch_size or 1,
+            drop_last=loader.drop_last,
+        )
+
+        kwargs = dict(
+            batch_sampler=batch_sampler,
+            num_workers=loader.num_workers,
+            collate_fn=loader.collate_fn,
+            pin_memory=loader.pin_memory,
+            timeout=loader.timeout,
+            worker_init_fn=loader.worker_init_fn,
+            multiprocessing_context=loader.multiprocessing_context,
+            generator=loader.generator,
+        )
+
+        sig = inspect.signature(DataLoader.__init__)
+        for attr in (
+            "prefetch_factor",
+            "persistent_workers",
+            "pin_memory_device",
+            "in_order",
+        ):
+            if attr in sig.parameters:
+                kwargs[attr] = getattr(loader, attr)
+
+        return DataLoader(loader.dataset, **kwargs)
 
     def _pretrain_representation(self, loader: DataLoader) -> None:
         """Warm-up the encoder by reconstructing masked inputs.
@@ -1006,6 +1051,27 @@ class ACXTrainer:
 
         return float(loss_y.item()), float(loss_cons.item()), float(loss_adv.item())
 
+    def _scheduler_loss(self, model: ACX, batch) -> torch.Tensor:
+        """Loss function used for the adaptive batch scheduler."""
+
+        if len(batch) == 4:
+            x, x_cat, t, y = batch
+            x_cat = x_cat.to(self.device)
+        else:
+            x, t, y = batch
+            x_cat = None
+        x = x.to(self.device)
+        t = t.to(self.device)
+        y = y.to(self.device)
+        mse = nn.MSELoss()
+        h, m0, m1, _ = model(x, x_cat)
+        if t.ndim == 1:
+            t = t.unsqueeze(-1)
+        if y.ndim == 1:
+            y = y.unsqueeze(-1)
+        m_obs = torch.where(t.bool(), m1, m0)
+        return mse(m_obs, y)
+
     def train(self, loader: DataLoader) -> ACX | Tuple[ACX, History]:
         """Train the model using ``loader`` and return it when finished."""
         cfg = self.train_cfg
@@ -1017,8 +1083,19 @@ class ACXTrainer:
 
         self._pretrain_representation(loader)
 
+        if cfg.adaptive_batch:
+            loader = self._mutable_loader(loader)
+
         opt_g, opt_d = self._make_optimizers()
         sched_g, sched_d = self._make_schedulers(opt_g, opt_d)
+        if cfg.adaptive_batch:
+            self.scheduler = GNSBatchScheduler(
+                model,
+                self._scheduler_loss,
+                loader,
+                opt_g,
+                target_gns=cfg.gns_target,
+            )
 
         bce = nn.BCEWithLogitsLoss()
         mse = nn.MSELoss()
@@ -1145,6 +1222,15 @@ class ACXTrainer:
             )
             _scheduler_step(sched_d, metric_d)
             self._adjust_regularization(stats.loss_d)
+
+            if self.scheduler is not None:
+                self.scheduler.after_train_step(val_loss=metric)
+                stats.gns = self.scheduler.smoothed_gns
+                stats.batch_size = loader.batch_sampler.batch_size
+                stats.lr_g = opt_g.param_groups[0]["lr"]
+                if writer:
+                    writer.add_scalar("gns", stats.gns, epoch)
+                    writer.add_scalar("batch_size", stats.batch_size, epoch)
 
             if cfg.ttur:
                 freeze_d = stats.loss_d < 0.3
