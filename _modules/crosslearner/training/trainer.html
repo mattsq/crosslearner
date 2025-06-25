@@ -316,7 +316,10 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.training.trainer.html">crosslearner.training.trainer</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../../api/generated/api/crosslearner.utils.html">crosslearner.utils</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/generated/api/crosslearner.utils.html">crosslearner.utils</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of crosslearner.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.utils.scheduler.html">crosslearner.utils.scheduler</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/generated/api/crosslearner.visualization.html">crosslearner.visualization</a></li>
 </ul>
 </li>
@@ -376,7 +379,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..datasets.masked</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaskedFeatureDataset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..training.nuisance</span><span class="w"> </span><span class="kn">import</span> <span class="n">estimate_nuisances</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..evaluation.evaluate</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_seed</span><span class="p">,</span> <span class="n">default_device</span><span class="p">,</span> <span class="n">apply_spectral_norm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">set_seed</span><span class="p">,</span>
+    <span class="n">default_device</span><span class="p">,</span>
+    <span class="n">apply_spectral_norm</span><span class="p">,</span>
+    <span class="n">MutableBatchSampler</span><span class="p">,</span>
+    <span class="n">GNSBatchScheduler</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.grl</span><span class="w"> </span><span class="kn">import</span> <span class="n">grad_reverse</span>
 
 
@@ -514,6 +523,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_rep_means</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_rep_vars</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_data</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="p">:</span> <span class="n">GNSBatchScheduler</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_clone_loader</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
@@ -552,6 +562,44 @@
                 <span class="n">kwargs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_mutable_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a ``DataLoader`` with a mutable batch sampler.&quot;&quot;&quot;</span>
+
+        <span class="n">shuffle</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loader</span><span class="o">.</span><span class="n">sampler</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">RandomSampler</span><span class="p">)</span>
+        <span class="n">sampler</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">RandomSampler</span><span class="p">(</span><span class="n">loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">shuffle</span>
+            <span class="k">else</span> <span class="n">SequentialSampler</span><span class="p">(</span><span class="n">loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">batch_sampler</span> <span class="o">=</span> <span class="n">MutableBatchSampler</span><span class="p">(</span>
+            <span class="n">sampler</span><span class="p">,</span>
+            <span class="n">loader</span><span class="o">.</span><span class="n">batch_size</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">drop_last</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">drop_last</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">batch_sampler</span><span class="o">=</span><span class="n">batch_sampler</span><span class="p">,</span>
+            <span class="n">num_workers</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
+            <span class="n">collate_fn</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">collate_fn</span><span class="p">,</span>
+            <span class="n">pin_memory</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">pin_memory</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span>
+            <span class="n">worker_init_fn</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">worker_init_fn</span><span class="p">,</span>
+            <span class="n">multiprocessing_context</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">multiprocessing_context</span><span class="p">,</span>
+            <span class="n">generator</span><span class="o">=</span><span class="n">loader</span><span class="o">.</span><span class="n">generator</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">DataLoader</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;prefetch_factor&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;persistent_workers&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;pin_memory_device&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;in_order&quot;</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_pretrain_representation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Warm-up the encoder by reconstructing masked inputs.</span>
@@ -1367,6 +1415,27 @@
 
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">loss_y</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="nb">float</span><span class="p">(</span><span class="n">loss_cons</span><span class="o">.</span><span class="n">item</span><span class="p">()),</span> <span class="nb">float</span><span class="p">(</span><span class="n">loss_adv</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_scheduler_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">ACX</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loss function used for the adaptive batch scheduler.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">x_cat</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">batch</span>
+            <span class="n">x_cat</span> <span class="o">=</span> <span class="n">x_cat</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">batch</span>
+            <span class="n">x_cat</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">mse</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+        <span class="n">h</span><span class="p">,</span> <span class="n">m0</span><span class="p">,</span> <span class="n">m1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x_cat</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">m_obs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">bool</span><span class="p">(),</span> <span class="n">m1</span><span class="p">,</span> <span class="n">m0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mse</span><span class="p">(</span><span class="n">m_obs</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
 <div class="viewcode-block" id="ACXTrainer.train">
 <a class="viewcode-back" href="../../../api/crosslearner.training.html#crosslearner.training.ACXTrainer.train">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ACX</span> <span class="o">|</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">ACX</span><span class="p">,</span> <span class="n">History</span><span class="p">]:</span>
@@ -1380,8 +1449,19 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_pretrain_representation</span><span class="p">(</span><span class="n">loader</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adaptive_batch</span><span class="p">:</span>
+            <span class="n">loader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutable_loader</span><span class="p">(</span><span class="n">loader</span><span class="p">)</span>
+
         <span class="n">opt_g</span><span class="p">,</span> <span class="n">opt_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_optimizers</span><span class="p">()</span>
         <span class="n">sched_g</span><span class="p">,</span> <span class="n">sched_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_schedulers</span><span class="p">(</span><span class="n">opt_g</span><span class="p">,</span> <span class="n">opt_d</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adaptive_batch</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">GNSBatchScheduler</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_loss</span><span class="p">,</span>
+                <span class="n">loader</span><span class="p">,</span>
+                <span class="n">opt_g</span><span class="p">,</span>
+                <span class="n">target_gns</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_target</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="n">bce</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BCEWithLogitsLoss</span><span class="p">()</span>
         <span class="n">mse</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
@@ -1508,6 +1588,15 @@
             <span class="p">)</span>
             <span class="n">_scheduler_step</span><span class="p">(</span><span class="n">sched_d</span><span class="p">,</span> <span class="n">metric_d</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_adjust_regularization</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">loss_d</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">after_train_step</span><span class="p">(</span><span class="n">val_loss</span><span class="o">=</span><span class="n">metric</span><span class="p">)</span>
+                <span class="n">stats</span><span class="o">.</span><span class="n">gns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">smoothed_gns</span>
+                <span class="n">stats</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">batch_sampler</span><span class="o">.</span><span class="n">batch_size</span>
+                <span class="n">stats</span><span class="o">.</span><span class="n">lr_g</span> <span class="o">=</span> <span class="n">opt_g</span><span class="o">.</span><span class="n">param_groups</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;lr&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">writer</span><span class="p">:</span>
+                    <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s2">&quot;gns&quot;</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">gns</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
+                    <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s2">&quot;batch_size&quot;</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">ttur</span><span class="p">:</span>
                 <span class="n">freeze_d</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">loss_d</span> <span class="o">&lt;</span> <span class="mf">0.3</span>

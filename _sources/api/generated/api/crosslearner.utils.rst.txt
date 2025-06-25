@@ -13,3 +13,10 @@ crosslearner.utils
       model_device
       set_seed
    
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   scheduler

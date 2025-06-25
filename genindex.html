@@ -315,7 +315,10 @@
 <li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.training.trainer.html">crosslearner.training.trainer</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="api/generated/api/crosslearner.utils.html">crosslearner.utils</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="api/generated/api/crosslearner.utils.html">crosslearner.utils</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle navigation of crosslearner.utils</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="api/generated/api/crosslearner.utils.scheduler.html">crosslearner.utils.scheduler</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="api/generated/api/crosslearner.visualization.html">crosslearner.visualization</a></li>
 </ul>
 </li>
@@ -378,12 +381,14 @@
 </li>
         <li><a href="api/crosslearner.training.html#crosslearner.training.ACXTrainer">ACXTrainer (class in crosslearner.training)</a>
 </li>
-        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.adaptive_reg">adaptive_reg (crosslearner.training.TrainingConfig attribute)</a>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.adaptive_batch">adaptive_batch (crosslearner.training.TrainingConfig attribute)</a>
 </li>
-        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.adv_loss">adv_loss (crosslearner.training.TrainingConfig attribute)</a>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.adaptive_reg">adaptive_reg (crosslearner.training.TrainingConfig attribute)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.adv_loss">adv_loss (crosslearner.training.TrainingConfig attribute)</a>
+</li>
         <li><a href="api/crosslearner.models.html#crosslearner.models.acx.ACX.adv_t_pred">adv_t_pred() (crosslearner.models.acx.ACX method)</a>
 </li>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.adv_t_weight">adv_t_weight (crosslearner.training.TrainingConfig attribute)</a>
@@ -420,6 +425,12 @@
 </li>
         <li><a href="api/crosslearner.training.html#crosslearner.training.ModelConfig.batch_norm">batch_norm (crosslearner.training.ModelConfig attribute)</a>
 </li>
+        <li><a href="api/crosslearner.html#crosslearner.EpochStats.batch_size">batch_size (crosslearner.EpochStats attribute)</a>
+
+        <ul>
+          <li><a href="api/crosslearner.training.html#crosslearner.training.history.EpochStats.batch_size">(crosslearner.training.history.EpochStats attribute)</a>
+</li>
+        </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.beta_cons">beta_cons (crosslearner.training.TrainingConfig attribute)</a>
@@ -597,8 +608,6 @@
           <li><a href="api/crosslearner.evaluation.html#module-crosslearner.evaluation.evaluate">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     crosslearner.evaluation.metrics
 
@@ -606,6 +615,8 @@
           <li><a href="api/crosslearner.evaluation.html#module-crosslearner.evaluation.metrics">module</a>, <a href="api/generated/api/crosslearner.evaluation.metrics.html#module-crosslearner.evaluation.metrics">[1]</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     crosslearner.evaluation.propensity
 
@@ -758,6 +769,13 @@
 
         <ul>
           <li><a href="api/generated/api/crosslearner.utils.html#module-crosslearner.utils">module</a>
+</li>
+        </ul></li>
+        <li>
+    crosslearner.utils.scheduler
+
+        <ul>
+          <li><a href="api/generated/api/crosslearner.utils.scheduler.html#module-crosslearner.utils.scheduler">module</a>
 </li>
         </ul></li>
         <li>
@@ -969,10 +987,10 @@
         </ul></li>
         <li><a href="api/crosslearner.datasets.html#crosslearner.datasets.get_lalonde_dataloader">get_lalonde_dataloader() (in module crosslearner.datasets)</a>, <a href="generated/datasets/crosslearner.datasets.get_lalonde_dataloader.html#crosslearner.datasets.get_lalonde_dataloader">[1]</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.datasets.html#crosslearner.datasets.get_random_dag_dataloader">get_random_dag_dataloader() (in module crosslearner.datasets)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.html#crosslearner.get_toy_dataloader">get_toy_dataloader() (in module crosslearner)</a>
 
         <ul>
@@ -984,6 +1002,14 @@
         <li><a href="api/crosslearner.datasets.html#crosslearner.datasets.get_tricky_dataloader">get_tricky_dataloader() (in module crosslearner.datasets)</a>, <a href="generated/datasets/crosslearner.datasets.get_tricky_dataloader.html#crosslearner.datasets.get_tricky_dataloader">[1]</a>
 </li>
         <li><a href="api/crosslearner.datasets.html#crosslearner.datasets.get_twins_dataloader">get_twins_dataloader() (in module crosslearner.datasets)</a>, <a href="generated/datasets/crosslearner.datasets.get_twins_dataloader.html#crosslearner.datasets.get_twins_dataloader">[1]</a>
+</li>
+        <li><a href="api/crosslearner.html#crosslearner.EpochStats.gns">gns (crosslearner.EpochStats attribute)</a>
+
+        <ul>
+          <li><a href="api/crosslearner.training.html#crosslearner.training.history.EpochStats.gns">(crosslearner.training.history.EpochStats attribute)</a>
+</li>
+        </ul></li>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.gns_target">gns_target (crosslearner.training.TrainingConfig attribute)</a>
 </li>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.grad_clip">grad_clip (crosslearner.training.TrainingConfig attribute)</a>
 </li>
@@ -1228,6 +1254,8 @@
           <li><a href="api/generated/api/crosslearner.training.trainer.html#module-crosslearner.training.trainer">crosslearner.training.trainer</a>
 </li>
           <li><a href="api/generated/api/crosslearner.utils.html#module-crosslearner.utils">crosslearner.utils</a>
+</li>
+          <li><a href="api/generated/api/crosslearner.utils.scheduler.html#module-crosslearner.utils.scheduler">crosslearner.utils.scheduler</a>
 </li>
           <li><a href="api/crosslearner.html#module-crosslearner.visualization">crosslearner.visualization</a>, <a href="api/generated/api/crosslearner.visualization.html#module-crosslearner.visualization">[1]</a>
 </li>
