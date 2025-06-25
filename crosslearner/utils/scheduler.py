@@ -15,7 +15,11 @@ from typing import Iterable, Optional
 
 import torch
 from torch.utils.data import BatchSampler, DataLoader
-from torch.cuda.amp import autocast
+
+try:  # torch>=1.12 provides a unified autocast
+    from torch.amp import autocast
+except Exception:  # pragma: no cover - older PyTorch
+    from torch.cuda.amp import autocast
 
 
 class MutableBatchSampler(BatchSampler):
@@ -105,9 +109,10 @@ class GNSBatchScheduler:
         """Estimate the gradient noise scale from two mini-batches."""
 
         grads = []
+        device_type = next(self.model.parameters()).device.type
         for b in (batch1, batch2):
             self.opt.zero_grad(set_to_none=True)
-            with autocast():
+            with autocast(device_type=device_type):
                 loss = self.loss_fn(self.model, b)
             loss.backward()
             g = torch.cat(
