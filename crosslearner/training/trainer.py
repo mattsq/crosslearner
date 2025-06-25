@@ -8,7 +8,13 @@ import inspect
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader, Dataset, TensorDataset
+from torch.utils.data import (
+    DataLoader,
+    Dataset,
+    TensorDataset,
+    RandomSampler,
+    SequentialSampler,
+)
 from torch.utils.tensorboard import SummaryWriter
 
 from .config import ModelConfig, TrainingConfig
