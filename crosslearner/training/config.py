@@ -194,3 +194,5 @@ class TrainingConfig:
     active_aug_samples: int = 0
     active_aug_steps: int = 10
     active_aug_lr: float = 0.1
+    adaptive_batch: bool = False
+    gns_target: float = 1.0

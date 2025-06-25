@@ -22,6 +22,8 @@ class EpochStats:
     grad_norm_d: Optional[float] = None
     lr_g: Optional[float] = None
     lr_d: Optional[float] = None
+    gns: Optional[float] = None
+    batch_size: Optional[int] = None
 
 
 History = List[EpochStats]
