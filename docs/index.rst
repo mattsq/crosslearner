@@ -33,6 +33,7 @@ the training procedure, hyperparameter sweeps and available modules.
    risk_early_stopping
    training_history
    tensorboard_logging
+   adaptive_batch_size
 
 .. toctree::
    :maxdepth: 2
