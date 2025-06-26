@@ -397,7 +397,8 @@ while still reaching a stable large-batch regime.</p>
 sets the tolerance around <code class="docutils literal notranslate"><span class="pre">gns_target</span></code>, <code class="docutils literal notranslate"><span class="pre">gns_check_every</span></code> determines how
 often the gradient noise scale is measured and <code class="docutils literal notranslate"><span class="pre">gns_plateau_patience</span></code> triggers
 growth when validation loss stops improving. <code class="docutils literal notranslate"><span class="pre">gns_ema</span></code> smooths the noise
-estimates and <code class="docutils literal notranslate"><span class="pre">gns_max_batch</span></code> caps the final batch size.</p>
+estimates and <code class="docutils literal notranslate"><span class="pre">gns_max_batch</span></code> caps the final batch size (defaults to the
+dataset size).</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>

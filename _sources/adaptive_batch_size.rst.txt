@@ -32,7 +32,8 @@ Additional knobs control how aggressively the batch size grows. ``gns_band``
 sets the tolerance around ``gns_target``, ``gns_check_every`` determines how
 often the gradient noise scale is measured and ``gns_plateau_patience`` triggers
 growth when validation loss stops improving. ``gns_ema`` smooths the noise
-estimates and ``gns_max_batch`` caps the final batch size.
+estimates and ``gns_max_batch`` caps the final batch size (defaults to the
+dataset size).
 
 When to use it
 --------------

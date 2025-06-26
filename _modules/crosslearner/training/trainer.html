@@ -1499,6 +1499,11 @@
         <span class="n">opt_g</span><span class="p">,</span> <span class="n">opt_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_optimizers</span><span class="p">()</span>
         <span class="n">sched_g</span><span class="p">,</span> <span class="n">sched_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_schedulers</span><span class="p">(</span><span class="n">opt_g</span><span class="p">,</span> <span class="n">opt_d</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">adaptive_batch</span><span class="p">:</span>
+            <span class="n">max_B</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">cfg</span><span class="o">.</span><span class="n">gns_max_batch</span>
+                <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gns_max_batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">loader</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">GNSBatchScheduler</span><span class="p">(</span>
                 <span class="n">model</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_scheduler_loss</span><span class="p">,</span>
@@ -1510,7 +1515,7 @@
                 <span class="n">check_every</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_check_every</span><span class="p">,</span>
                 <span class="n">plateau_patience</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_plateau_patience</span><span class="p">,</span>
                 <span class="n">ema</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_ema</span><span class="p">,</span>
-                <span class="n">max_global_batch</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_max_batch</span><span class="p">,</span>
+                <span class="n">max_global_batch</span><span class="o">=</span><span class="n">max_B</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="n">bce</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BCEWithLogitsLoss</span><span class="p">()</span>
