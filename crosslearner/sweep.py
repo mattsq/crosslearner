@@ -110,6 +110,9 @@ def main(argv: Iterable[str] | None = None) -> None:
             phi_layers=params["phi_layers"],
             head_layers=params["head_layers"],
             disc_layers=params["disc_layers"],
+            phi_dropout=params["phi_dropout"],
+            head_dropout=params["head_dropout"],
+            disc_dropout=params["disc_dropout"],
             batch_norm=params["batch_norm"],
         )
         train_cfg = TrainingConfig(
@@ -119,9 +122,6 @@ def main(argv: Iterable[str] | None = None) -> None:
             alpha_out=params["alpha_out"],
             beta_cons=params["beta_cons"],
             gamma_adv=params["gamma_adv"],
-            phi_dropout=params["phi_dropout"],
-            head_dropout=params["head_dropout"],
-            disc_dropout=params["disc_dropout"],
             spectral_norm=params["spectral_norm"],
             verbose=False,
         )
