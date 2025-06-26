@@ -7,6 +7,9 @@ corrupted inputs from :class:`crosslearner.datasets.MaskedFeatureDataset` and a
 linear decoder tries to predict the original features.  Only the shared
 representation network ``phi`` and this decoder are updated.
 
+When ``verbose`` is enabled the average reconstruction loss for each
+pretraining epoch is printed to the console.
+
 ``pretrain_mask_prob`` controls the fraction of features set to zero, mimicking
 missing covariates.  ``pretrain_lr`` can override the encoder's learning rate
 for this phase while ``finetune_lr`` specifies the learning rate for subsequent
