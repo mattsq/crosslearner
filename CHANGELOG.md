@@ -110,6 +110,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added missing docstrings across several modules to improve code clarity
 - Improved adaptive batch scheduler with unified autocast and new unit tests
+- Exposed additional adaptive batch parameters (`gns_band`, `gns_growth_factor`,
+  `gns_check_every`, `gns_plateau_patience`, `gns_ema`, `gns_max_batch`) via
+  ``TrainingConfig``
 - Logged reconstruction loss during representation pretraining
 - Logged batch progress with a progress bar when ``verbose`` is enabled during
   training

@@ -8,6 +8,7 @@ from crosslearner.models.acx import ACX
 from crosslearner.training.train_acx import train_acx
 from crosslearner.training import ModelConfig, TrainingConfig
 from crosslearner.training.trainer import ACXTrainer
+from crosslearner.utils import GNSBatchScheduler
 import torch.nn as nn
 import pytest
 from torch.utils.data import DataLoader, TensorDataset
@@ -519,3 +520,25 @@ def test_pretrain_with_embeddings():
     cfg = TrainingConfig(pretrain_epochs=1, epochs=1, verbose=False)
     train_acx(loader, model_cfg, cfg, device="cpu")
     assert cfg.lr_g < 1e-3
+
+
+def test_adaptive_batch_parameters(monkeypatch):
+    loader, _ = get_toy_dataloader(batch_size=2, n=8, p=4)
+    model_cfg = ModelConfig(p=4)
+    cfg = TrainingConfig(
+        epochs=1,
+        adaptive_batch=True,
+        gns_target=1.0,
+        gns_band=1.0,
+        gns_growth_factor=2,
+        gns_check_every=1,
+        gns_plateau_patience=1,
+        gns_ema=0.0,
+        gns_max_batch=4,
+        verbose=False,
+    )
+    trainer = ACXTrainer(model_cfg, cfg, device="cpu")
+    monkeypatch.setattr(GNSBatchScheduler, "_grad_noise_scale", lambda self, a, b: 0.0)
+    trainer.train(loader)
+    assert trainer.scheduler is not None
+    assert trainer.scheduler.loader.batch_sampler.batch_size == 4

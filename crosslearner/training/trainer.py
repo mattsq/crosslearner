@@ -1138,6 +1138,12 @@ class ACXTrainer:
                 loader,
                 opt_g,
                 target_gns=cfg.gns_target,
+                band=cfg.gns_band,
+                growth_factor=cfg.gns_growth_factor,
+                check_every=cfg.gns_check_every,
+                plateau_patience=cfg.gns_plateau_patience,
+                ema=cfg.gns_ema,
+                max_global_batch=cfg.gns_max_batch,
             )
 
         bce = nn.BCEWithLogitsLoss()
