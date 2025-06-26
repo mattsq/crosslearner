@@ -21,6 +21,7 @@ dependencies = [
     "optuna",
     "onnx",
     "onnxruntime",
+    "tqdm",
 ]
 
 [project.scripts]
