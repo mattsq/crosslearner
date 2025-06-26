@@ -202,3 +202,31 @@ class TrainingConfig:
         1.0
         #: Target gradient noise scale triggering batch growth.
     )
+    gns_band: float = (
+        0.7
+        #: Multiplicative tolerance around ``gns_target`` before growing the
+        #: batch size.
+    )
+    gns_growth_factor: int = (
+        2
+        #: Factor by which to multiply the batch size when ``gns_target`` is
+        #: reached.
+    )
+    gns_check_every: int = (
+        200
+        #: Number of training steps between gradient noise scale evaluations.
+    )
+    gns_plateau_patience: int = (
+        3
+        #: Force a batch growth step after this many evaluations without
+        #: improvement in the validation loss.
+    )
+    gns_ema: float = (
+        0.9
+        #: Exponential moving average factor for smoothing the gradient noise
+        #: scale estimates.
+    )
+    gns_max_batch: Optional[int] = (
+        None
+        #: Optional hard limit on the batch size reached by the scheduler.
+    )
