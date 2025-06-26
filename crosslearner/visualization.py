@@ -26,16 +26,57 @@ def plot_losses(history: History):
     ax1.plot(epochs, [h.loss_adv for h in history], label="adversarial")
     ax1.set_xlabel("epoch")
     ax1.set_ylabel("loss")
-    has_val = any(h.val_pehe is not None for h in history)
-    if has_val:
+    has_metric = any(h.val_pehe is not None for h in history)
+    has_val_losses = any(
+        h.val_loss_y is not None
+        or h.val_loss_cons is not None
+        or h.val_loss_adv is not None
+        for h in history
+    )
+
+    prefix = "val" if has_metric else "risk"
+
+    if has_val_losses:
+        if any(h.val_loss_y is not None for h in history):
+            ax1.plot(
+                epochs,
+                [
+                    h.val_loss_y if h.val_loss_y is not None else float("nan")
+                    for h in history
+                ],
+                "C0--",
+                label=f"{prefix}_loss_y",
+            )
+        if any(h.val_loss_cons is not None for h in history):
+            ax1.plot(
+                epochs,
+                [
+                    h.val_loss_cons if h.val_loss_cons is not None else float("nan")
+                    for h in history
+                ],
+                "C1--",
+                label=f"{prefix}_loss_cons",
+            )
+        if any(h.val_loss_adv is not None for h in history):
+            ax1.plot(
+                epochs,
+                [
+                    h.val_loss_adv if h.val_loss_adv is not None else float("nan")
+                    for h in history
+                ],
+                "C2--",
+                label=f"{prefix}_loss_adv",
+            )
+
+    if has_metric:
         ax2 = ax1.twinx()
         ax2.plot(
             epochs,
             [h.val_pehe if h.val_pehe is not None else float("nan") for h in history],
             "k--",
-            label="val_pehe",
+            label="val_pehe" if prefix == "val" else "val_risk",
         )
-        ax2.set_ylabel("PEHE")
+        ax2.set_ylabel("PEHE" if prefix == "val" else "risk")
         lines1, labels1 = ax1.get_legend_handles_labels()
         lines2, labels2 = ax2.get_legend_handles_labels()
         ax2.legend(lines1 + lines2, labels1 + labels2)
