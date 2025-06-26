@@ -16,6 +16,7 @@ from torch.utils.data import (
     SequentialSampler,
 )
 from torch.utils.tensorboard import SummaryWriter
+from tqdm.auto import tqdm
 
 from .config import ModelConfig, TrainingConfig
 from .history import EpochStats, History
@@ -274,7 +275,14 @@ class ACXTrainer:
         for epoch in range(cfg.pretrain_epochs):
             loss_sum = 0.0
             batch_count = 0
-            for batch in pre_loader:
+            batch_iter = pre_loader
+            if cfg.verbose:
+                batch_iter = tqdm(
+                    pre_loader,
+                    desc=f"pretrain {epoch + 1}/{cfg.pretrain_epochs}",
+                    leave=False,
+                )
+            for batch in batch_iter:
                 if len(batch) == 3:
                     x_m, x_cat, x = batch
                     x_cat = x_cat.to(self.device)
@@ -669,7 +677,15 @@ class ACXTrainer:
         }
         rep_counts = {0: 0, 1: 0}
 
-        for batch in loader:
+        batch_iter = loader
+        if cfg.verbose:
+            batch_iter = tqdm(
+                loader,
+                desc=f"epoch {epoch+1}/{cfg.epochs}",
+                leave=False,
+            )
+
+        for batch in batch_iter:
             if len(batch) == 4:
                 Xb, Xcb, Tb, Yb = batch
                 Xcb = Xcb.to(device)
