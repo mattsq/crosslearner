@@ -534,11 +534,11 @@ def test_adaptive_batch_parameters(monkeypatch):
         gns_check_every=1,
         gns_plateau_patience=1,
         gns_ema=0.0,
-        gns_max_batch=4,
+        gns_max_batch=None,
         verbose=False,
     )
     trainer = ACXTrainer(model_cfg, cfg, device="cpu")
     monkeypatch.setattr(GNSBatchScheduler, "_grad_noise_scale", lambda self, a, b: 0.0)
     trainer.train(loader)
     assert trainer.scheduler is not None
-    assert trainer.scheduler.loader.batch_sampler.batch_size == 4
+    assert trainer.scheduler.max_B == len(loader.dataset)

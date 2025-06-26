@@ -81,7 +81,8 @@ class GNSBatchScheduler:
             plateau_patience: Number of evaluations without improvement before
                 forcing a growth step when ``val_loss`` plateaus.
             ema: Exponential moving average factor for smoothing GNS.
-            max_global_batch: Optional cap on the absolute batch size.
+            max_global_batch: Optional cap on the absolute batch size. ``None``
+                uses the full dataset size.
         """
         self.model = model
         self.loss_fn = loss_fn
@@ -97,7 +98,11 @@ class GNSBatchScheduler:
         self.bad_evals = 0
         self.best_val = math.inf
         self.step = 0
-        self.max_B = max_global_batch
+        self.max_B = (
+            max_global_batch
+            if max_global_batch is not None
+            else len(dataloader.dataset)
+        )
         self.smoothed_gns = 0.0
         self.base_lr = [
             g["lr"] / self.loader.batch_sampler.batch_size
