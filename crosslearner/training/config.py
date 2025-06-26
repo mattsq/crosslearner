@@ -229,4 +229,5 @@ class TrainingConfig:
     gns_max_batch: Optional[int] = (
         None
         #: Optional hard limit on the batch size reached by the scheduler.
+        #: ``None`` defaults to the full dataset size.
     )

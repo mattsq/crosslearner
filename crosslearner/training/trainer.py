@@ -1132,6 +1132,11 @@ class ACXTrainer:
         opt_g, opt_d = self._make_optimizers()
         sched_g, sched_d = self._make_schedulers(opt_g, opt_d)
         if cfg.adaptive_batch:
+            max_B = (
+                cfg.gns_max_batch
+                if cfg.gns_max_batch is not None
+                else len(loader.dataset)
+            )
             self.scheduler = GNSBatchScheduler(
                 model,
                 self._scheduler_loss,
@@ -1143,7 +1148,7 @@ class ACXTrainer:
                 check_every=cfg.gns_check_every,
                 plateau_patience=cfg.gns_plateau_patience,
                 ema=cfg.gns_ema,
-                max_global_batch=cfg.gns_max_batch,
+                max_global_batch=max_B,
             )
 
         bce = nn.BCEWithLogitsLoss()

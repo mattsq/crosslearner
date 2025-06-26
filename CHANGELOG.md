@@ -116,3 +116,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Logged reconstruction loss during representation pretraining
 - Logged batch progress with a progress bar when ``verbose`` is enabled during
   training
+- ``gns_max_batch`` now defaults to the dataset size when using adaptive
+  batching
