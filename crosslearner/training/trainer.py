@@ -271,7 +271,9 @@ class ACXTrainer:
         mse = nn.MSELoss()
         was_training = self.model.training
         self.model.train()
-        for _ in range(cfg.pretrain_epochs):
+        for epoch in range(cfg.pretrain_epochs):
+            loss_sum = 0.0
+            batch_count = 0
             for batch in pre_loader:
                 if len(batch) == 3:
                     x_m, x_cat, x = batch
@@ -287,6 +289,14 @@ class ACXTrainer:
                 opt.zero_grad(set_to_none=True)
                 loss.backward()
                 opt.step()
+                loss_sum += loss.item()
+                batch_count += 1
+            if cfg.verbose:
+                mean_loss = loss_sum / max(1, batch_count)
+                print(
+                    f"pretrain epoch {epoch + 1}/{cfg.pretrain_epochs} "
+                    f"recon_loss={mean_loss:.4f}"
+                )
         cfg.lr_g = cfg.finetune_lr or cfg.lr_g * 0.1
         if not was_training:
             self.model.eval()
