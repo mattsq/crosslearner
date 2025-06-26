@@ -569,6 +569,34 @@
     <span class="n">gns_target</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
         <span class="mf">1.0</span>
         <span class="c1">#: Target gradient noise scale triggering batch growth.</span>
+    <span class="p">)</span>
+    <span class="n">gns_band</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.7</span>
+        <span class="c1">#: Multiplicative tolerance around ``gns_target`` before growing the</span>
+        <span class="c1">#: batch size.</span>
+    <span class="p">)</span>
+    <span class="n">gns_growth_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mi">2</span>
+        <span class="c1">#: Factor by which to multiply the batch size when ``gns_target`` is</span>
+        <span class="c1">#: reached.</span>
+    <span class="p">)</span>
+    <span class="n">gns_check_every</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mi">200</span>
+        <span class="c1">#: Number of training steps between gradient noise scale evaluations.</span>
+    <span class="p">)</span>
+    <span class="n">gns_plateau_patience</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mi">3</span>
+        <span class="c1">#: Force a batch growth step after this many evaluations without</span>
+        <span class="c1">#: improvement in the validation loss.</span>
+    <span class="p">)</span>
+    <span class="n">gns_ema</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.9</span>
+        <span class="c1">#: Exponential moving average factor for smoothing the gradient noise</span>
+        <span class="c1">#: scale estimates.</span>
+    <span class="p">)</span>
+    <span class="n">gns_max_batch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">None</span>
+        <span class="c1">#: Optional hard limit on the batch size reached by the scheduler.</span>
     <span class="p">)</span></div>
 
 </pre></div>

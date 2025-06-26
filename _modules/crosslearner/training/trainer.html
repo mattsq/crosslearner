@@ -1505,6 +1505,12 @@
                 <span class="n">loader</span><span class="p">,</span>
                 <span class="n">opt_g</span><span class="p">,</span>
                 <span class="n">target_gns</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_target</span><span class="p">,</span>
+                <span class="n">band</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_band</span><span class="p">,</span>
+                <span class="n">growth_factor</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_growth_factor</span><span class="p">,</span>
+                <span class="n">check_every</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_check_every</span><span class="p">,</span>
+                <span class="n">plateau_patience</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_plateau_patience</span><span class="p">,</span>
+                <span class="n">ema</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_ema</span><span class="p">,</span>
+                <span class="n">max_global_batch</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">gns_max_batch</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="n">bce</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BCEWithLogitsLoss</span><span class="p">()</span>

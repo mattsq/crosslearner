@@ -373,7 +373,7 @@
 <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> batch size during training.  The scheduler estimates the
 <em>gradient noise scale</em> (GNS) every few steps using two mini-batches. When the
 noise falls below <code class="docutils literal notranslate"><span class="pre">gns_target</span></code> the batch size is multiplied by
-<code class="docutils literal notranslate"><span class="pre">growth_factor</span></code> and the optimiser learning rates are scaled accordingly.</p>
+<code class="docutils literal notranslate"><span class="pre">gns_growth_factor</span></code> and the optimiser learning rates are scaled accordingly.</p>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
 <p>Early epochs often benefit from small batches that yield noisy but informative
@@ -388,10 +388,16 @@ while still reaching a stable large-batch regime.</p>
     <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
     <span class="n">adaptive_batch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">gns_target</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">gns_growth_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Additional knobs control how aggressively the batch size grows. <code class="docutils literal notranslate"><span class="pre">gns_band</span></code>
+sets the tolerance around <code class="docutils literal notranslate"><span class="pre">gns_target</span></code>, <code class="docutils literal notranslate"><span class="pre">gns_check_every</span></code> determines how
+often the gradient noise scale is measured and <code class="docutils literal notranslate"><span class="pre">gns_plateau_patience</span></code> triggers
+growth when validation loss stops improving. <code class="docutils literal notranslate"><span class="pre">gns_ema</span></code> smooths the noise
+estimates and <code class="docutils literal notranslate"><span class="pre">gns_max_batch</span></code> caps the final batch size.</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
