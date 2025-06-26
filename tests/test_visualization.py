@@ -32,6 +32,45 @@ def test_plot_losses_returns_figure():
     matplotlib.pyplot.close(fig)
 
 
+def test_plot_losses_with_validation_losses():
+    hist = [
+        EpochStats(
+            epoch=0,
+            loss_d=0.0,
+            loss_g=0.0,
+            loss_y=0.0,
+            loss_cons=0.0,
+            loss_adv=0.0,
+            val_pehe=1.0,
+            val_loss_y=0.1,
+            val_loss_cons=0.2,
+            val_loss_adv=0.3,
+        )
+    ]
+    fig = plot_losses(hist)
+    assert fig is not None
+    matplotlib.pyplot.close(fig)
+
+
+def test_plot_losses_with_risk_only():
+    hist = [
+        EpochStats(
+            epoch=0,
+            loss_d=0.0,
+            loss_g=0.0,
+            loss_y=0.0,
+            loss_cons=0.0,
+            loss_adv=0.0,
+            val_loss_y=0.1,
+            val_loss_cons=0.2,
+            val_loss_adv=0.3,
+        )
+    ]
+    fig = plot_losses(hist)
+    assert fig is not None
+    matplotlib.pyplot.close(fig)
+
+
 def test_scatter_tau_returns_figure():
     model = ACX(p=3)
     X = torch.randn(4, 3)
