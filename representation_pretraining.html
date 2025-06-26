@@ -374,6 +374,8 @@ is trained to reconstruct masked features.  During this stage the model is fed
 corrupted inputs from <a class="reference internal" href="api/crosslearner.datasets.html#crosslearner.datasets.MaskedFeatureDataset" title="crosslearner.datasets.MaskedFeatureDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">crosslearner.datasets.MaskedFeatureDataset</span></code></a> and a
 linear decoder tries to predict the original features.  Only the shared
 representation network <code class="docutils literal notranslate"><span class="pre">phi</span></code> and this decoder are updated.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">verbose</span></code> is enabled the average reconstruction loss for each
+pretraining epoch is printed to the console.</p>
 <p><code class="docutils literal notranslate"><span class="pre">pretrain_mask_prob</span></code> controls the fraction of features set to zero, mimicking
 missing covariates.  <code class="docutils literal notranslate"><span class="pre">pretrain_lr</span></code> can override the encoder’s learning rate
 for this phase while <code class="docutils literal notranslate"><span class="pre">finetune_lr</span></code> specifies the learning rate for subsequent
