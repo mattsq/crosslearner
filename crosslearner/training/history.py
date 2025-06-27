@@ -20,6 +20,9 @@ class EpochStats:
     val_loss_adv: Optional[float] = None
     grad_norm_g: Optional[float] = None
     grad_norm_d: Optional[float] = None
+    w_y: Optional[float] = None
+    w_cons: Optional[float] = None
+    w_adv: Optional[float] = None
     lr_g: Optional[float] = None
     lr_d: Optional[float] = None
     gns: Optional[float] = None

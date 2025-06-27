@@ -166,6 +166,27 @@ def test_plot_grad_norms_returns_figure():
     matplotlib.pyplot.close(fig)
 
 
+def test_plot_grad_norms_with_weights_returns_figure():
+    hist = [
+        EpochStats(
+            epoch=0,
+            loss_d=0.0,
+            loss_g=0.0,
+            loss_y=0.0,
+            loss_cons=0.0,
+            loss_adv=0.0,
+            grad_norm_g=1.0,
+            grad_norm_d=2.0,
+            w_y=0.5,
+            w_cons=1.0,
+            w_adv=1.5,
+        )
+    ]
+    fig = plot_grad_norms(hist)
+    assert fig is not None
+    matplotlib.pyplot.close(fig)
+
+
 def test_plot_learning_rates_returns_figure():
     hist = [
         EpochStats(
