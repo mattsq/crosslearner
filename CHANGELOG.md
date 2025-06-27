@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Fixed `crosslearner-sweep` crash when `disentangle=True` by sampling
+  `rep_dim_c`, `rep_dim_a` and `rep_dim_i`
 - Extended ``plot_losses`` to visualise validation losses and identify risk-based metrics
 - Added `get_random_dag_dataloader` for generating random DAG-based synthetic datasets
 - Initial creation of CHANGELOG
