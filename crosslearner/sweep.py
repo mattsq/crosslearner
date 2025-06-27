@@ -84,7 +84,9 @@ def _space(trial: optuna.Trial) -> dict:
         "head_dropout": trial.suggest_float("head_dropout", 0.0, 0.5),
         "disc_dropout": trial.suggest_float("disc_dropout", 0.0, 0.5),
         "epochs": trial.suggest_int("epochs", 10, 50),
-        "batch_norm": trial.suggest_categorical("batch_norm", [True, False]),
+        "normalization": trial.suggest_categorical(
+            "normalization", [None, "batch", "layer", "group"]
+        ),
         "spectral_norm": trial.suggest_categorical("spectral_norm", [True, False]),
         # Newly exposed model parameters
         "residual": trial.suggest_categorical("residual", [True, False]),

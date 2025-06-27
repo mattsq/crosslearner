@@ -44,6 +44,22 @@ def _get_activation(act: str | Callable[[], nn.Module]) -> Callable[[], nn.Modul
     return act
 
 
+def _get_norm(norm: str | None, h: int) -> nn.Module | None:
+    """Return a normalisation layer for ``h`` features."""
+
+    if norm is None:
+        return None
+    name = norm.lower()
+    if name == "batch":
+        return nn.BatchNorm1d(h)
+    if name == "layer":
+        return nn.LayerNorm(h)
+    if name == "group":
+        groups = min(8, h)
+        return nn.GroupNorm(groups, h)
+    raise ValueError(f"Unknown normalization '{norm}'")
+
+
 class MLP(nn.Module):
     """Simple multi-layer perceptron used throughout the framework.
 
@@ -55,8 +71,8 @@ class MLP(nn.Module):
         dropout: Dropout probability applied after each hidden layer.
         residual: If ``True`` add skip connections between blocks when the
             dimensions match.
-        batch_norm: If ``True`` add ``BatchNorm1d`` after each hidden linear
-            layer.
+        norm: Optional normalization layer (``"batch"``, ``"layer"`` or
+            ``"group"``) after each hidden linear.
     """
 
     def __init__(
@@ -68,7 +84,7 @@ class MLP(nn.Module):
         activation: str | Callable[[], nn.Module] = nn.ReLU,
         dropout: float = 0.0,
         residual: bool = False,
-        batch_norm: bool = False,
+        norm: str | None = None,
     ) -> None:
         super().__init__()
         self.residual = residual
@@ -81,8 +97,9 @@ class MLP(nn.Module):
             raise ValueError(f"Dropout must be in the range [0, 1), but got {dropout}.")
         for h in hidden:
             block = [nn.Linear(d, h)]
-            if batch_norm:
-                block.append(nn.BatchNorm1d(h))
+            norm_layer = _get_norm(norm, h)
+            if norm_layer is not None:
+                block.append(norm_layer)
             block.append(act_fn())
             if dropout > 0:
                 block.append(nn.Dropout(dropout))
@@ -143,7 +160,7 @@ class MOEHeads(nn.Module):
         activation: str | Callable[[], nn.Module] = nn.ReLU,
         dropout: float = 0.0,
         residual: bool = False,
-        batch_norm: bool = False,
+        norm: str | None = None,
     ) -> None:
         super().__init__()
         self.num_experts = int(num_experts)
@@ -157,7 +174,7 @@ class MOEHeads(nn.Module):
                     activation=act_fn,
                     dropout=dropout,
                     residual=residual,
-                    batch_norm=batch_norm,
+                    norm=norm,
                 )
                 for _ in range(self.num_experts)
             ]
@@ -171,7 +188,7 @@ class MOEHeads(nn.Module):
                     activation=act_fn,
                     dropout=dropout,
                     residual=residual,
-                    batch_norm=batch_norm,
+                    norm=norm,
                 )
                 for _ in range(self.num_experts)
             ]
@@ -183,7 +200,7 @@ class MOEHeads(nn.Module):
             activation=act_fn,
             dropout=dropout,
             residual=residual,
-            batch_norm=batch_norm,
+            norm=norm,
         )
         self.softmax = nn.Softmax(dim=1)
         self._gates: torch.Tensor | None = None
@@ -255,7 +272,7 @@ class ACX(nn.Module):
         head_residual: bool | None = None,
         disc_residual: bool | None = None,
         disc_pack: int = 1,
-        batch_norm: bool = False,
+        normalization: str | None = None,
         moe_experts: int = 1,
         tau_heads: int = 1,
         tau_bias: bool = True,
@@ -286,7 +303,8 @@ class ACX(nn.Module):
                 heads.
             disc_residual: Override residual connections for the discriminator.
             disc_pack: Number of samples concatenated for the discriminator.
-            batch_norm: Insert ``BatchNorm1d`` layers in all MLPs.
+            normalization: Optional normalization layer (``"batch"``, ``"layer"``
+                or ``"group"``) inserted in all MLPs.
             moe_experts: Number of expert pairs for the potential-outcome heads.
             tau_heads: Number of parallel effect heads for ensembling.
             tau_bias: If ``False`` freeze effect head biases at zero.
@@ -336,7 +354,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=phi_dropout,
             residual=phi_residual,
-            batch_norm=batch_norm,
+            norm=normalization,
         )
         head_in = self.rep_dim_c + self.rep_dim_a if disentangle else rep_dim_total
 
@@ -347,7 +365,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
-            batch_norm=batch_norm,
+            norm=normalization,
         )
         self.mu1 = MLP(
             head_in,
@@ -356,7 +374,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
-            batch_norm=batch_norm,
+            norm=normalization,
         )
         if self.use_moe:
             self.moe = MOEHeads(
@@ -366,7 +384,7 @@ class ACX(nn.Module):
                 activation=act_fn,
                 dropout=head_dropout,
                 residual=head_residual,
-                batch_norm=batch_norm,
+                norm=normalization,
             )
         else:
             self.moe = NullMOE(self.mu0, self.mu1)
@@ -378,7 +396,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=head_dropout,
             residual=head_residual,
-            batch_norm=batch_norm,
+            norm=normalization,
         )
         self.prop.net.add_module("sigmoid", nn.Sigmoid())
         self.epsilon = nn.Parameter(torch.tensor(0.0))
@@ -392,7 +410,7 @@ class ACX(nn.Module):
                     activation=act_fn,
                     dropout=head_dropout,
                     residual=head_residual,
-                    batch_norm=batch_norm,
+                    norm=normalization,
                 )
                 for _ in range(self.num_tau_heads)
             ]
@@ -412,7 +430,7 @@ class ACX(nn.Module):
             activation=act_fn,
             dropout=disc_dropout,
             residual=disc_residual,
-            batch_norm=batch_norm,
+            norm=normalization,
         )
         if disentangle:
             self.adv_t = MLP(
@@ -422,7 +440,7 @@ class ACX(nn.Module):
                 activation=act_fn,
                 dropout=disc_dropout,
                 residual=disc_residual,
-                batch_norm=batch_norm,
+                norm=normalization,
             )
             self.adv_y = MLP(
                 self.rep_dim_c + self.rep_dim_i,
@@ -431,7 +449,7 @@ class ACX(nn.Module):
                 activation=act_fn,
                 dropout=disc_dropout,
                 residual=disc_residual,
-                batch_norm=batch_norm,
+                norm=normalization,
             )
         else:
             self.adv_t = None

@@ -343,12 +343,20 @@ def test_train_acx_dropout_options():
     assert any(isinstance(m, nn.Dropout) for m in model.disc.net.modules())
 
 
-def test_train_acx_batch_norm_option():
+@pytest.mark.parametrize(
+    "norm, cls",
+    [
+        ("batch", nn.BatchNorm1d),
+        ("layer", nn.LayerNorm),
+        ("group", nn.GroupNorm),
+    ],
+)
+def test_train_acx_norm_option(norm, cls):
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
-    model_cfg = ModelConfig(p=4, batch_norm=True)
+    model_cfg = ModelConfig(p=4, normalization=norm)
     train_cfg = TrainingConfig(epochs=1, verbose=False)
     model = train_acx(loader, model_cfg, train_cfg, device="cpu")
-    assert any(isinstance(m, nn.BatchNorm1d) for m in model.phi.net.modules())
+    assert any(isinstance(m, cls) for m in model.phi.net.modules())
 
 
 def test_alt_adv_losses():
