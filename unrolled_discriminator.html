@@ -394,6 +394,7 @@ discriminator from collapsing to trivial solutions.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
     <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
     <span class="n">unrolled_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">unrolled_steps_epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
@@ -411,7 +412,16 @@ or imbalanced datasets where the discriminator can easily separate real
 and fake samples. For large datasets or well-balanced problems the
 additional computation may not be worth the minor stability gains.
 Start with <code class="docutils literal notranslate"><span class="pre">unrolled_steps=1</span></code> and disable the feature if training
-slows down without improvement.</p>
+slows down without improvement. Limit unrolling to early epochs via
+<code class="docutils literal notranslate"><span class="pre">unrolled_steps_epochs</span></code> to avoid overfitting the generator to the
+critic:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">unrolled_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">unrolled_steps_epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
