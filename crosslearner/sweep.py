@@ -133,6 +133,13 @@ def _space(trial: optuna.Trial) -> dict:
         ),
         "rep_momentum": trial.suggest_float("rep_momentum", 0.9, 0.999),
     }
+
+    if params["disentangle"]:
+        params.update(
+            rep_dim_c=trial.suggest_int("rep_dim_c", 16, 64),
+            rep_dim_a=trial.suggest_int("rep_dim_a", 16, 64),
+            rep_dim_i=trial.suggest_int("rep_dim_i", 16, 64),
+        )
     return params
 
 
