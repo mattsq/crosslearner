@@ -542,3 +542,12 @@ def test_adaptive_batch_parameters(monkeypatch):
     trainer.train(loader)
     assert trainer.scheduler is not None
     assert trainer.scheduler.max_B == len(loader.dataset)
+
+
+def test_train_acx_gradnorm():
+    loader, _ = get_toy_dataloader(batch_size=4, n=16, p=4)
+    model_cfg = ModelConfig(p=4)
+    cfg = TrainingConfig(epochs=1, use_gradnorm=True, verbose=False)
+    trainer = ACXTrainer(model_cfg, cfg, device="cpu")
+    trainer.train(loader)
+    assert trainer.loss_weights.numel() == 3

@@ -231,3 +231,6 @@ class TrainingConfig:
         #: Optional hard limit on the batch size reached by the scheduler.
         #: ``None`` defaults to the full dataset size.
     )
+    use_gradnorm: bool = False  #: Enable GradNorm adaptive loss balancing.
+    gradnorm_alpha: float = 1.0  #: Rebalancing strength for GradNorm.
+    gradnorm_lr: float = 1e-3  #: Learning rate for GradNorm weight updates.

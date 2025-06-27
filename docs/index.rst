@@ -34,6 +34,7 @@ the training procedure, hyperparameter sweeps and available modules.
    training_history
    tensorboard_logging
    adaptive_batch_size
+   gradnorm
 
 .. toctree::
    :maxdepth: 2
