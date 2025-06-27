@@ -109,6 +109,11 @@ class TrainingConfig:
     lambda_gp_min: float = 1e-3
     lambda_gp_max: float = 100.0
     unrolled_steps: int = 0
+    unrolled_steps_epochs: int = (
+        0
+        #: Apply ``unrolled_steps`` for at most this many epochs. ``0``
+        #: keeps unrolling enabled throughout training.
+    )
     eta_fm: float = 5.0
     grl_weight: float = 1.0
     contrastive_weight: float = 0.0
