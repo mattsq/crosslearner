@@ -86,6 +86,48 @@ def _space(trial: optuna.Trial) -> dict:
         "epochs": trial.suggest_int("epochs", 10, 50),
         "batch_norm": trial.suggest_categorical("batch_norm", [True, False]),
         "spectral_norm": trial.suggest_categorical("spectral_norm", [True, False]),
+        # Newly exposed model parameters
+        "residual": trial.suggest_categorical("residual", [True, False]),
+        "disc_pack": trial.suggest_int("disc_pack", 1, 4),
+        "moe_experts": trial.suggest_int("moe_experts", 1, 4),
+        "tau_heads": trial.suggest_int("tau_heads", 1, 4),
+        "tau_bias": trial.suggest_categorical("tau_bias", [True, False]),
+        # Newly exposed training parameters
+        "warm_start": trial.suggest_int("warm_start", 0, 5),
+        "adv_loss": trial.suggest_categorical("adv_loss", ["bce", "hinge", "ls"]),
+        "feature_matching": trial.suggest_categorical(
+            "feature_matching", [True, False]
+        ),
+        "label_smoothing": trial.suggest_categorical("label_smoothing", [True, False]),
+        "instance_noise": trial.suggest_categorical("instance_noise", [True, False]),
+        "gradient_reversal": trial.suggest_categorical(
+            "gradient_reversal", [True, False]
+        ),
+        "disc_steps": trial.suggest_int("disc_steps", 1, 3),
+        "disc_aug_prob": trial.suggest_float("disc_aug_prob", 0.0, 0.5),
+        "disc_aug_noise": trial.suggest_float("disc_aug_noise", 0.0, 0.1),
+        "mmd_weight": trial.suggest_float("mmd_weight", 0.0, 1.0),
+        "mmd_sigma": trial.suggest_float("mmd_sigma", 0.1, 2.0),
+        "lambda_gp": trial.suggest_float("lambda_gp", 0.0, 20.0),
+        "r1_gamma": trial.suggest_float("r1_gamma", 0.0, 2.0),
+        "r2_gamma": trial.suggest_float("r2_gamma", 0.0, 2.0),
+        "adaptive_reg": trial.suggest_categorical("adaptive_reg", [True, False]),
+        "unrolled_steps": trial.suggest_int("unrolled_steps", 0, 5),
+        "grl_weight": trial.suggest_float("grl_weight", 0.5, 2.0),
+        "contrastive_weight": trial.suggest_float("contrastive_weight", 0.0, 1.0),
+        "delta_prop": trial.suggest_float("delta_prop", 0.0, 1.0),
+        "lambda_dr": trial.suggest_float("lambda_dr", 0.0, 1.0),
+        "noise_std": trial.suggest_float("noise_std", 0.0, 0.1),
+        "noise_consistency_weight": trial.suggest_float(
+            "noise_consistency_weight", 0.0, 1.0
+        ),
+        "disentangle": trial.suggest_categorical("disentangle", [True, False]),
+        "adv_t_weight": trial.suggest_float("adv_t_weight", 0.0, 1.0),
+        "adv_y_weight": trial.suggest_float("adv_y_weight", 0.0, 1.0),
+        "rep_consistency_weight": trial.suggest_float(
+            "rep_consistency_weight", 0.0, 1.0
+        ),
+        "rep_momentum": trial.suggest_float("rep_momentum", 0.9, 0.999),
     }
     return params
 
@@ -106,25 +148,14 @@ def main(argv: Iterable[str] | None = None) -> None:
         params = _space(trial)
         model_cfg = ModelConfig(
             p=p,
-            rep_dim=params["rep_dim"],
-            phi_layers=params["phi_layers"],
-            head_layers=params["head_layers"],
-            disc_layers=params["disc_layers"],
-            phi_dropout=params["phi_dropout"],
-            head_dropout=params["head_dropout"],
-            disc_dropout=params["disc_dropout"],
-            batch_norm=params["batch_norm"],
+            **{
+                k: v for k, v in params.items() if k in ModelConfig.__dataclass_fields__
+            },
         )
-        train_cfg = TrainingConfig(
-            epochs=params["epochs"],
-            lr_g=params["lr_g"],
-            lr_d=params["lr_d"],
-            alpha_out=params["alpha_out"],
-            beta_cons=params["beta_cons"],
-            gamma_adv=params["gamma_adv"],
-            spectral_norm=params["spectral_norm"],
-            verbose=False,
-        )
+        train_params = {
+            k: v for k, v in params.items() if k in TrainingConfig.__dataclass_fields__
+        }
+        train_cfg = TrainingConfig(**train_params, verbose=False)
         model = train_acx(loader, model_cfg, train_cfg, device=device)
         if mu0 is not None and mu1 is not None:
             return evaluate(model, X, mu0, mu1)
