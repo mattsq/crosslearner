@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added synthetic data generation utilities with configurable noise and missing outcomes
 - MLP and ACX are now TorchScript and ONNX exportable via `export_model`
 - Added optional batch normalization through `batch_norm` flag in `ModelConfig`
+- Extended `ModelConfig` with `normalization` option supporting layer or group
+  normalisation in place of batch norm
 - Expanded documentation: added setup instructions, dataset descriptions and
   testing guide
 - Added optional contrastive loss via `contrastive_weight` for balanced

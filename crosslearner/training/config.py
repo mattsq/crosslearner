@@ -33,7 +33,11 @@ class ModelConfig:
     disc_pack: int = (
         1  #: Number of samples concatenated for PacGAN-style discriminator.
     )
-    batch_norm: bool = False
+    normalization: str | None = (
+        None
+        #: Optional normalization layer after each hidden linear.
+        #: Choose from ``"batch"``, ``"layer"`` or ``"group"``.
+    )
     moe_experts: int = 1  #: Number of expert pairs for mixture-of-experts heads.
     tau_heads: int = 1  #: Number of effect heads for epistemic ensembling.
     tau_bias: bool = True  #: If ``False`` freeze the effect head biases at zero.

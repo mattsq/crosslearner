@@ -47,9 +47,9 @@ following parameters:
 ``weight_init``
   Initialisation scheme applied to linear layers. Options include
   ``"xavier_uniform"`` and ``"kaiming_uniform"``.
-``batch_norm``
-  If ``True`` insert ``BatchNorm1d`` layers after each hidden linear
-  layer.
+``normalization``
+  Optional normalisation applied after each hidden linear layer.
+  Set to ``"batch"``, ``"layer"`` or ``"group"``.
 
 New features
 ------------
@@ -87,7 +87,7 @@ The features can be controlled either directly when instantiating
         p=10,
         rep_dim=128,
         weight_init="kaiming_uniform",
-        batch_norm=True,
+        normalization="batch",
     )
 
     # Using a configuration object
@@ -95,7 +95,7 @@ The features can be controlled either directly when instantiating
         p=10,
         rep_dim=128,
         weight_init="kaiming_uniform",
-        batch_norm=True,
+        normalization="batch",
     )
     model = ACX(
         cfg.p,
@@ -113,7 +113,7 @@ The features can be controlled either directly when instantiating
         disc_residual=cfg.disc_residual,
         disc_pack=cfg.disc_pack,
         weight_init=cfg.weight_init,
-        batch_norm=cfg.batch_norm,
+        normalization=cfg.normalization,
     )
 
 References
