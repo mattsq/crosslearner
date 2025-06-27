@@ -94,7 +94,9 @@ def _space(trial: optuna.Trial) -> dict:
         "tau_bias": trial.suggest_categorical("tau_bias", [True, False]),
         # Newly exposed training parameters
         "warm_start": trial.suggest_int("warm_start", 0, 5),
-        "adv_loss": trial.suggest_categorical("adv_loss", ["bce", "hinge", "ls"]),
+        "adv_loss": trial.suggest_categorical(
+            "adv_loss", ["bce", "hinge", "ls", "rgan"]
+        ),
         "feature_matching": trial.suggest_categorical(
             "feature_matching", [True, False]
         ),
