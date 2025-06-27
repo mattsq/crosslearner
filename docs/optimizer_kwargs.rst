@@ -5,6 +5,11 @@ The ``opt_g_kwargs`` and ``opt_d_kwargs`` fields of
 :class:`~crosslearner.training.TrainingConfig` allow you to pass additional
 keyword arguments to the generator and discriminator optimisers.
 
+``opt_phi_kwargs``, ``opt_head_kwargs`` and ``opt_disc_kwargs`` further let you
+override these settings for the encoder, outcome heads and discriminator
+individually.  Values in these dictionaries take precedence over those in
+``opt_g_kwargs`` or ``opt_d_kwargs`` for the respective parameter groups.
+
 Motivation
 ----------
 
@@ -26,6 +31,9 @@ these optimisers can then be provided via ``opt_g_kwargs`` and
        optimizer="adam",
        opt_g_kwargs={"betas": (0.5, 0.999)},
        opt_d_kwargs={"betas": (0.9, 0.999)},
+       opt_phi_kwargs={"betas": (0.5, 0.9)},
+       opt_head_kwargs={"weight_decay": 1e-4},
+       opt_disc_kwargs={"betas": (0.9, 0.999)},
    )
    model = train_acx(loader, ModelConfig(p=10), cfg)
 

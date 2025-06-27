@@ -176,6 +176,25 @@ def test_train_acx_custom_optimizer():
     assert isinstance(model, ACX)
 
 
+def test_head_specific_optimizer_kwargs():
+    loader, _ = get_toy_dataloader(batch_size=8, n=32, p=3)
+    model_cfg = ModelConfig(p=3)
+    train_cfg = TrainingConfig(
+        epochs=1,
+        optimizer="sgd",
+        opt_g_kwargs={"momentum": 0.0},
+        opt_phi_kwargs={"momentum": 0.1},
+        opt_head_kwargs={"momentum": 0.2},
+        opt_disc_kwargs={"momentum": 0.3},
+        verbose=False,
+    )
+    trainer = ACXTrainer(model_cfg, train_cfg, device="cpu")
+    opt_g, opt_d = trainer._make_optimizers()
+    assert opt_g.param_groups[0]["momentum"] == 0.1
+    assert opt_g.param_groups[1]["momentum"] == 0.2
+    assert opt_d.param_groups[0]["momentum"] == 0.3
+
+
 def test_train_acx_custom_scheduler(monkeypatch):
     loader, _ = get_toy_dataloader(batch_size=8, n=32, p=3)
 

@@ -574,22 +574,34 @@ class ACXTrainer:
 
         opt_g_kwargs = cfg.opt_g_kwargs or {}
         opt_d_kwargs = cfg.opt_d_kwargs or {}
+        rep_kwargs = {**opt_g_kwargs, **(cfg.opt_rep_kwargs or {})}
+        phi_kwargs = {**rep_kwargs, **(cfg.opt_phi_kwargs or {})}
+        head_kwargs = {**opt_g_kwargs, **(cfg.opt_head_kwargs or {})}
+        disc_kwargs = {**opt_d_kwargs, **(cfg.opt_disc_kwargs or {})}
 
         opt_g = opt_cls(
-            list(model.phi.parameters())
-            + list(model.head_parameters())
-            + list(model.tau_parameters())
-            + list(model.prop.parameters())
-            + [model.epsilon],
-            lr=cfg.lr_g,
-            **opt_g_kwargs,
+            [
+                {
+                    "params": list(model.phi.parameters()),
+                    "lr": cfg.lr_g,
+                    **phi_kwargs,
+                },
+                {
+                    "params": list(model.head_parameters())
+                    + list(model.tau_parameters())
+                    + list(model.prop.parameters())
+                    + [model.epsilon],
+                    "lr": cfg.lr_g,
+                    **head_kwargs,
+                },
+            ]
         )
         disc_params = list(model.disc.parameters())
         if model.disentangle:
             disc_params += list(model.adv_t.parameters()) + list(
                 model.adv_y.parameters()
             )
-        opt_d = opt_cls(disc_params, lr=cfg.lr_d, **opt_d_kwargs)
+        opt_d = opt_cls(disc_params, lr=cfg.lr_d, **disc_kwargs)
         return opt_g, opt_d
 
     def _make_schedulers(

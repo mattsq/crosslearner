@@ -52,6 +52,10 @@ class TrainingConfig:
     optimizer: str | Type[torch.optim.Optimizer] = "adam"
     opt_g_kwargs: dict = field(default_factory=dict)
     opt_d_kwargs: dict = field(default_factory=dict)
+    opt_rep_kwargs: dict = field(default_factory=dict)
+    opt_phi_kwargs: dict = field(default_factory=dict)
+    opt_disc_kwargs: dict = field(default_factory=dict)
+    opt_head_kwargs: dict = field(default_factory=dict)
     lr_scheduler: str | Type[torch.optim.lr_scheduler._LRScheduler] | None = None
     sched_g_kwargs: dict = field(default_factory=dict)
     sched_d_kwargs: dict = field(default_factory=dict)
