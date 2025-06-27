@@ -178,6 +178,7 @@ class ACXTrainer:
             )
             self.w_opt = None
         self._gradnorm_l0: list[torch.Tensor | None] = [None, None, None]
+        self._phi_frozen = False
 
     def _clone_loader(
         self, loader: DataLoader, dataset: Dataset, *, shuffle: bool = True
@@ -1036,7 +1037,9 @@ class ACXTrainer:
                 loss_contrast = F.triplet_margin_loss(
                     hb, h_pos, h_neg, margin=cfg.contrastive_margin
                 )
-            if cfg.use_gradnorm:
+            if cfg.use_gradnorm and any(
+                p.requires_grad for p in self.model.phi.parameters()
+            ):
                 if self._gradnorm_l0[0] is None:
                     self._gradnorm_l0 = [
                         loss_y.detach(),
@@ -1341,6 +1344,14 @@ class ACXTrainer:
 
         for epoch in range(cfg.epochs):
             self.current_epoch = epoch
+            if (
+                cfg.freeze_phi_epoch is not None
+                and epoch >= cfg.freeze_phi_epoch
+                and not self._phi_frozen
+            ):
+                for p in self.model.phi.parameters():
+                    p.requires_grad_(False)
+                self._phi_frozen = True
             if cfg.active_aug_freq > 0 and epoch % cfg.active_aug_freq == 0:
                 new_x, new_t, new_y = self._search_disagreement(
                     cfg.active_aug_samples,
