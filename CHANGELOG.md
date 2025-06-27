@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `crosslearner-sweep` command for Optuna hyperparameter search
 - Fixed dropout parameters in `crosslearner-sweep` to apply to `ModelConfig`
   instead of `TrainingConfig`
+- Extended `crosslearner-sweep` to sample all configuration options
 - Added synthetic data generation utilities with configurable noise and missing outcomes
 - MLP and ACX are now TorchScript and ONNX exportable via `export_model`
 - Added optional batch normalization through `batch_norm` flag in `ModelConfig`
