@@ -56,7 +56,11 @@ def predict_tau_ensemble(
     samples = []
     for model in models:
         device = model_device(model)
+        was_training = model.training
+        model.eval()
         _, _, _, tau = model(X.to(device))
+        if was_training:
+            model.train()
         samples.append(tau.cpu())
     stacked = torch.stack(samples)
     mean = stacked.mean(dim=0)
