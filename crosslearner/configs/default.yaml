@@ -15,6 +15,10 @@ lr_d: 0.001
 optimizer: adam
 opt_g_kwargs: {}
 opt_d_kwargs: {}
+opt_rep_kwargs: {}
+opt_phi_kwargs: {}
+opt_disc_kwargs: {}
+opt_head_kwargs: {}
 epochs: 30
 grad_clip: 2.0
 warm_start: 0

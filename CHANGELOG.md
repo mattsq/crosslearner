@@ -77,6 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documented ``warm_start`` option for pretraining the generator
 - Documented ``opt_g_kwargs`` and ``opt_d_kwargs`` for custom optimizer
   arguments
+- Added ``opt_phi_kwargs``, ``opt_head_kwargs`` and ``opt_disc_kwargs`` for
+  overriding optimiser parameters of individual network components
 - Added options to log gradient norms, learning rates and weight histograms for
   improved training diagnostics
 - Extended visualisation utilities to plot auxiliary losses, gradient norms and
