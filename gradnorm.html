@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Adaptive Batch Scheduling" href="adaptive_batch_size.html" /><link rel="prev" title="Tracking Training History" href="training_history.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Gradient Reversal for Adversarial Training" href="gradient_reversal.html" /><link rel="prev" title="Adaptive Batch Scheduling" href="adaptive_batch_size.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Monitoring Training with TensorBoard - crosslearner 0.1 documentation</title>
+        <title>Adaptive Loss Balancing with GradNorm - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -231,9 +231,9 @@
 <li class="toctree-l1"><a class="reference internal" href="ttur.html">Two Time-Scale Update Rule (TTUR)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="risk_early_stopping.html">Orthogonal Risk for Early Stopping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="training_history.html">Tracking Training History</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Monitoring Training with TensorBoard</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tensorboard_logging.html">Monitoring Training with TensorBoard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adaptive_batch_size.html">Adaptive Batch Scheduling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gradnorm.html">Adaptive Loss Balancing with GradNorm</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Adaptive Loss Balancing with GradNorm</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Regularization and Tricks</span></p>
 <ul>
@@ -348,7 +348,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/tensorboard_logging.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/gradnorm.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -368,58 +368,40 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="monitoring-training-with-tensorboard">
-<h1>Monitoring Training with TensorBoard<a class="headerlink" href="#monitoring-training-with-tensorboard" title="Link to this heading">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">tensorboard_logdir</span></code> option of <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>
-enables detailed logging of the training progress. When set to a directory path
-an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.tensorboard.SummaryWriter</span></code> is created and
-standard metrics are written as event files. This includes generator and
-adversary losses as well as the validation PEHE or orthogonal risk if either
-<code class="docutils literal notranslate"><span class="pre">val_data</span></code> or <code class="docutils literal notranslate"><span class="pre">risk_data</span></code> are provided.</p>
-<p>Additional monitoring options <code class="docutils literal notranslate"><span class="pre">log_grad_norms</span></code> and <code class="docutils literal notranslate"><span class="pre">log_learning_rate</span></code>
-record gradient norms and optimiser learning rates respectively.  Setting
-<code class="docutils literal notranslate"><span class="pre">log_weight_histograms</span></code> writes parameter distributions for offline analysis.</p>
+          <section id="adaptive-loss-balancing-with-gradnorm">
+<h1>Adaptive Loss Balancing with GradNorm<a class="headerlink" href="#adaptive-loss-balancing-with-gradnorm" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">use_gradnorm</span></code> turns on dynamic weighting of the outcome, consistency and
+adversarial losses during training.  The algorithm adjusts three learnable
+weights so that the gradient norms of each objective with respect to the shared
+encoder match.  This prevents any single loss from dominating optimisation and
+removes the need to manually tune <code class="docutils literal notranslate"><span class="pre">alpha_out</span></code>, <code class="docutils literal notranslate"><span class="pre">beta_cons</span></code> and
+<code class="docutils literal notranslate"><span class="pre">gamma_adv</span></code>.</p>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
-<p>Visualising loss curves helps diagnose convergence issues and compare different
-settings. TensorBoard provides an interactive dashboard that lets you inspect
-how metrics evolve over time. This is useful when tuning hyperparameters or
-running longer experiments where printing every epoch would clutter the output.</p>
+<p>When multiple objectives compete for the same parameters, one loss can quickly
+overpower the others.  GradNorm balances the optimisation by scaling each loss
+according to its relative training speed, encouraging all tasks to learn at a
+similar rate.</p>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
-<p>Pass a directory to <code class="docutils literal notranslate"><span class="pre">tensorboard_logdir</span></code> in the training configuration:</p>
+<p>Enable the feature via <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
     <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-    <span class="n">tensorboard_logdir</span><span class="o">=</span><span class="s2">&quot;runs/experiment1&quot;</span><span class="p">,</span>
-    <span class="n">log_grad_norms</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">log_learning_rate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">use_gradnorm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>After training launch TensorBoard to view the logs:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tensorboard</span> <span class="o">--</span><span class="n">logdir</span> <span class="n">runs</span><span class="o">/</span><span class="n">experiment1</span>
-</pre></div>
-</div>
+<p><code class="docutils literal notranslate"><span class="pre">gradnorm_alpha</span></code> controls how aggressively slower objectives are up-weighted
+(default <code class="docutils literal notranslate"><span class="pre">1.0</span></code>) and <code class="docutils literal notranslate"><span class="pre">gradnorm_lr</span></code> sets the learning rate for the internal
+weight optimiser.</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
-<p>Enable <code class="docutils literal notranslate"><span class="pre">tensorboard_logdir</span></code> whenever you want a graphical overview of the
-training process. It is especially helpful during development to spot unstable
-adversarial dynamics or overfitting. For quick tests you can keep it <code class="docutils literal notranslate"><span class="pre">None</span></code> to
-avoid writing additional files.</p>
-</section>
-<section id="references">
-<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
-<div role="list" class="citation-list">
-<div class="citation" id="abadi2016" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span>Abadi2016<span class="fn-bracket">]</span></span>
-<p>Abadi, M., et al. <em>TensorFlow: A System for Large-Scale Machine
-Learning.</em> OSDI 2016. Introduces TensorBoard for visualising training
-metrics.</p>
-</div>
-</div>
+<p>GradNorm is helpful whenever the outcome, consistency and adversarial losses
+have very different magnitudes or convergence speeds.  It automatically
+rebalances their contributions and often yields more stable training.</p>
 </section>
 </section>
 
@@ -428,23 +410,23 @@ metrics.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="adaptive_batch_size.html">
+          <a class="next-page" href="gradient_reversal.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Adaptive Batch Scheduling</div>
+                <div class="title">Gradient Reversal for Adversarial Training</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="training_history.html">
+          <a class="prev-page" href="adaptive_batch_size.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Tracking Training History</div>
+                <div class="title">Adaptive Batch Scheduling</div>
                 
               </div>
             </a>
@@ -478,11 +460,10 @@ metrics.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Monitoring Training with TensorBoard</a><ul>
+<li><a class="reference internal" href="#">Adaptive Loss Balancing with GradNorm</a><ul>
 <li><a class="reference internal" href="#motivation">Motivation</a></li>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 <li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
-<li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 </ul>

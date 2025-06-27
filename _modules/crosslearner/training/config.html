@@ -232,6 +232,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../training_history.html">Tracking Training History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tensorboard_logging.html">Monitoring Training with TensorBoard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../adaptive_batch_size.html">Adaptive Batch Scheduling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gradnorm.html">Adaptive Loss Balancing with GradNorm</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Regularization and Tricks</span></p>
 <ul>
@@ -598,7 +599,10 @@
         <span class="kc">None</span>
         <span class="c1">#: Optional hard limit on the batch size reached by the scheduler.</span>
         <span class="c1">#: ``None`` defaults to the full dataset size.</span>
-    <span class="p">)</span></div>
+    <span class="p">)</span>
+    <span class="n">use_gradnorm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1">#: Enable GradNorm adaptive loss balancing.</span>
+    <span class="n">gradnorm_alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1">#: Rebalancing strength for GradNorm.</span>
+    <span class="n">gradnorm_lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span>  <span class="c1">#: Learning rate for GradNorm weight updates.</span></div>
 
 </pre></div>
         </article>

@@ -232,6 +232,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../training_history.html">Tracking Training History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tensorboard_logging.html">Monitoring Training with TensorBoard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../adaptive_batch_size.html">Adaptive Batch Scheduling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gradnorm.html">Adaptive Loss Balancing with GradNorm</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Regularization and Tricks</span></p>
 <ul>
@@ -532,6 +533,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_rep_vars</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pseudo_data</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scheduler</span><span class="p">:</span> <span class="n">GNSBatchScheduler</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">train_cfg</span><span class="o">.</span><span class="n">use_gradnorm</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w_opt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="p">],</span> <span class="n">lr</span><span class="o">=</span><span class="n">train_cfg</span><span class="o">.</span><span class="n">gradnorm_lr</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">train_cfg</span><span class="o">.</span><span class="n">alpha_out</span><span class="p">,</span> <span class="n">train_cfg</span><span class="o">.</span><span class="n">beta_cons</span><span class="p">,</span> <span class="n">train_cfg</span><span class="o">.</span><span class="n">gamma_adv</span><span class="p">],</span>
+                <span class="n">device</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w_opt</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gradnorm_l0</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_clone_loader</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">:</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1300,21 +1311,71 @@
                 <span class="n">loss_contrast</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">triplet_margin_loss</span><span class="p">(</span>
                     <span class="n">hb</span><span class="p">,</span> <span class="n">h_pos</span><span class="p">,</span> <span class="n">h_neg</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">contrastive_margin</span>
                 <span class="p">)</span>
-
-            <span class="n">loss_g</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">cfg</span><span class="o">.</span><span class="n">alpha_out</span> <span class="o">*</span> <span class="n">loss_y</span>
-                <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">beta_cons</span> <span class="o">*</span> <span class="n">loss_cons</span>
-                <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gamma_adv</span> <span class="o">*</span> <span class="n">loss_adv</span>
-                <span class="o">+</span> <span class="n">loss_adv_t</span>
-                <span class="o">+</span> <span class="n">loss_adv_y</span>
-                <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">contrastive_weight</span> <span class="o">*</span> <span class="n">loss_contrast</span>
-                <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">mmd_weight</span> <span class="o">*</span> <span class="n">loss_mmd</span>
-                <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">delta_prop</span> <span class="o">*</span> <span class="n">loss_prop</span>
-                <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">lambda_dr</span> <span class="o">*</span> <span class="n">loss_dr</span>
-                <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">noise_consistency_weight</span> <span class="o">*</span> <span class="n">loss_noise</span>
-                <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">rep_consistency_weight</span> <span class="o">*</span> <span class="n">rep_pen</span>
-                <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">moe_entropy_weight</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">moe_entropy</span><span class="p">()</span>
-            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">use_gradnorm</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradnorm_l0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_gradnorm_l0</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">loss_y</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+                        <span class="n">loss_cons</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+                        <span class="n">loss_adv</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span>
+                    <span class="p">]</span>
+                <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span>
+                <span class="n">grads</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">w_i</span><span class="p">,</span> <span class="n">L_i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="p">(</span><span class="n">loss_y</span><span class="p">,</span> <span class="n">loss_cons</span><span class="p">,</span> <span class="n">loss_adv</span><span class="p">)):</span>
+                    <span class="n">g</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span>
+                        <span class="n">w_i</span> <span class="o">*</span> <span class="n">L_i</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+                        <span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">create_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">grads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">g</span><span class="p">]),</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="n">g_bar</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">grads</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3.0</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">L_i</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span> <span class="o">/</span> <span class="n">L0</span>
+                    <span class="k">for</span> <span class="n">L_i</span><span class="p">,</span> <span class="n">L0</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">((</span><span class="n">loss_y</span><span class="p">,</span> <span class="n">loss_cons</span><span class="p">,</span> <span class="n">loss_adv</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gradnorm_l0</span><span class="p">)</span>
+                <span class="p">]</span>
+                <span class="n">r_hat</span> <span class="o">=</span> <span class="p">[</span><span class="n">ri</span> <span class="o">/</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">)</span> <span class="k">for</span> <span class="n">ri</span> <span class="ow">in</span> <span class="n">r</span><span class="p">]</span>
+                <span class="n">loss_gradnorm</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">g</span> <span class="o">-</span> <span class="n">g_bar</span> <span class="o">*</span> <span class="p">(</span><span class="n">r_h</span><span class="o">**</span><span class="n">cfg</span><span class="o">.</span><span class="n">gradnorm_alpha</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="n">r_h</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">r_hat</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">w_opt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">w_opt</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">(</span><span class="n">set_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">(</span><span class="n">set_to_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">loss_gradnorm</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">retain_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">w_opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+                    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">clamp_</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mul_</span><span class="p">(</span><span class="mf">3.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+                <span class="n">weights_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                <span class="n">loss_g</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">weights_det</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_y</span>
+                    <span class="o">+</span> <span class="n">weights_det</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_cons</span>
+                    <span class="o">+</span> <span class="n">weights_det</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_adv</span>
+                    <span class="o">+</span> <span class="n">loss_adv_t</span>
+                    <span class="o">+</span> <span class="n">loss_adv_y</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">contrastive_weight</span> <span class="o">*</span> <span class="n">loss_contrast</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">mmd_weight</span> <span class="o">*</span> <span class="n">loss_mmd</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">delta_prop</span> <span class="o">*</span> <span class="n">loss_prop</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">lambda_dr</span> <span class="o">*</span> <span class="n">loss_dr</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">noise_consistency_weight</span> <span class="o">*</span> <span class="n">loss_noise</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">rep_consistency_weight</span> <span class="o">*</span> <span class="n">rep_pen</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">moe_entropy_weight</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">moe_entropy</span><span class="p">()</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">loss_g</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_y</span>
+                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_cons</span>
+                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_adv</span>
+                    <span class="o">+</span> <span class="n">loss_adv_t</span>
+                    <span class="o">+</span> <span class="n">loss_adv_y</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">contrastive_weight</span> <span class="o">*</span> <span class="n">loss_contrast</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">mmd_weight</span> <span class="o">*</span> <span class="n">loss_mmd</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">delta_prop</span> <span class="o">*</span> <span class="n">loss_prop</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">lambda_dr</span> <span class="o">*</span> <span class="n">loss_dr</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">noise_consistency_weight</span> <span class="o">*</span> <span class="n">loss_noise</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">rep_consistency_weight</span> <span class="o">*</span> <span class="n">rep_pen</span>
+                    <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">moe_entropy_weight</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">moe_entropy</span><span class="p">()</span>
+                <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">feature_matching</span><span class="p">:</span>
                 <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>

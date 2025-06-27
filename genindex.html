@@ -231,6 +231,7 @@
 <li class="toctree-l1"><a class="reference internal" href="training_history.html">Tracking Training History</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tensorboard_logging.html">Monitoring Training with TensorBoard</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adaptive_batch_size.html">Adaptive Batch Scheduling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gradnorm.html">Adaptive Loss Balancing with GradNorm</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Regularization and Tricks</span></p>
 <ul>
@@ -998,10 +999,10 @@
           <li><a href="api/crosslearner.datasets.html#crosslearner.datasets.toy.get_toy_dataloader">(in module crosslearner.datasets.toy)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.datasets.html#crosslearner.datasets.get_tricky_dataloader">get_tricky_dataloader() (in module crosslearner.datasets)</a>, <a href="generated/datasets/crosslearner.datasets.get_tricky_dataloader.html#crosslearner.datasets.get_tricky_dataloader">[1]</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="api/crosslearner.datasets.html#crosslearner.datasets.get_twins_dataloader">get_twins_dataloader() (in module crosslearner.datasets)</a>, <a href="generated/datasets/crosslearner.datasets.get_twins_dataloader.html#crosslearner.datasets.get_twins_dataloader">[1]</a>
 </li>
         <li><a href="api/crosslearner.html#crosslearner.EpochStats.gns">gns (crosslearner.EpochStats attribute)</a>
@@ -1041,6 +1042,10 @@
         <li><a href="api/crosslearner.training.html#crosslearner.training.grl.grad_reverse">grad_reverse() (in module crosslearner.training.grl)</a>
 </li>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.gradient_reversal">gradient_reversal (crosslearner.training.TrainingConfig attribute)</a>
+</li>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.gradnorm_alpha">gradnorm_alpha (crosslearner.training.TrainingConfig attribute)</a>
+</li>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.gradnorm_lr">gradnorm_lr (crosslearner.training.TrainingConfig attribute)</a>
 </li>
         <li><a href="api/crosslearner.training.html#crosslearner.training.grl.GradReverse">GradReverse (class in crosslearner.training.grl)</a>
 </li>
@@ -1585,6 +1590,8 @@
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.use_gradnorm">use_gradnorm (crosslearner.training.TrainingConfig attribute)</a>
+</li>
         <li><a href="api/crosslearner.training.html#crosslearner.training.TrainingConfig.use_wgan_gp">use_wgan_gp (crosslearner.training.TrainingConfig attribute)</a>
 </li>
     </ul></td>
