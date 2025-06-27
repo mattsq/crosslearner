@@ -397,6 +397,8 @@ similar rate.</p>
 <p><code class="docutils literal notranslate"><span class="pre">gradnorm_alpha</span></code> controls how aggressively slower objectives are up-weighted
 (default <code class="docutils literal notranslate"><span class="pre">1.0</span></code>) and <code class="docutils literal notranslate"><span class="pre">gradnorm_lr</span></code> sets the learning rate for the internal
 weight optimiser.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">log_grad_norms=True</span></code> the adaptive weights are recorded in the training
+history and can be visualised with <a class="reference internal" href="api/crosslearner.html#crosslearner.visualization.plot_grad_norms" title="crosslearner.visualization.plot_grad_norms"><code class="xref py py-func docutils literal notranslate"><span class="pre">crosslearner.visualization.plot_grad_norms()</span></code></a>.</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>

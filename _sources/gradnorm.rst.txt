@@ -31,6 +31,9 @@ Enable the feature via :class:`~crosslearner.training.TrainingConfig`::
 (default ``1.0``) and ``gradnorm_lr`` sets the learning rate for the internal
 weight optimiser.
 
+If ``log_grad_norms=True`` the adaptive weights are recorded in the training
+history and can be visualised with :func:`crosslearner.visualization.plot_grad_norms`.
+
 When to use it
 --------------
 

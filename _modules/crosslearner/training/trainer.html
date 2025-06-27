@@ -1094,6 +1094,11 @@
             <span class="mi">1</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">rep_dim</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">),</span>
         <span class="p">}</span>
         <span class="n">rep_counts</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="n">weight_sums</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">log_grad_norms</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">use_gradnorm</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
 
         <span class="n">batch_iter</span> <span class="o">=</span> <span class="n">loader</span>
         <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
@@ -1434,6 +1439,8 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">clamp_</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">)</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mul_</span><span class="p">(</span><span class="mf">3.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
                 <span class="n">weights_det</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_weights</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">weight_sums</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">weight_sums</span> <span class="o">+=</span> <span class="n">weights_det</span>
                 <span class="n">loss_g</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">weights_det</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_y</span>
                     <span class="o">+</span> <span class="n">weights_det</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">loss_cons</span>
@@ -1539,6 +1546,10 @@
         <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">log_grad_norms</span> <span class="ow">and</span> <span class="n">batch_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">stats</span><span class="o">.</span><span class="n">grad_norm_g</span> <span class="o">=</span> <span class="n">grad_norm_g_sum</span> <span class="o">/</span> <span class="n">batch_count</span>
             <span class="n">stats</span><span class="o">.</span><span class="n">grad_norm_d</span> <span class="o">=</span> <span class="n">grad_norm_d_sum</span> <span class="o">/</span> <span class="n">batch_count</span>
+            <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">use_gradnorm</span> <span class="ow">and</span> <span class="n">weight_sums</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">stats</span><span class="o">.</span><span class="n">w_y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">weight_sums</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">batch_count</span><span class="p">)</span>
+                <span class="n">stats</span><span class="o">.</span><span class="n">w_cons</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">weight_sums</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">batch_count</span><span class="p">)</span>
+                <span class="n">stats</span><span class="o">.</span><span class="n">w_adv</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">weight_sums</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">batch_count</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">stats</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_validation_losses</span><span class="p">(</span>
@@ -1783,6 +1794,10 @@
                     <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span>
                         <span class="s2">&quot;grad_norm/discriminator&quot;</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">grad_norm_d</span><span class="p">,</span> <span class="n">epoch</span>
                     <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">use_gradnorm</span><span class="p">:</span>
+                        <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s2">&quot;grad_norm/weight_y&quot;</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">w_y</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
+                        <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s2">&quot;grad_norm/weight_cons&quot;</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">w_cons</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
+                        <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span><span class="s2">&quot;grad_norm/weight_adv&quot;</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">w_adv</span><span class="p">,</span> <span class="n">epoch</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">log_learning_rate</span><span class="p">:</span>
                     <span class="n">writer</span><span class="o">.</span><span class="n">add_scalar</span><span class="p">(</span>
                         <span class="s2">&quot;lr/generator&quot;</span><span class="p">,</span> <span class="n">opt_g</span><span class="o">.</span><span class="n">param_groups</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;lr&quot;</span><span class="p">],</span> <span class="n">epoch</span>
