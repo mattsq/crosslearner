@@ -22,6 +22,7 @@ opt_head_kwargs: {}
 epochs: 30
 grad_clip: 2.0
 warm_start: 0
+freeze_phi_epoch: null
 use_wgan_gp: false
 adv_loss: bce
 ema_decay: null

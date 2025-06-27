@@ -598,3 +598,12 @@ def test_train_acx_gradnorm():
     model, history = trainer.train(loader)
     assert trainer.loss_weights.numel() == 3
     assert history[0].w_y is not None
+
+
+def test_freeze_phi_after_epoch():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4)
+    cfg = TrainingConfig(epochs=2, freeze_phi_epoch=1, verbose=False)
+    trainer = ACXTrainer(model_cfg, cfg, device="cpu")
+    model = trainer.train(loader)
+    assert not any(p.requires_grad for p in model.phi.parameters())

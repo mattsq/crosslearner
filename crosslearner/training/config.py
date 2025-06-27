@@ -151,6 +151,11 @@ class TrainingConfig:
         #: Optional learning rate for the encoder after pretraining. ``None``
         #: scales ``lr_g`` by ``0.1``.
     )
+    freeze_phi_epoch: int | None = (
+        None
+        #: Freeze the representation network ``phi`` after this epoch.
+        #: ``None`` keeps ``phi`` trainable throughout training.
+    )
     adv_t_weight: float = (
         0.0
         #: Weight for predicting treatment from the confounder and

@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `crosslearner-benchmark` command comparing ACX to baseline models
 - Added GradNorm adaptive loss balancing via ``use_gradnorm`` configuration
 - Logged GradNorm weights when ``use_gradnorm`` and ``log_grad_norms`` are enabled
+- Added ``freeze_phi_epoch`` option to ``TrainingConfig`` to stop updating the
+  representation network after a chosen epoch
 - Added PacGAN-style discriminator packing via `disc_pack` configuration
 - Unified benchmark CLI and baseline comparison
 - Added mixture-of-experts heads via ``moe_experts`` and ``moe_entropy_weight``
