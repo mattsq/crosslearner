@@ -727,6 +727,11 @@ class ACXTrainer:
             1: torch.zeros(self.model.rep_dim, device=device),
         }
         rep_counts = {0: 0, 1: 0}
+        weight_sums = (
+            torch.zeros(3, device=device)
+            if cfg.log_grad_norms and cfg.use_gradnorm
+            else None
+        )
 
         batch_iter = loader
         if cfg.verbose:
@@ -1067,6 +1072,8 @@ class ACXTrainer:
                         self.loss_weights.data.clamp_(min=1e-6)
                         self.loss_weights.data.mul_(3.0 / self.loss_weights.data.sum())
                 weights_det = self.loss_weights.detach()
+                if weight_sums is not None:
+                    weight_sums += weights_det
                 loss_g = (
                     weights_det[0] * loss_y
                     + weights_det[1] * loss_cons
@@ -1172,6 +1179,10 @@ class ACXTrainer:
         if cfg.log_grad_norms and batch_count > 0:
             stats.grad_norm_g = grad_norm_g_sum / batch_count
             stats.grad_norm_d = grad_norm_d_sum / batch_count
+            if cfg.use_gradnorm and weight_sums is not None:
+                stats.w_y = float(weight_sums[0] / batch_count)
+                stats.w_cons = float(weight_sums[1] / batch_count)
+                stats.w_adv = float(weight_sums[2] / batch_count)
         return stats
 
     def _validation_losses(
@@ -1414,6 +1425,10 @@ class ACXTrainer:
                     writer.add_scalar(
                         "grad_norm/discriminator", stats.grad_norm_d, epoch
                     )
+                    if cfg.use_gradnorm:
+                        writer.add_scalar("grad_norm/weight_y", stats.w_y, epoch)
+                        writer.add_scalar("grad_norm/weight_cons", stats.w_cons, epoch)
+                        writer.add_scalar("grad_norm/weight_adv", stats.w_adv, epoch)
                 if cfg.log_learning_rate:
                     writer.add_scalar(
                         "lr/generator", opt_g.param_groups[0]["lr"], epoch

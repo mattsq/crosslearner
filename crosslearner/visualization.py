@@ -296,16 +296,34 @@ def plot_ice(
 
 
 def plot_grad_norms(history: History) -> plt.Figure:
-    """Return a matplotlib Figure with gradient norm curves."""
+    """Return a matplotlib Figure with gradient norm and weight curves."""
     epochs = [h.epoch for h in history]
-    fig, ax = plt.subplots()
+    fig, ax1 = plt.subplots()
     if any(h.grad_norm_g is not None for h in history):
-        ax.plot(epochs, [h.grad_norm_g for h in history], label="generator")
+        ax1.plot(epochs, [h.grad_norm_g for h in history], label="generator")
     if any(h.grad_norm_d is not None for h in history):
-        ax.plot(epochs, [h.grad_norm_d for h in history], label="discriminator")
-    ax.set_xlabel("epoch")
-    ax.set_ylabel("gradient norm")
-    ax.legend()
+        ax1.plot(epochs, [h.grad_norm_d for h in history], label="discriminator")
+    ax1.set_xlabel("epoch")
+    ax1.set_ylabel("gradient norm")
+
+    has_weights = any(
+        h.w_y is not None or h.w_cons is not None or h.w_adv is not None
+        for h in history
+    )
+    if has_weights:
+        ax2 = ax1.twinx()
+        if any(h.w_y is not None for h in history):
+            ax2.plot(epochs, [h.w_y for h in history], "C2--", label="w_y")
+        if any(h.w_cons is not None for h in history):
+            ax2.plot(epochs, [h.w_cons for h in history], "C3--", label="w_cons")
+        if any(h.w_adv is not None for h in history):
+            ax2.plot(epochs, [h.w_adv for h in history], "C4--", label="w_adv")
+        ax2.set_ylabel("weight")
+        lines1, labels1 = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax2.legend(lines1 + lines2, labels1 + labels2)
+    else:
+        ax1.legend()
     fig.tight_layout()
     return fig
 
