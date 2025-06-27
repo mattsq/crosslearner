@@ -374,6 +374,10 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">opt_g_kwargs</span></code> and <code class="docutils literal notranslate"><span class="pre">opt_d_kwargs</span></code> fields of
 <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a> allow you to pass additional
 keyword arguments to the generator and discriminator optimisers.</p>
+<p><code class="docutils literal notranslate"><span class="pre">opt_phi_kwargs</span></code>, <code class="docutils literal notranslate"><span class="pre">opt_head_kwargs</span></code> and <code class="docutils literal notranslate"><span class="pre">opt_disc_kwargs</span></code> further let you
+override these settings for the encoder, outcome heads and discriminator
+individually.  Values in these dictionaries take precedence over those in
+<code class="docutils literal notranslate"><span class="pre">opt_g_kwargs</span></code> or <code class="docutils literal notranslate"><span class="pre">opt_d_kwargs</span></code> for the respective parameter groups.</p>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
 <p>While the default <code class="docutils literal notranslate"><span class="pre">Adam</span></code> optimiser works well for most experiments, you may
@@ -392,6 +396,9 @@ these optimisers can then be provided via <code class="docutils literal notransl
     <span class="n">optimizer</span><span class="o">=</span><span class="s2">&quot;adam&quot;</span><span class="p">,</span>
     <span class="n">opt_g_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;betas&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">)},</span>
     <span class="n">opt_d_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;betas&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">)},</span>
+    <span class="n">opt_phi_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;betas&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">)},</span>
+    <span class="n">opt_head_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;weight_decay&quot;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">},</span>
+    <span class="n">opt_disc_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;betas&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">)},</span>
 <span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>

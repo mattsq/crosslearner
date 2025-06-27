@@ -941,22 +941,34 @@
 
         <span class="n">opt_g_kwargs</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">opt_g_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="n">opt_d_kwargs</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">opt_d_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">rep_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">opt_g_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">opt_rep_kwargs</span> <span class="ow">or</span> <span class="p">{})}</span>
+        <span class="n">phi_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">rep_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">opt_phi_kwargs</span> <span class="ow">or</span> <span class="p">{})}</span>
+        <span class="n">head_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">opt_g_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">opt_head_kwargs</span> <span class="ow">or</span> <span class="p">{})}</span>
+        <span class="n">disc_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">opt_d_kwargs</span><span class="p">,</span> <span class="o">**</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">opt_disc_kwargs</span> <span class="ow">or</span> <span class="p">{})}</span>
 
         <span class="n">opt_g</span> <span class="o">=</span> <span class="n">opt_cls</span><span class="p">(</span>
-            <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-            <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">head_parameters</span><span class="p">())</span>
-            <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tau_parameters</span><span class="p">())</span>
-            <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">prop</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
-            <span class="o">+</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">epsilon</span><span class="p">],</span>
-            <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">lr_g</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">opt_g_kwargs</span><span class="p">,</span>
+            <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">phi</span><span class="o">.</span><span class="n">parameters</span><span class="p">()),</span>
+                    <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">cfg</span><span class="o">.</span><span class="n">lr_g</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">phi_kwargs</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">head_parameters</span><span class="p">())</span>
+                    <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">tau_parameters</span><span class="p">())</span>
+                    <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">prop</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+                    <span class="o">+</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">epsilon</span><span class="p">],</span>
+                    <span class="s2">&quot;lr&quot;</span><span class="p">:</span> <span class="n">cfg</span><span class="o">.</span><span class="n">lr_g</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">head_kwargs</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">]</span>
         <span class="p">)</span>
         <span class="n">disc_params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">disc</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">disentangle</span><span class="p">:</span>
             <span class="n">disc_params</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">adv_t</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">adv_y</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span>
             <span class="p">)</span>
-        <span class="n">opt_d</span> <span class="o">=</span> <span class="n">opt_cls</span><span class="p">(</span><span class="n">disc_params</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">lr_d</span><span class="p">,</span> <span class="o">**</span><span class="n">opt_d_kwargs</span><span class="p">)</span>
+        <span class="n">opt_d</span> <span class="o">=</span> <span class="n">opt_cls</span><span class="p">(</span><span class="n">disc_params</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">lr_d</span><span class="p">,</span> <span class="o">**</span><span class="n">disc_kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">opt_g</span><span class="p">,</span> <span class="n">opt_d</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_schedulers</span><span class="p">(</span>
