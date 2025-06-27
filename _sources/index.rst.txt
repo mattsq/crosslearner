@@ -29,6 +29,7 @@ the training procedure, hyperparameter sweeps and available modules.
    hyperparameter_sweeps
    optimizer_kwargs
    warm_start
+   freeze_phi
    ttur
    risk_early_stopping
    training_history

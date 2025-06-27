@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Representation Disentanglement and Auxiliary Adversaries" href="representation_disentanglement.html" /><link rel="prev" title="Effect Head Bias" href="tau_head_bias.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Two Time-Scale Update Rule (TTUR)" href="ttur.html" /><link rel="prev" title="Warm Start for Stable Optimisation" href="warm_start.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Representation Pretraining - crosslearner 0.1 documentation</title>
+        <title>Freezing the Representation Network - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -178,7 +178,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -224,11 +224,11 @@
 <li class="toctree-l1"><a class="reference internal" href="theory.html">Theoretical Background</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Training Configuration</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="hyperparameter_sweeps.html">Hyperparameter Sweeps with Optuna</a></li>
 <li class="toctree-l1"><a class="reference internal" href="optimizer_kwargs.html">Custom Optimizer Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="warm_start.html">Warm Start for Stable Optimisation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="freeze_phi.html">Freezing the Representation Network</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Freezing the Representation Network</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ttur.html">Two Time-Scale Update Rule (TTUR)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="risk_early_stopping.html">Orthogonal Risk for Early Stopping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="training_history.html">Tracking Training History</a></li>
@@ -237,7 +237,7 @@
 <li class="toctree-l1"><a class="reference internal" href="gradnorm.html">Adaptive Loss Balancing with GradNorm</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Regularization and Tricks</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="gradient_reversal.html">Gradient Reversal for Adversarial Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="feature_matching.html">Feature Matching for Stable GAN Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="label_smoothing.html">Label Smoothing for the Discriminator</a></li>
@@ -256,7 +256,7 @@
 <li class="toctree-l1"><a class="reference internal" href="unrolled_discriminator.html">Unrolled Discriminator Updates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mixture_of_experts.html">Mixture-of-Experts Potential-Outcome Heads</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tau_head_bias.html">Effect Head Bias</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Representation Pretraining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="representation_pretraining.html">Representation Pretraining</a></li>
 <li class="toctree-l1"><a class="reference internal" href="representation_disentanglement.html">Representation Disentanglement and Auxiliary Adversaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="doubly_robust.html">Doubly Robust Objective and Propensity Head</a></li>
 <li class="toctree-l1"><a class="reference internal" href="uncertainty.html">Uncertainty Estimation</a></li>
@@ -350,7 +350,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/representation_pretraining.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/freeze_phi.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -364,37 +364,29 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="representation-pretraining">
-<h1>Representation Pretraining<a class="headerlink" href="#representation-pretraining" title="Link to this heading">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">pretrain_epochs</span></code> enables an unsupervised warm-up phase where the encoder
-is trained to reconstruct masked features.  During this stage the model is fed
-corrupted inputs from <a class="reference internal" href="api/crosslearner.datasets.html#crosslearner.datasets.MaskedFeatureDataset" title="crosslearner.datasets.MaskedFeatureDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">crosslearner.datasets.MaskedFeatureDataset</span></code></a> and a
-linear decoder tries to predict the original features.  Only the shared
-representation network <code class="docutils literal notranslate"><span class="pre">phi</span></code> and this decoder are updated.</p>
-<p>When <code class="docutils literal notranslate"><span class="pre">verbose</span></code> is enabled a progress bar tracks batches and the average
-reconstruction loss for each pretraining epoch is printed to the console.</p>
-<p><code class="docutils literal notranslate"><span class="pre">pretrain_mask_prob</span></code> controls the fraction of features set to zero, mimicking
-missing covariates.  <code class="docutils literal notranslate"><span class="pre">pretrain_lr</span></code> can override the encoder’s learning rate
-for this phase while <code class="docutils literal notranslate"><span class="pre">finetune_lr</span></code> specifies the learning rate for subsequent
-training.  When <code class="docutils literal notranslate"><span class="pre">finetune_lr</span></code> is not provided <code class="docutils literal notranslate"><span class="pre">lr_g</span></code> is reduced by a factor
-of <code class="docutils literal notranslate"><span class="pre">0.1</span></code> after pretraining.</p>
-<p>This initialization can stabilise adversarial training on small datasets or
-when the encoder has many parameters.</p>
-<p>Example usage:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
-    <span class="n">pretrain_epochs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-    <span class="n">pretrain_mask_prob</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
+          <section id="freezing-the-representation-network">
+<h1>Freezing the Representation Network<a class="headerlink" href="#freezing-the-representation-network" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">freeze_phi_epoch</span></code> in <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a> stops
+updating the shared representation network <code class="docutils literal notranslate"><span class="pre">phi</span></code> after a chosen epoch.
+Setting <code class="docutils literal notranslate"><span class="pre">freeze_phi_epoch</span></code> to an integer freezes all parameters of <code class="docutils literal notranslate"><span class="pre">phi</span></code>
+from that epoch onwards.  Use <code class="docutils literal notranslate"><span class="pre">None</span></code> to keep training <code class="docutils literal notranslate"><span class="pre">phi</span></code> for the
+entire run.</p>
+<p>This can be helpful when the encoder should remain fixed while fine-tuning
+the outcome or effect heads on a new dataset.</p>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model_cfg</span> <span class="o">=</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">train_cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span><span class="n">epochs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">freeze_phi_epoch</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">model_cfg</span><span class="p">,</span> <span class="n">train_cfg</span><span class="p">)</span>
 </pre></div>
 </div>
+</section>
 </section>
 
         </article>
@@ -402,23 +394,23 @@ when the encoder has many parameters.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="representation_disentanglement.html">
+          <a class="next-page" href="ttur.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Representation Disentanglement and Auxiliary Adversaries</div>
+                <div class="title">Two Time-Scale Update Rule (TTUR)</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="tau_head_bias.html">
+          <a class="prev-page" href="warm_start.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Effect Head Bias</div>
+                <div class="title">Warm Start for Stable Optimisation</div>
                 
               </div>
             </a>
@@ -440,8 +432,27 @@ when the encoder has many parameters.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Freezing the Representation Network</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

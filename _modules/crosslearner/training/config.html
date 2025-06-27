@@ -227,6 +227,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../hyperparameter_sweeps.html">Hyperparameter Sweeps with Optuna</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../optimizer_kwargs.html">Custom Optimizer Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../warm_start.html">Warm Start for Stable Optimisation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../freeze_phi.html">Freezing the Representation Network</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ttur.html">Two Time-Scale Update Rule (TTUR)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../risk_early_stopping.html">Orthogonal Risk for Early Stopping</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../training_history.html">Tracking Training History</a></li>
@@ -520,6 +521,11 @@
         <span class="kc">None</span>
         <span class="c1">#: Optional learning rate for the encoder after pretraining. ``None``</span>
         <span class="c1">#: scales ``lr_g`` by ``0.1``.</span>
+    <span class="p">)</span>
+    <span class="n">freeze_phi_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">None</span>
+        <span class="c1">#: Freeze the representation network ``phi`` after this epoch.</span>
+        <span class="c1">#: ``None`` keeps ``phi`` trainable throughout training.</span>
     <span class="p">)</span>
     <span class="n">adv_t_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="p">(</span>
         <span class="mf">0.0</span>
