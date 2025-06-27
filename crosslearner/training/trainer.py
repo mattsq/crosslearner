@@ -163,6 +163,7 @@ class ACXTrainer:
                 p.requires_grad_(False)
             self._ema_params = dict(self.ema_model.named_parameters())
 
+        self.current_epoch: int = 0
         self._rep_means: dict[int, torch.Tensor] | None = None
         self._rep_vars: dict[int, torch.Tensor] | None = None
         self._pseudo_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None = None
@@ -482,6 +483,9 @@ class ACXTrainer:
     ):
         """Return discriminator outputs after optional unrolled updates."""
         steps = self.train_cfg.unrolled_steps
+        limit = self.train_cfg.unrolled_steps_epochs
+        if limit > 0 and getattr(self, "current_epoch", 0) >= limit:
+            steps = 0
         if steps <= 0:
             hb_p, ycf_p, tb_p = self._pack_inputs(hb, ycf, tb)
             logits = self.model.discriminator(hb_p, ycf_p, tb_p)
@@ -1325,6 +1329,7 @@ class ACXTrainer:
             e_hat_val, mu0_val, mu1_val = risk_vals
 
         for epoch in range(cfg.epochs):
+            self.current_epoch = epoch
             if cfg.active_aug_freq > 0 and epoch % cfg.active_aug_freq == 0:
                 new_x, new_t, new_y = self._search_disagreement(
                     cfg.active_aug_samples,

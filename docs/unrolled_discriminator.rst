@@ -28,6 +28,7 @@ Enable unrolled updates by setting ``unrolled_steps`` in
    cfg = TrainingConfig(
        epochs=30,
        unrolled_steps=1,
+       unrolled_steps_epochs=10,
    )
    model = train_acx(loader, ModelConfig(p=10), cfg)
 
@@ -45,7 +46,15 @@ or imbalanced datasets where the discriminator can easily separate real
 and fake samples. For large datasets or well-balanced problems the
 additional computation may not be worth the minor stability gains.
 Start with ``unrolled_steps=1`` and disable the feature if training
-slows down without improvement.
+slows down without improvement. Limit unrolling to early epochs via
+``unrolled_steps_epochs`` to avoid overfitting the generator to the
+critic::
+
+   cfg = TrainingConfig(
+       epochs=30,
+       unrolled_steps=1,
+       unrolled_steps_epochs=10,
+   )
 
 References
 ----------

@@ -390,6 +390,19 @@ def test_train_acx_moe_heads():
     assert isinstance(model, ACX)
 
 
+def test_unrolled_steps_epochs():
+    loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
+    model_cfg = ModelConfig(p=4)
+    cfg = TrainingConfig(
+        epochs=2,
+        unrolled_steps=1,
+        unrolled_steps_epochs=1,
+        verbose=False,
+    )
+    model = train_acx(loader, model_cfg, cfg, device="cpu")
+    assert isinstance(model, ACX)
+
+
 def test_train_acx_contrastive_loss():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     model_cfg = ModelConfig(p=4)
