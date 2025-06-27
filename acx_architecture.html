@@ -415,8 +415,8 @@ following parameters:</p>
 <dt><code class="docutils literal notranslate"><span class="pre">weight_init</span></code></dt><dd><p>Initialisation scheme applied to linear layers. Options include
 <code class="docutils literal notranslate"><span class="pre">&quot;xavier_uniform&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;kaiming_uniform&quot;</span></code>.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">batch_norm</span></code></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code> insert <code class="docutils literal notranslate"><span class="pre">BatchNorm1d</span></code> layers after each hidden linear
-layer.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">normalization</span></code></dt><dd><p>Optional normalisation applied after each hidden linear layer.
+Set to <code class="docutils literal notranslate"><span class="pre">&quot;batch&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;layer&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;group&quot;</span></code>.</p>
 </dd>
 </dl>
 </section>
@@ -451,7 +451,7 @@ independence structure.</p>
     <span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">rep_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
     <span class="n">weight_init</span><span class="o">=</span><span class="s2">&quot;kaiming_uniform&quot;</span><span class="p">,</span>
-    <span class="n">batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">normalization</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Using a configuration object</span>
@@ -459,7 +459,7 @@ independence structure.</p>
     <span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">rep_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
     <span class="n">weight_init</span><span class="o">=</span><span class="s2">&quot;kaiming_uniform&quot;</span><span class="p">,</span>
-    <span class="n">batch_norm</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">normalization</span><span class="o">=</span><span class="s2">&quot;batch&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">ACX</span><span class="p">(</span>
     <span class="n">cfg</span><span class="o">.</span><span class="n">p</span><span class="p">,</span>
@@ -477,7 +477,7 @@ independence structure.</p>
     <span class="n">disc_residual</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">disc_residual</span><span class="p">,</span>
     <span class="n">disc_pack</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">disc_pack</span><span class="p">,</span>
     <span class="n">weight_init</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">weight_init</span><span class="p">,</span>
-    <span class="n">batch_norm</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">,</span>
+    <span class="n">normalization</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">normalization</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>

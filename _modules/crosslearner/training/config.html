@@ -400,7 +400,11 @@
     <span class="n">disc_pack</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
         <span class="mi">1</span>  <span class="c1">#: Number of samples concatenated for PacGAN-style discriminator.</span>
     <span class="p">)</span>
-    <span class="n">batch_norm</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">normalization</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="kc">None</span>
+        <span class="c1">#: Optional normalization layer after each hidden linear.</span>
+        <span class="c1">#: Choose from ``&quot;batch&quot;``, ``&quot;layer&quot;`` or ``&quot;group&quot;``.</span>
+    <span class="p">)</span>
     <span class="n">moe_experts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1">#: Number of expert pairs for mixture-of-experts heads.</span>
     <span class="n">tau_heads</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1">#: Number of effect heads for epistemic ensembling.</span>
     <span class="n">tau_bias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1">#: If ``False`` freeze the effect head biases at zero.</span></div>
