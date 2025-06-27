@@ -167,6 +167,16 @@ class ACXTrainer:
         self._rep_vars: dict[int, torch.Tensor] | None = None
         self._pseudo_data: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | None = None
         self.scheduler: GNSBatchScheduler | None = None
+        if train_cfg.use_gradnorm:
+            self.loss_weights = nn.Parameter(torch.ones(3, device=self.device))
+            self.w_opt = torch.optim.Adam([self.loss_weights], lr=train_cfg.gradnorm_lr)
+        else:
+            self.loss_weights = torch.tensor(
+                [train_cfg.alpha_out, train_cfg.beta_cons, train_cfg.gamma_adv],
+                device=self.device,
+            )
+            self.w_opt = None
+        self._gradnorm_l0: list[torch.Tensor | None] = [None, None, None]
 
     def _clone_loader(
         self, loader: DataLoader, dataset: Dataset, *, shuffle: bool = True
@@ -935,21 +945,71 @@ class ACXTrainer:
                 loss_contrast = F.triplet_margin_loss(
                     hb, h_pos, h_neg, margin=cfg.contrastive_margin
                 )
-
-            loss_g = (
-                cfg.alpha_out * loss_y
-                + cfg.beta_cons * loss_cons
-                + cfg.gamma_adv * loss_adv
-                + loss_adv_t
-                + loss_adv_y
-                + cfg.contrastive_weight * loss_contrast
-                + cfg.mmd_weight * loss_mmd
-                + cfg.delta_prop * loss_prop
-                + cfg.lambda_dr * loss_dr
-                + cfg.noise_consistency_weight * loss_noise
-                + cfg.rep_consistency_weight * rep_pen
-                + cfg.moe_entropy_weight * model.moe_entropy()
-            )
+            if cfg.use_gradnorm:
+                if self._gradnorm_l0[0] is None:
+                    self._gradnorm_l0 = [
+                        loss_y.detach(),
+                        loss_cons.detach(),
+                        loss_adv.detach(),
+                    ]
+                weights = self.loss_weights
+                grads = []
+                for w_i, L_i in zip(weights, (loss_y, loss_cons, loss_adv)):
+                    g = torch.autograd.grad(
+                        w_i * L_i,
+                        self.model.phi.parameters(),
+                        retain_graph=True,
+                        create_graph=True,
+                    )
+                    grads.append(torch.norm(torch.cat([p.view(-1) for p in g]), 2))
+                g_bar = sum(grads) / 3.0
+                r = [
+                    L_i.detach() / L0
+                    for L_i, L0 in zip((loss_y, loss_cons, loss_adv), self._gradnorm_l0)
+                ]
+                r_hat = [ri / (sum(r) / 3.0) for ri in r]
+                loss_gradnorm = sum(
+                    torch.abs(g - g_bar * (r_h**cfg.gradnorm_alpha))
+                    for g, r_h in zip(grads, r_hat)
+                )
+                if self.w_opt is not None:
+                    self.w_opt.zero_grad(set_to_none=True)
+                    self.model.zero_grad(set_to_none=True)
+                    loss_gradnorm.backward(retain_graph=True)
+                    self.w_opt.step()
+                    with torch.no_grad():
+                        self.loss_weights.data.clamp_(min=1e-6)
+                        self.loss_weights.data.mul_(3.0 / self.loss_weights.data.sum())
+                weights_det = self.loss_weights.detach()
+                loss_g = (
+                    weights_det[0] * loss_y
+                    + weights_det[1] * loss_cons
+                    + weights_det[2] * loss_adv
+                    + loss_adv_t
+                    + loss_adv_y
+                    + cfg.contrastive_weight * loss_contrast
+                    + cfg.mmd_weight * loss_mmd
+                    + cfg.delta_prop * loss_prop
+                    + cfg.lambda_dr * loss_dr
+                    + cfg.noise_consistency_weight * loss_noise
+                    + cfg.rep_consistency_weight * rep_pen
+                    + cfg.moe_entropy_weight * model.moe_entropy()
+                )
+            else:
+                loss_g = (
+                    self.loss_weights[0] * loss_y
+                    + self.loss_weights[1] * loss_cons
+                    + self.loss_weights[2] * loss_adv
+                    + loss_adv_t
+                    + loss_adv_y
+                    + cfg.contrastive_weight * loss_contrast
+                    + cfg.mmd_weight * loss_mmd
+                    + cfg.delta_prop * loss_prop
+                    + cfg.lambda_dr * loss_dr
+                    + cfg.noise_consistency_weight * loss_noise
+                    + cfg.rep_consistency_weight * rep_pen
+                    + cfg.moe_entropy_weight * model.moe_entropy()
+                )
 
             if cfg.feature_matching:
                 with torch.no_grad():
