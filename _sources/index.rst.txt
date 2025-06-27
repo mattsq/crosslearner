@@ -47,6 +47,7 @@ the training procedure, hyperparameter sweeps and available modules.
    exponential_moving_average
    weight_clipping
    wgan_gp
+   relativistic_gan
    r1_r2_regularization
    instance_noise
    contrastive_loss

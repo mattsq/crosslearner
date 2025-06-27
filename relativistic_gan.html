@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Relativistic GAN Loss" href="relativistic_gan.html" /><link rel="prev" title="Weight Clipping for Wasserstein Training" href="weight_clipping.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="R1 and R2 Gradient Penalties" href="r1_r2_regularization.html" /><link rel="prev" title="Wasserstein Gradient Penalty" href="wgan_gp.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Wasserstein Gradient Penalty - crosslearner 0.1 documentation</title>
+        <title>Relativistic GAN Loss - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
@@ -243,8 +243,8 @@
 <li class="toctree-l1"><a class="reference internal" href="spectral_norm.html">Spectral Normalisation for Stable Training</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exponential_moving_average.html">Exponential Moving Average of Generator Parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="weight_clipping.html">Weight Clipping for Wasserstein Training</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Wasserstein Gradient Penalty</a></li>
-<li class="toctree-l1"><a class="reference internal" href="relativistic_gan.html">Relativistic GAN Loss</a></li>
+<li class="toctree-l1"><a class="reference internal" href="wgan_gp.html">Wasserstein Gradient Penalty</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Relativistic GAN Loss</a></li>
 <li class="toctree-l1"><a class="reference internal" href="r1_r2_regularization.html">R1 and R2 Gradient Penalties</a></li>
 <li class="toctree-l1"><a class="reference internal" href="instance_noise.html">Instance Noise for Robust Discriminator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contrastive_loss.html">Contrastive Representation Loss</a></li>
@@ -349,7 +349,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/wgan_gp.rst.txt" title="View this page">
+  <a class="muted-link" href="_sources/relativistic_gan.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -369,70 +369,34 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="wasserstein-gradient-penalty">
-<h1>Wasserstein Gradient Penalty<a class="headerlink" href="#wasserstein-gradient-penalty" title="Link to this heading">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">use_wgan_gp</span></code> flag of <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>
-replaces the default binary cross-entropy objective with the
-<em>Wasserstein GAN with Gradient Penalty</em> (WGAN-GP) loss.  When enabled the
-trainer minimises the Wasserstein distance between real and generated
-outcome pairs while adding a gradient penalty of strength <code class="docutils literal notranslate"><span class="pre">lambda_gp</span></code>.
-This promotes a 1-Lipschitz discriminator and often yields more stable
-adversarial training.</p>
-<section id="motivation">
-<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
-<p>Standard GAN losses can suffer from vanishing gradients when the
-discriminator learns much faster than the generator.  The WGAN-GP loss
-addresses this by directly estimating the Wasserstein distance and
-regularising the discriminator’s gradients on random interpolations
-between real and fake samples.  Enforcing a Lipschitz constraint in this
-way leads to smoother optimisation and better behaved adversaries
-<a href="#id1"><span class="problematic" id="id2">:footcite:`Gulrajani2017`</span></a>.</p>
-</section>
+          <section id="relativistic-gan-loss">
+<h1>Relativistic GAN Loss<a class="headerlink" href="#relativistic-gan-loss" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">adv_loss='rgan'</span></code> option replaces the standard discriminator objective with
+<em>Relativistic Average GAN</em> losses. Instead of judging real and fake samples in
+isolation, the discriminator compares them directly. This often yields more
+stable gradients and encourages diverse generations.</p>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h2>
-<p>Activate the loss by either passing <code class="docutils literal notranslate"><span class="pre">use_wgan_gp=True</span></code> or setting
-<code class="docutils literal notranslate"><span class="pre">adv_loss='wgan-gp'</span></code> when constructing the training configuration:</p>
+<p>Enable the loss via <a class="reference internal" href="api/crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.TrainingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">TrainingConfig</span><span class="p">(</span>
-    <span class="n">epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-    <span class="n">use_wgan_gp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">lambda_gp</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">adv_loss</span><span class="o">=</span><span class="s1">&#39;rgan&#39;</span><span class="p">,</span>
+    <span class="n">use_wgan_gp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>       <span class="c1"># optional gradient penalty</span>
 <span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">train_acx</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">ModelConfig</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">cfg</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The gradient penalty weight <code class="docutils literal notranslate"><span class="pre">lambda_gp</span></code> determines how strongly the
-norm of the discriminator gradients is pushed towards one.  Lower values
-behave similarly to ordinary Wasserstein training, while higher values
-can prevent the discriminator from overfitting.</p>
-</section>
-<section id="adaptive-regularisation">
-<h2>Adaptive regularisation<a class="headerlink" href="#adaptive-regularisation" title="Link to this heading">¶</a></h2>
-<p>Setting <code class="docutils literal notranslate"><span class="pre">adaptive_reg=True</span></code> automatically tunes <code class="docutils literal notranslate"><span class="pre">lambda_gp</span></code> based on
-the discriminator loss.  After each epoch <code class="docutils literal notranslate"><span class="pre">lambda_gp</span></code> is increased by
-<code class="docutils literal notranslate"><span class="pre">reg_factor</span></code> when the loss falls below <code class="docutils literal notranslate"><span class="pre">d_reg_lower</span></code> and decreased
-when it exceeds <code class="docutils literal notranslate"><span class="pre">d_reg_upper</span></code>.  The value is clipped to the range
-<code class="docutils literal notranslate"><span class="pre">[lambda_gp_min,</span> <span class="pre">lambda_gp_max]</span></code> to avoid excessive penalties.  This
-feedback mechanism keeps the discriminator in a healthy loss range
-without manual tweaking.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">use_wgan_gp</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> a gradient penalty of strength
+<code class="docutils literal notranslate"><span class="pre">lambda_gp</span></code> is applied to the relativistic discriminator. The generator
+then maximises the probability that fake outcomes appear more realistic
+than real ones.</p>
 </section>
 <section id="when-to-use-it">
 <h2>When to use it<a class="headerlink" href="#when-to-use-it" title="Link to this heading">¶</a></h2>
-<p>Enable WGAN-GP when binary cross-entropy or hinge losses cause unstable
-training or the generator receives weak gradients.  The method is
-particularly helpful on small or noisy datasets where the discriminator
-quickly dominates.  Combine <code class="docutils literal notranslate"><span class="pre">use_wgan_gp</span></code> with <code class="docutils literal notranslate"><span class="pre">adaptive_reg</span></code> to
-maintain smooth learning without constant monitoring.</p>
-</section>
-<section id="references">
-<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
-<div role="list" class="citation-list">
-<div class="citation" id="gulrajani2017" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span>Gulrajani2017<span class="fn-bracket">]</span></span>
-<p>Gulrajani, I., Ahmed, F., Arjovsky, M., Dumoulin, V., &amp;
-Courville, A. <em>Improved Training of Wasserstein GANs.</em> NIPS 2017. Introduces
-the gradient penalty for Wasserstein GANs.</p>
-</div>
-</div>
+<p>Relativistic adversaries can stabilise training when ordinary
+cross-entropy saturates. Try this option if the discriminator quickly
+overpowers the generator or if you observe mode collapse with the
+standard loss.</p>
 </section>
 </section>
 
@@ -441,23 +405,23 @@ the gradient penalty for Wasserstein GANs.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="relativistic_gan.html">
+          <a class="next-page" href="r1_r2_regularization.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Relativistic GAN Loss</div>
+                <div class="title">R1 and R2 Gradient Penalties</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="weight_clipping.html">
+          <a class="prev-page" href="wgan_gp.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Weight Clipping for Wasserstein Training</div>
+                <div class="title">Wasserstein Gradient Penalty</div>
                 
               </div>
             </a>
@@ -491,12 +455,9 @@ the gradient penalty for Wasserstein GANs.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Wasserstein Gradient Penalty</a><ul>
-<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#">Relativistic GAN Loss</a><ul>
 <li><a class="reference internal" href="#usage">Usage</a></li>
-<li><a class="reference internal" href="#adaptive-regularisation">Adaptive regularisation</a></li>
 <li><a class="reference internal" href="#when-to-use-it">When to use it</a></li>
-<li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 </ul>
