@@ -335,7 +335,7 @@ def test_train_acx_batch_norm_option():
 def test_alt_adv_losses():
     loader, _ = get_toy_dataloader(batch_size=4, n=8, p=4)
     model_cfg = ModelConfig(p=4)
-    for loss in ("hinge", "lsgan"):
+    for loss in ("hinge", "lsgan", "rgan"):
         train_cfg = TrainingConfig(epochs=1, adv_loss=loss, verbose=False)
         model = train_acx(loader, model_cfg, train_cfg, device="cpu")
         assert isinstance(model, ACX)

@@ -473,13 +473,24 @@ class ACXTrainer:
         use_wgan: bool,
         use_hinge: bool,
         use_ls: bool,
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+        rgan: bool = False,
+        *,
+        return_real: bool = False,
+    ) -> (
+        tuple[torch.Tensor, torch.Tensor]
+        | tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+    ):
+        """Return discriminator outputs after optional unrolled updates."""
         steps = self.train_cfg.unrolled_steps
         if steps <= 0:
             hb_p, ycf_p, tb_p = self._pack_inputs(hb, ycf, tb)
             logits = self.model.discriminator(hb_p, ycf_p, tb_p)
             feats = self.model.disc_features(hb_p, ycf_p, tb_p)
-            return logits, feats
+            if not return_real:
+                return logits, feats
+            hb_r, y_r, t_r = self._pack_inputs(hb, yb, tb)
+            real_logits = self.model.discriminator(hb_r, y_r, t_r)
+            return logits, feats, real_logits
         disc = self.model.disc
         params = OrderedDict(
             (n, p.detach().requires_grad_(True)) for n, p in disc.named_parameters()
@@ -493,7 +504,15 @@ class ACXTrainer:
             fake_logits = functional_call(
                 disc, params, (torch.cat([hb_f, y_f, t_f], dim=1),)
             )
-            if use_wgan:
+            if rgan:
+                eps = 1e-8
+                mean_r = real_logits.mean()
+                mean_f = fake_logits.mean()
+                loss_step = (
+                    -torch.log(torch.sigmoid(real_logits - mean_f) + eps).mean()
+                    - torch.log(1 - torch.sigmoid(fake_logits - mean_r) + eps).mean()
+                )
+            elif use_wgan:
                 loss_step = fake_logits.mean() - real_logits.mean()
             elif use_hinge:
                 loss_step = (
@@ -528,7 +547,12 @@ class ACXTrainer:
             if k.startswith("blocks.")
         )
         feats = functional_call(disc.net[:-1], net_params, (inp,))
-        return logits, feats
+        if not return_real:
+            return logits, feats
+        hb_r, y_r, t_r = self._pack_inputs(hb, yb, tb)
+        inp_r = torch.cat([hb_r, y_r, t_r], dim=1)
+        real_logits = functional_call(disc, params, (inp_r,))
+        return logits, feats, real_logits
 
     def _make_optimizers(self) -> Tuple[torch.optim.Optimizer, torch.optim.Optimizer]:
         cfg = self.train_cfg
@@ -672,6 +696,7 @@ class ACXTrainer:
         use_wgan = cfg.use_wgan_gp or adv == "wgan-gp"
         use_hinge = adv == "hinge"
         use_ls = adv == "lsgan"
+        rgan = adv == "rgan"
 
         loss_d_sum = loss_g_sum = 0.0
         loss_y_sum = loss_cons_sum = loss_adv_sum = 0.0
@@ -804,6 +829,35 @@ class ACXTrainer:
                         loss_d = mse_adv(real_logits, ones_real) + mse_adv(
                             fake_logits, zeros_fake
                         )
+                    elif adv == "rgan":
+                        eps_val = 1e-8
+                        mean_r = real_logits.mean()
+                        mean_f = fake_logits.mean()
+                        loss_d = (
+                            -torch.log(
+                                torch.sigmoid(real_logits - mean_f) + eps_val
+                            ).mean()
+                            - torch.log(
+                                1 - torch.sigmoid(fake_logits - mean_r) + eps_val
+                            ).mean()
+                        )
+                        if cfg.use_wgan_gp and cfg.lambda_gp > 0:
+                            eps = torch.rand_like(Yb_disc)
+                            interpolates = eps * Yb_disc + (1 - eps) * Ycf
+                            interpolates.requires_grad_(True)
+                            h_i, y_i, t_i = self._pack_inputs(hb_aug, interpolates, Tb)
+                            interp_logits = model.discriminator(h_i, y_i, t_i)
+                            grads = torch.autograd.grad(
+                                outputs=interp_logits,
+                                inputs=interpolates,
+                                grad_outputs=ones_real,
+                                create_graph=True,
+                                only_inputs=True,
+                            )[0]
+                            gp = (
+                                (grads.norm(2, dim=1) - 1) ** 2
+                            ).mean() * cfg.lambda_gp
+                            loss_d = loss_d + gp
                     else:
                         real_lbl = ones_real
                         fake_lbl = zeros_fake
@@ -895,7 +949,8 @@ class ACXTrainer:
             loss_adv = zero_tensor
             loss_contrast = zero_tensor
             if not cfg.gradient_reversal:
-                fake_logits, fake_feats = self._unrolled_logits(
+                rgan = adv == "rgan"
+                outputs = self._unrolled_logits(
                     hb,
                     Yb,
                     Ycf,
@@ -904,17 +959,32 @@ class ACXTrainer:
                     use_wgan,
                     use_hinge,
                     use_ls,
+                    rgan,
+                    return_real=rgan,
                 )
-                if use_wgan or use_hinge:
-                    loss_adv = -fake_logits.mean()
-                elif use_ls:
-                    mse_adv = nn.MSELoss()
-                    loss_adv = mse_adv(fake_logits, torch.ones_like(fake_logits))
+                if rgan:
+                    fake_logits, fake_feats, real_logits_g = outputs
+                    eps_val = 1e-8
+                    mean_r = real_logits_g.mean()
+                    mean_f = fake_logits.mean()
+                    loss_adv = (
+                        -torch.log(torch.sigmoid(fake_logits - mean_r) + eps_val).mean()
+                        - torch.log(
+                            1 - torch.sigmoid(real_logits_g - mean_f) + eps_val
+                        ).mean()
+                    )
                 else:
-                    real_lbl = torch.ones_like(fake_logits)
-                    if cfg.label_smoothing:
-                        real_lbl = real_lbl * 0.9
-                    loss_adv = bce(fake_logits, real_lbl)
+                    fake_logits, fake_feats = outputs
+                    if use_wgan or use_hinge:
+                        loss_adv = -fake_logits.mean()
+                    elif use_ls:
+                        mse_adv = nn.MSELoss()
+                        loss_adv = mse_adv(fake_logits, torch.ones_like(fake_logits))
+                    else:
+                        real_lbl = torch.ones_like(fake_logits)
+                        if cfg.label_smoothing:
+                            real_lbl = real_lbl * 0.9
+                        loss_adv = bce(fake_logits, real_lbl)
 
             loss_adv_t = zero_tensor
             loss_adv_y = zero_tensor
@@ -1115,15 +1185,30 @@ class ACXTrainer:
             use_wgan = self.train_cfg.use_wgan_gp or adv == "wgan-gp"
             use_hinge = adv == "hinge"
             use_ls = adv == "lsgan"
-            fake_logits, _ = self._unrolled_logits(
-                h, y, y_cf, t, bce, use_wgan, use_hinge, use_ls
+            rgan = adv == "rgan"
+            outputs = self._unrolled_logits(
+                h, y, y_cf, t, bce, use_wgan, use_hinge, use_ls, rgan, return_real=rgan
             )
-            if use_wgan or use_hinge:
+            if rgan:
+                fake_logits, _, real_logits_v = outputs
+                eps_val = 1e-8
+                mean_r = real_logits_v.mean()
+                mean_f = fake_logits.mean()
+                loss_adv = (
+                    -torch.log(torch.sigmoid(fake_logits - mean_r) + eps_val).mean()
+                    - torch.log(
+                        1 - torch.sigmoid(real_logits_v - mean_f) + eps_val
+                    ).mean()
+                )
+            elif use_wgan or use_hinge:
+                fake_logits, _ = outputs
                 loss_adv = -fake_logits.mean()
             elif use_ls:
+                fake_logits, _ = outputs
                 mse_adv = nn.MSELoss()
                 loss_adv = mse_adv(fake_logits, torch.ones_like(fake_logits))
             else:
+                fake_logits, _ = outputs
                 real_lbl = torch.ones_like(fake_logits)
                 if self.train_cfg.label_smoothing:
                     real_lbl = real_lbl * 0.9
