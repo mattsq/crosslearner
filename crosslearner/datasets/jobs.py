@@ -20,5 +20,8 @@ def get_jobs_dataloader(batch_size: int = 256):
     x = torch.tensor(
         df.drop(columns=["re78", "treat", "data_id"]).values, dtype=torch.float32
     )
+    mean = x.mean(0, keepdim=True)
+    std = x.std(0, unbiased=False, keepdim=True).clamp_min(1e-6)
+    x = (x - mean) / std
     loader = DataLoader(TensorDataset(x, t, y), batch_size=batch_size, shuffle=True)
     return loader, (None, None)

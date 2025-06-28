@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from crosslearner.datasets.toy import get_toy_dataloader
 from crosslearner.datasets.complex import get_complex_dataloader
 from crosslearner.datasets.jobs import get_jobs_dataloader
@@ -37,6 +38,15 @@ def test_get_jobs_dataloader_shapes():
     assert T.shape == (4, 1)
     assert Y.shape == (4, 1)
     assert mu0 is None and mu1 is None
+
+
+def test_jobs_dataloader_standardization():
+    loader, _ = get_jobs_dataloader(batch_size=128)
+    X_all = torch.cat([b[0] for b in loader])
+    mean = X_all.mean(0)
+    std = X_all.std(0, unbiased=False)
+    assert torch.allclose(mean, torch.zeros_like(mean), atol=1e-4)
+    assert torch.allclose(std, torch.ones_like(std), atol=1e-4)
 
 
 def test_get_ihdp_dataloader_shapes(monkeypatch, tmp_path):
