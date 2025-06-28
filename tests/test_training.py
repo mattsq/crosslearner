@@ -162,6 +162,14 @@ def test_train_acx_custom_architecture():
     assert isinstance(model, ACX)
 
 
+def test_train_acx_grl_disc_pack():
+    loader, _ = get_toy_dataloader(batch_size=8, n=32, p=3)
+    model_cfg = ModelConfig(p=3, disc_pack=2)
+    train_cfg = TrainingConfig(epochs=1, gradient_reversal=True, verbose=False)
+    model = train_acx(loader, model_cfg, train_cfg, device="cpu")
+    assert isinstance(model, ACX)
+
+
 def test_train_acx_custom_optimizer():
     loader, _ = get_toy_dataloader(batch_size=8, n=32, p=3)
     model_cfg = ModelConfig(p=3)
