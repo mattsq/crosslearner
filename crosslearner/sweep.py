@@ -174,6 +174,9 @@ def main(argv: Iterable[str] | None = None) -> None:
         return evaluate_dr(model, X, T_all, Y_all, propensity)
 
     study = optuna.create_study(direction="minimize")
+    if args.trials < 1:
+        print("No trials executed")
+        return
     study.optimize(objective, n_trials=args.trials)
     print("Best value", study.best_value)
     print("Best params", study.best_params)
