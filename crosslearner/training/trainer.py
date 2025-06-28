@@ -1123,7 +1123,10 @@ class ACXTrainer:
                 gr_h = grad_reverse(hb, cfg.grl_weight)
                 h_p, y_p, t_p = self._pack_inputs(gr_h, Yb, Tb)
                 t_logits = model.discriminator(h_p, y_p, t_p)
-                loss_grl = bce(t_logits, Tb)
+                t_target = t_p
+                if t_target.size() != t_logits.size():
+                    t_target = t_target.mean(1, keepdim=True)
+                loss_grl = bce(t_logits, t_target)
                 loss_g += loss_grl
 
             opt_g.zero_grad(set_to_none=True)
