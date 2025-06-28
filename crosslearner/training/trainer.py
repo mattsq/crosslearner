@@ -1048,14 +1048,28 @@ class ACXTrainer:
                     ]
                 weights = self.loss_weights
                 grads = []
+                phi_params = list(self.model.phi.parameters())
                 for w_i, L_i in zip(weights, (loss_y, loss_cons, loss_adv)):
                     g = torch.autograd.grad(
                         w_i * L_i,
-                        self.model.phi.parameters(),
+                        phi_params,
                         retain_graph=True,
                         create_graph=True,
+                        allow_unused=True,
                     )
-                    grads.append(torch.norm(torch.cat([p.view(-1) for p in g]), 2))
+                    grads.append(
+                        torch.norm(
+                            torch.cat(
+                                [
+                                    (
+                                        p if p is not None else torch.zeros_like(param)
+                                    ).view(-1)
+                                    for p, param in zip(g, phi_params)
+                                ]
+                            ),
+                            2,
+                        )
+                    )
                 g_bar = sum(grads) / 3.0
                 r = [
                     L_i.detach() / L0
