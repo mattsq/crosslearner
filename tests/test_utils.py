@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 import random
 
-from crosslearner.models.acx import MLP, _get_activation
+from crosslearner.models.acx import MLP, _get_activation, _get_norm
 from crosslearner.utils import (
     set_seed,
     default_device,
@@ -57,6 +57,12 @@ def test_mlp_normalization_layers(norm, cls):
     mlp = MLP(4, 2, hidden=(3, 3), norm=norm)
     layers = [m for m in mlp.net.modules() if isinstance(m, cls)]
     assert len(layers) == 2
+
+
+def test_group_norm_groups_divide_width():
+    norm = _get_norm("group", 73)
+    assert isinstance(norm, nn.GroupNorm)
+    assert 73 % norm.num_groups == 0
 
 
 def test_set_seed_reproducibility():
