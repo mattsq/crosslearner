@@ -70,6 +70,11 @@ def _space(trial: optuna.Trial) -> dict:
     disc_layers = trial.suggest_int("disc_layers", 1, 3)
     disc_layers = [disc_width] * disc_layers
 
+    epistemic_consistency = trial.suggest_categorical(
+        "epistemic_consistency", [True, False]
+    )
+    tau_heads = trial.suggest_int("tau_heads", 2 if epistemic_consistency else 1, 4)
+
     params = {
         "rep_dim": rep_dim,
         "phi_layers": phi_layers,
@@ -98,7 +103,7 @@ def _space(trial: optuna.Trial) -> dict:
         "disc_residual": trial.suggest_categorical("disc_residual", [True, False]),
         "disc_pack": trial.suggest_int("disc_pack", 1, 4),
         "moe_experts": trial.suggest_int("moe_experts", 1, 4),
-        "tau_heads": trial.suggest_int("tau_heads", 1, 4),
+        "tau_heads": tau_heads,
         "tau_bias": trial.suggest_categorical("tau_bias", [True, False]),
         # Newly exposed training parameters
         "warm_start": trial.suggest_int("warm_start", 0, 5),
@@ -141,9 +146,7 @@ def _space(trial: optuna.Trial) -> dict:
         "disentangle": trial.suggest_categorical("disentangle", [True, False]),
         "adv_t_weight": trial.suggest_float("adv_t_weight", 0.0, 1.0),
         "adv_y_weight": trial.suggest_float("adv_y_weight", 0.0, 1.0),
-        "epistemic_consistency": trial.suggest_categorical(
-            "epistemic_consistency", [True, False]
-        ),
+        "epistemic_consistency": epistemic_consistency,
         "rep_consistency_weight": trial.suggest_float(
             "rep_consistency_weight", 0.0, 1.0
         ),
