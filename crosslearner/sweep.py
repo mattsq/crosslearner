@@ -75,6 +75,9 @@ def _space(trial: optuna.Trial) -> dict:
         "phi_layers": phi_layers,
         "head_layers": head_layers,
         "disc_layers": disc_layers,
+        # Newly exposed model parameters
+        "embed_dim": trial.suggest_int("embed_dim", 4, 16),
+        "activation": trial.suggest_categorical("activation", ["relu", "gelu", "tanh"]),
         "lr_g": trial.suggest_float("lr_g", 1e-4, 1e-2, log=True),
         "lr_d": trial.suggest_float("lr_d", 1e-4, 1e-2, log=True),
         "alpha_out": trial.suggest_float("alpha_out", 0.5, 2.0),
@@ -88,8 +91,11 @@ def _space(trial: optuna.Trial) -> dict:
             "normalization", [None, "batch", "layer", "group"]
         ),
         "spectral_norm": trial.suggest_categorical("spectral_norm", [True, False]),
-        # Newly exposed model parameters
+        # Residual connections per subnetwork
         "residual": trial.suggest_categorical("residual", [True, False]),
+        "phi_residual": trial.suggest_categorical("phi_residual", [True, False]),
+        "head_residual": trial.suggest_categorical("head_residual", [True, False]),
+        "disc_residual": trial.suggest_categorical("disc_residual", [True, False]),
         "disc_pack": trial.suggest_int("disc_pack", 1, 4),
         "moe_experts": trial.suggest_int("moe_experts", 1, 4),
         "tau_heads": trial.suggest_int("tau_heads", 1, 4),
@@ -117,21 +123,59 @@ def _space(trial: optuna.Trial) -> dict:
         "r2_gamma": trial.suggest_float("r2_gamma", 0.0, 2.0),
         "adaptive_reg": trial.suggest_categorical("adaptive_reg", [True, False]),
         "unrolled_steps": trial.suggest_int("unrolled_steps", 0, 5),
+        "unrolled_steps_epochs": trial.suggest_int("unrolled_steps_epochs", 0, 10),
+        "ema_decay": trial.suggest_float("ema_decay", 0.9, 0.999),
+        "use_wgan_gp": trial.suggest_categorical("use_wgan_gp", [True, False]),
+        "ttur": trial.suggest_categorical("ttur", [True, False]),
         "grl_weight": trial.suggest_float("grl_weight", 0.5, 2.0),
         "contrastive_weight": trial.suggest_float("contrastive_weight", 0.0, 1.0),
+        "contrastive_margin": trial.suggest_float("contrastive_margin", 0.5, 2.0),
+        "contrastive_noise": trial.suggest_float("contrastive_noise", 0.0, 0.1),
         "delta_prop": trial.suggest_float("delta_prop", 0.0, 1.0),
         "lambda_dr": trial.suggest_float("lambda_dr", 0.0, 1.0),
         "noise_std": trial.suggest_float("noise_std", 0.0, 0.1),
         "noise_consistency_weight": trial.suggest_float(
             "noise_consistency_weight", 0.0, 1.0
         ),
+        "moe_entropy_weight": trial.suggest_float("moe_entropy_weight", 0.0, 1.0),
         "disentangle": trial.suggest_categorical("disentangle", [True, False]),
         "adv_t_weight": trial.suggest_float("adv_t_weight", 0.0, 1.0),
         "adv_y_weight": trial.suggest_float("adv_y_weight", 0.0, 1.0),
+        "epistemic_consistency": trial.suggest_categorical(
+            "epistemic_consistency", [True, False]
+        ),
         "rep_consistency_weight": trial.suggest_float(
             "rep_consistency_weight", 0.0, 1.0
         ),
         "rep_momentum": trial.suggest_float("rep_momentum", 0.9, 0.999),
+        "pretrain_epochs": trial.suggest_int("pretrain_epochs", 0, 10),
+        "pretrain_mask_prob": trial.suggest_float("pretrain_mask_prob", 0.1, 0.3),
+        "pretrain_lr": trial.suggest_float("pretrain_lr", 1e-4, 1e-2, log=True),
+        "finetune_lr": trial.suggest_float("finetune_lr", 1e-4, 1e-2, log=True),
+        "freeze_phi_epoch": trial.suggest_int("freeze_phi_epoch", 0, 20),
+        "weight_clip": trial.suggest_float("weight_clip", 0.0, 0.1),
+        "log_grad_norms": trial.suggest_categorical("log_grad_norms", [True, False]),
+        "log_learning_rate": trial.suggest_categorical(
+            "log_learning_rate", [True, False]
+        ),
+        "log_weight_histograms": trial.suggest_categorical(
+            "log_weight_histograms", [True, False]
+        ),
+        "optimizer": trial.suggest_categorical("optimizer", ["adam", "adamw", "sgd"]),
+        "lr_scheduler": trial.suggest_categorical(
+            "lr_scheduler", [None, "cosine", "step"]
+        ),
+        "adaptive_batch": trial.suggest_categorical("adaptive_batch", [True, False]),
+        "gns_target": trial.suggest_float("gns_target", 0.5, 2.0),
+        "gns_band": trial.suggest_float("gns_band", 0.5, 1.0),
+        "gns_growth_factor": trial.suggest_int("gns_growth_factor", 1, 4),
+        "gns_check_every": trial.suggest_int("gns_check_every", 50, 400),
+        "gns_plateau_patience": trial.suggest_int("gns_plateau_patience", 1, 5),
+        "gns_ema": trial.suggest_float("gns_ema", 0.5, 0.99),
+        "gns_max_batch": trial.suggest_int("gns_max_batch", 64, 512),
+        "use_gradnorm": trial.suggest_categorical("use_gradnorm", [True, False]),
+        "gradnorm_alpha": trial.suggest_float("gradnorm_alpha", 0.5, 1.5),
+        "gradnorm_lr": trial.suggest_float("gradnorm_lr", 1e-4, 1e-2, log=True),
     }
 
     if params["disentangle"]:

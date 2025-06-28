@@ -32,3 +32,9 @@ def test_space_disentangle_includes_rep_dims():
     params = _space(DummyTrial())
     assert params["disentangle"]
     assert all(k in params for k in ("rep_dim_c", "rep_dim_a", "rep_dim_i"))
+
+
+def test_space_includes_new_params():
+    params = _space(DummyTrial())
+    assert "phi_residual" in params
+    assert "pretrain_epochs" in params
