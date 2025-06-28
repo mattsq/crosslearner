@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Adjusted ``GroupNorm`` groups to always divide the hidden layer width,
   preventing crashes during hyperparameter sweeps
 - Extended ``plot_losses`` to visualise validation losses and identify risk-based metrics
+- Standardised covariates in the ``Jobs`` dataloader
 - Added `get_random_dag_dataloader` for generating random DAG-based synthetic datasets
 - Initial creation of CHANGELOG
 - Added `crosslearner-benchmark` command comparing ACX to baseline models
