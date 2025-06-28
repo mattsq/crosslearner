@@ -38,3 +38,9 @@ def test_space_includes_new_params():
     params = _space(DummyTrial())
     assert "phi_residual" in params
     assert "pretrain_epochs" in params
+
+
+def test_epistemic_consistency_enforces_tau_heads():
+    params = _space(DummyTrial())
+    if params["epistemic_consistency"]:
+        assert params["tau_heads"] > 1
