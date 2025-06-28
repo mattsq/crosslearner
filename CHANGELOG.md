@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 - Fixed `crosslearner-sweep` crash when `disentangle=True` by sampling
   `rep_dim_c`, `rep_dim_a` and `rep_dim_i`
+- Expanded `crosslearner-sweep` to sample additional model and training
+  configuration options
 - Adjusted ``GroupNorm`` groups to always divide the hidden layer width,
   preventing crashes during hyperparameter sweeps
 - Extended ``plot_losses`` to visualise validation losses and identify risk-based metrics
