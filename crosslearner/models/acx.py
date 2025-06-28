@@ -3,6 +3,7 @@
 import torch
 import torch.nn as nn
 from typing import Callable, Iterable
+import math
 
 
 def _get_activation(act: str | Callable[[], nn.Module]) -> Callable[[], nn.Module]:
@@ -55,7 +56,7 @@ def _get_norm(norm: str | None, h: int) -> nn.Module | None:
     if name == "layer":
         return nn.LayerNorm(h)
     if name == "group":
-        groups = min(8, h)
+        groups = math.gcd(h, min(8, h))
         return nn.GroupNorm(groups, h)
     raise ValueError(f"Unknown normalization '{norm}'")
 
