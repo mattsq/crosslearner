@@ -22,6 +22,12 @@ from .datasets import (
     get_aircraft_dataloader,
     get_tricky_dataloader,
     get_random_dag_dataloader,
+    get_cps_mixtape_dataloader,
+    get_thornton_hiv_dataloader,
+    get_nhefs_dataloader,
+    get_social_insure_dataloader,
+    get_credit_cards_dataloader,
+    get_close_elections_dataloader,
 )
 from .training.train_acx import train_acx
 from .training import ModelConfig, TrainingConfig
@@ -44,6 +50,12 @@ DATASET_LOADERS: Dict[
     "aircraft": get_aircraft_dataloader,
     "tricky": get_tricky_dataloader,
     "random_dag": get_random_dag_dataloader,
+    "cps": get_cps_mixtape_dataloader,
+    "thornton_hiv": get_thornton_hiv_dataloader,
+    "nhefs": get_nhefs_dataloader,
+    "social_insure": get_social_insure_dataloader,
+    "credit_cards": get_credit_cards_dataloader,
+    "close_elections": get_close_elections_dataloader,
 }
 
 
