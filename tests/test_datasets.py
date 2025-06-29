@@ -6,7 +6,20 @@ from crosslearner.datasets.jobs import get_jobs_dataloader
 from crosslearner.datasets.aircraft import get_aircraft_dataloader
 from crosslearner.datasets.tricks import get_tricky_dataloader
 from crosslearner.datasets.random_dag import get_random_dag_dataloader
-from crosslearner.datasets import ihdp, acic2016, acic2018, twins, lalonde, synthetic
+from crosslearner.datasets import (
+    ihdp,
+    acic2016,
+    acic2018,
+    twins,
+    lalonde,
+    synthetic,
+    cps,
+    thornton,
+    nhefs,
+    social_insure,
+    credit_cards,
+    close_elections,
+)
 
 
 def test_get_toy_dataloader_shapes():
@@ -222,3 +235,51 @@ def test_get_random_dag_dataloader():
     assert Y.shape == (2, 1)
     assert mu0.shape == (4, 1)
     assert mu1.shape == (4, 1)
+
+
+def test_get_cps_mixtape_dataloader():
+    loader, _ = cps.get_cps_mixtape_dataloader(batch_size=4)
+    X, T, Y = next(iter(loader))
+    assert X.shape[0] == 4
+    assert T.shape == (4, 1)
+    assert Y.shape == (4, 1)
+
+
+def test_get_thornton_hiv_dataloader():
+    loader, _ = thornton.get_thornton_hiv_dataloader(batch_size=4)
+    X, T, Y = next(iter(loader))
+    assert X.shape[0] == 4
+    assert T.shape == (4, 1)
+    assert Y.shape == (4, 1)
+
+
+def test_get_nhefs_dataloader():
+    loader, _ = nhefs.get_nhefs_dataloader(batch_size=4)
+    X, T, Y = next(iter(loader))
+    assert X.shape[0] == 4
+    assert T.shape == (4, 1)
+    assert Y.shape == (4, 1)
+
+
+def test_get_social_insure_dataloader():
+    loader, _ = social_insure.get_social_insure_dataloader(batch_size=4)
+    X, T, Y = next(iter(loader))
+    assert X.shape[0] == 4
+    assert T.shape == (4, 1)
+    assert Y.shape == (4, 1)
+
+
+def test_get_credit_cards_dataloader():
+    loader, _ = credit_cards.get_credit_cards_dataloader(batch_size=4)
+    X, T, Y = next(iter(loader))
+    assert X.shape[0] == 4
+    assert T.shape == (4, 1)
+    assert Y.shape == (4, 1)
+
+
+def test_get_close_elections_dataloader():
+    loader, _ = close_elections.get_close_elections_dataloader(batch_size=4)
+    X, T, Y = next(iter(loader))
+    assert X.shape[0] == 4
+    assert T.shape == (4, 1)
+    assert Y.shape == (4, 1)

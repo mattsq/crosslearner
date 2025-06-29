@@ -51,6 +51,48 @@ def get_lalonde_dataloader(*args, **kwargs):
     return _loader(*args, **kwargs)
 
 
+def get_cps_mixtape_dataloader(*args, **kwargs):
+    """Load the CPS Mixtape dataset on demand."""
+    from .cps import get_cps_mixtape_dataloader as _loader
+
+    return _loader(*args, **kwargs)
+
+
+def get_thornton_hiv_dataloader(*args, **kwargs):
+    """Load the Thornton HIV dataset on demand."""
+    from .thornton import get_thornton_hiv_dataloader as _loader
+
+    return _loader(*args, **kwargs)
+
+
+def get_nhefs_dataloader(*args, **kwargs):
+    """Load the NHEFS dataset on demand."""
+    from .nhefs import get_nhefs_dataloader as _loader
+
+    return _loader(*args, **kwargs)
+
+
+def get_social_insure_dataloader(*args, **kwargs):
+    """Load the Social Insure dataset on demand."""
+    from .social_insure import get_social_insure_dataloader as _loader
+
+    return _loader(*args, **kwargs)
+
+
+def get_credit_cards_dataloader(*args, **kwargs):
+    """Load the credit cards dataset on demand."""
+    from .credit_cards import get_credit_cards_dataloader as _loader
+
+    return _loader(*args, **kwargs)
+
+
+def get_close_elections_dataloader(*args, **kwargs):
+    """Load the close elections dataset on demand."""
+    from .close_elections import get_close_elections_dataloader as _loader
+
+    return _loader(*args, **kwargs)
+
+
 __all__ = [
     "get_toy_dataloader",
     "get_complex_dataloader",
@@ -60,6 +102,12 @@ __all__ = [
     "get_acic2018_dataloader",
     "get_twins_dataloader",
     "get_lalonde_dataloader",
+    "get_cps_mixtape_dataloader",
+    "get_thornton_hiv_dataloader",
+    "get_nhefs_dataloader",
+    "get_social_insure_dataloader",
+    "get_credit_cards_dataloader",
+    "get_close_elections_dataloader",
     "get_confounding_dataloader",
     "get_aircraft_dataloader",
     "get_tricky_dataloader",
