@@ -19,6 +19,9 @@ from .datasets import (
     get_twins_dataloader,
     get_lalonde_dataloader,
     get_confounding_dataloader,
+    get_aircraft_dataloader,
+    get_tricky_dataloader,
+    get_random_dag_dataloader,
 )
 from .training.train_acx import train_acx
 from .training import ModelConfig, TrainingConfig
@@ -38,6 +41,9 @@ DATASET_LOADERS: Dict[
     "twins": get_twins_dataloader,
     "lalonde": get_lalonde_dataloader,
     "confounded": get_confounding_dataloader,
+    "aircraft": get_aircraft_dataloader,
+    "tricky": get_tricky_dataloader,
+    "random_dag": get_random_dag_dataloader,
 }
 
 
