@@ -40,7 +40,8 @@ The loaders cover both synthetic benchmarks and popular real-world datasets.
   Semi-synthetic Infant Health and Development Program benchmark with 100
   replications.
 ``get_jobs_dataloader``
-  Jobs training dataset (NSW study) used for off-policy evaluation.
+  Jobs training dataset (NSW study) used for off-policy evaluation. The
+  covariates and outcome are standardised.
 ``get_acic2016_dataloader`` / ``get_acic2018_dataloader``
   Load the ACIC challenge benchmarks.  The loaders automatically download the
   ``.npz`` files if they are not present locally.

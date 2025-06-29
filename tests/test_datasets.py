@@ -47,6 +47,11 @@ def test_jobs_dataloader_standardization():
     std = X_all.std(0, unbiased=False)
     assert torch.allclose(mean, torch.zeros_like(mean), atol=1e-4)
     assert torch.allclose(std, torch.ones_like(std), atol=1e-4)
+    Y_all = torch.cat([b[2] for b in loader])
+    y_mean = Y_all.mean(0)
+    y_std = Y_all.std(0, unbiased=False)
+    assert torch.allclose(y_mean, torch.zeros_like(y_mean), atol=1e-4)
+    assert torch.allclose(y_std, torch.ones_like(y_std), atol=1e-4)
 
 
 def test_get_ihdp_dataloader_shapes(monkeypatch, tmp_path):
