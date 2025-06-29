@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Extended ``plot_losses`` to visualise validation losses and identify risk-based metrics
 - Standardised covariates in the ``Jobs`` dataloader
 - Added `get_random_dag_dataloader` for generating random DAG-based synthetic datasets
+- Stopped `GNSBatchScheduler` from evaluating gradient noise once the maximum
+  batch size is reached
 - Initial creation of CHANGELOG
 - Added `crosslearner-benchmark` command comparing ACX to baseline models
 - Added GradNorm adaptive loss balancing via ``use_gradnorm`` configuration
