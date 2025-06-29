@@ -139,6 +139,8 @@ class GNSBatchScheduler:
         new_B = (
             min(old_B * self.growth, self.max_B) if self.max_B else old_B * self.growth
         )
+        if new_B <= old_B:
+            return
         self.loader.batch_sampler.batch_size = new_B
         for pg, base in zip(self.opt.param_groups, self.base_lr):
             pg["lr"] = base * new_B
