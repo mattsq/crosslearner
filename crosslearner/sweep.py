@@ -55,7 +55,7 @@ def _parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def _space(trial: optuna.Trial) -> dict:
+def _space(trial: optuna.Trial, dataset_size: int) -> dict:
     rep_dim = trial.suggest_int("rep_dim", 32, 128)
 
     phi_width = trial.suggest_int("phi_width", 64, 256)
@@ -75,6 +75,8 @@ def _space(trial: optuna.Trial) -> dict:
     )
     tau_heads = trial.suggest_int("tau_heads", 2 if epistemic_consistency else 1, 4)
 
+    upper_B = min(512, dataset_size)
+    lower_B = min(32, upper_B)
     params = {
         "rep_dim": rep_dim,
         "phi_layers": phi_layers,
@@ -179,6 +181,7 @@ def _space(trial: optuna.Trial) -> dict:
         "use_gradnorm": trial.suggest_categorical("use_gradnorm", [True, False]),
         "gradnorm_alpha": trial.suggest_float("gradnorm_alpha", 0.5, 1.5),
         "gradnorm_lr": trial.suggest_float("gradnorm_lr", 1e-4, 1e-2, log=True),
+        "batch_size": trial.suggest_int("batch_size", lower_B, upper_B),
     }
 
     if params["disentangle"]:
@@ -195,15 +198,15 @@ def main(argv: Iterable[str] | None = None) -> None:
     set_seed(args.seed)
     loader_fn = DATASET_LOADERS[args.dataset]
     loader, (mu0, mu1) = loader_fn()
-    p = loader.dataset.tensors[0].size(1)
+    dataset = loader.dataset
+    dataset_size = len(dataset)
+    p = dataset.tensors[0].size(1)
     device = default_device()
 
-    X = torch.cat([b[0] for b in loader])
-    T_all = torch.cat([b[1] for b in loader])
-    Y_all = torch.cat([b[2] for b in loader])
+    X, T_all, Y_all = dataset.tensors  # type: ignore[misc]
 
     def objective(trial: optuna.Trial) -> float:
-        params = _space(trial)
+        params = _space(trial, dataset_size)
         model_cfg = ModelConfig(
             p=p,
             **{
@@ -214,7 +217,9 @@ def main(argv: Iterable[str] | None = None) -> None:
             k: v for k, v in params.items() if k in TrainingConfig.__dataclass_fields__
         }
         train_cfg = TrainingConfig(**train_params, verbose=False)
-        model = train_acx(loader, model_cfg, train_cfg, device=device)
+        batch_size = params.get("batch_size", loader.batch_size or 1)
+        train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+        model = train_acx(train_loader, model_cfg, train_cfg, device=device)
         if mu0 is not None and mu1 is not None:
             return evaluate(model, X, mu0, mu1)
         propensity = torch.full_like(T_all, T_all.float().mean().item())

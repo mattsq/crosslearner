@@ -29,18 +29,23 @@ class DummyTrial(optuna.trial.Trial):
 
 
 def test_space_disentangle_includes_rep_dims():
-    params = _space(DummyTrial())
+    params = _space(DummyTrial(), dataset_size=128)
     assert params["disentangle"]
     assert all(k in params for k in ("rep_dim_c", "rep_dim_a", "rep_dim_i"))
 
 
 def test_space_includes_new_params():
-    params = _space(DummyTrial())
+    params = _space(DummyTrial(), dataset_size=128)
     assert "phi_residual" in params
     assert "pretrain_epochs" in params
 
 
 def test_epistemic_consistency_enforces_tau_heads():
-    params = _space(DummyTrial())
+    params = _space(DummyTrial(), dataset_size=128)
     if params["epistemic_consistency"]:
         assert params["tau_heads"] > 1
+
+
+def test_batch_size_in_bounds():
+    params = _space(DummyTrial(), dataset_size=100)
+    assert 1 <= params["batch_size"] <= 100
