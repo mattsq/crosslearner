@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Standardised covariates and outcome in the ``Jobs`` dataloader
 - Twins and ACIC 2016 datasets now load from ``causaldata`` and ``causallib``
   packages for reproducible access
+- Added loaders for several ``causaldata`` tables, including ``cps_mixtape``,
+  ``thornton_hiv``, ``nhefs_complete``, ``social_insure``, ``credit_cards`` and
+  ``close_elections_lmb``
 - Added `get_random_dag_dataloader` for generating random DAG-based synthetic datasets
 - Stopped `GNSBatchScheduler` from evaluating gradient noise once the maximum
   batch size is reached
