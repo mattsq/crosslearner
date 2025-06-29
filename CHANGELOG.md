@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `get_random_dag_dataloader` for generating random DAG-based synthetic datasets
 - Stopped `GNSBatchScheduler` from evaluating gradient noise once the maximum
   batch size is reached
+- Prevented spurious scheduler messages when the batch size cannot increase
 - `crosslearner-sweep` now optimises the training `batch_size` within the
   dataset size
 - `crosslearner-sweep` accepts the full set of ``causaldata`` loaders, including
