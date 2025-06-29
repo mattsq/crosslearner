@@ -1,0 +1,12 @@
+crosslearner.datasets.credit\_cards
+===================================
+
+.. automodule:: crosslearner.datasets.credit_cards
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_credit_cards_dataloader
+   

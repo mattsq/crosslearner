@@ -8,5 +8,6 @@ crosslearner.datasets.utils
 
    .. autosummary::
    
+      dataframe_to_dataloader
       download_if_missing
    

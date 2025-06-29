@@ -1,0 +1,6 @@
+﻿crosslearner.datasets.get\_close\_elections\_dataloader
+=======================================================
+
+.. currentmodule:: crosslearner.datasets
+
+.. autofunction:: get_close_elections_dataloader

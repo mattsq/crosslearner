@@ -1,0 +1,6 @@
+﻿crosslearner.datasets.get\_thornton\_hiv\_dataloader
+====================================================
+
+.. currentmodule:: crosslearner.datasets
+
+.. autofunction:: get_thornton_hiv_dataloader

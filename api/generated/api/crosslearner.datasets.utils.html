@@ -213,6 +213,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_acic2018_dataloader.html">crosslearner.datasets.get_acic2018_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_twins_dataloader.html">crosslearner.datasets.get_twins_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_lalonde_dataloader.html">crosslearner.datasets.get_lalonde_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_cps_mixtape_dataloader.html">crosslearner.datasets.get_cps_mixtape_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_thornton_hiv_dataloader.html">crosslearner.datasets.get_thornton_hiv_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_nhefs_dataloader.html">crosslearner.datasets.get_nhefs_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_social_insure_dataloader.html">crosslearner.datasets.get_social_insure_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_credit_cards_dataloader.html">crosslearner.datasets.get_credit_cards_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_close_elections_dataloader.html">crosslearner.datasets.get_close_elections_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_aircraft_dataloader.html">crosslearner.datasets.get_aircraft_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../generated/datasets/crosslearner.datasets.get_tricky_dataloader.html">crosslearner.datasets.get_tricky_dataloader</a></li>
 </ul>
@@ -274,13 +280,19 @@
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.acic2016.html">crosslearner.datasets.acic2016</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.acic2018.html">crosslearner.datasets.acic2018</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.aircraft.html">crosslearner.datasets.aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.close_elections.html">crosslearner.datasets.close_elections</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.complex.html">crosslearner.datasets.complex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.cps.html">crosslearner.datasets.cps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.credit_cards.html">crosslearner.datasets.credit_cards</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.ihdp.html">crosslearner.datasets.ihdp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.jobs.html">crosslearner.datasets.jobs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.lalonde.html">crosslearner.datasets.lalonde</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.masked.html">crosslearner.datasets.masked</a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.nhefs.html">crosslearner.datasets.nhefs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.random_dag.html">crosslearner.datasets.random_dag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.social_insure.html">crosslearner.datasets.social_insure</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.synthetic.html">crosslearner.datasets.synthetic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.thornton.html">crosslearner.datasets.thornton</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.toy.html">crosslearner.datasets.toy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.tricks.html">crosslearner.datasets.tricks</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.datasets.twins.html">crosslearner.datasets.twins</a></li>
@@ -372,12 +384,15 @@
         <article role="main" id="furo-main-content">
           <section id="module-crosslearner.datasets.utils">
 <span id="crosslearner-datasets-utils"></span><h1>crosslearner.datasets.utils<a class="headerlink" href="#module-crosslearner.datasets.utils" title="Link to this heading">¶</a></h1>
-<p>Helper functions for downloading datasets.</p>
+<p>Helper functions for downloading datasets and preparing dataloaders.</p>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_if_missing</span></code>(url, path)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dataframe_to_dataloader</span></code>(df, treatment_col, ...)</p></td>
+<td><p>Convert a <code class="docutils literal notranslate"><span class="pre">pandas</span></code> table to a <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_if_missing</span></code>(url, path)</p></td>
 <td><p>Download <code class="docutils literal notranslate"><span class="pre">url</span></code> to <code class="docutils literal notranslate"><span class="pre">path</span></code> if the file does not already exist.</p></td>
 </tr>
 </tbody>

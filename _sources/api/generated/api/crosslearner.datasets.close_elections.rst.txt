@@ -1,0 +1,12 @@
+crosslearner.datasets.close\_elections
+======================================
+
+.. automodule:: crosslearner.datasets.close_elections
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_close_elections_dataloader
+   

@@ -212,6 +212,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../../generated/datasets/crosslearner.datasets.get_acic2018_dataloader.html">crosslearner.datasets.get_acic2018_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../generated/datasets/crosslearner.datasets.get_twins_dataloader.html">crosslearner.datasets.get_twins_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../generated/datasets/crosslearner.datasets.get_lalonde_dataloader.html">crosslearner.datasets.get_lalonde_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../generated/datasets/crosslearner.datasets.get_cps_mixtape_dataloader.html">crosslearner.datasets.get_cps_mixtape_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../generated/datasets/crosslearner.datasets.get_thornton_hiv_dataloader.html">crosslearner.datasets.get_thornton_hiv_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../generated/datasets/crosslearner.datasets.get_nhefs_dataloader.html">crosslearner.datasets.get_nhefs_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../generated/datasets/crosslearner.datasets.get_social_insure_dataloader.html">crosslearner.datasets.get_social_insure_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../generated/datasets/crosslearner.datasets.get_credit_cards_dataloader.html">crosslearner.datasets.get_credit_cards_dataloader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../generated/datasets/crosslearner.datasets.get_close_elections_dataloader.html">crosslearner.datasets.get_close_elections_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../generated/datasets/crosslearner.datasets.get_aircraft_dataloader.html">crosslearner.datasets.get_aircraft_dataloader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../generated/datasets/crosslearner.datasets.get_tricky_dataloader.html">crosslearner.datasets.get_tricky_dataloader</a></li>
 </ul>
@@ -273,13 +279,19 @@
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.acic2016.html">crosslearner.datasets.acic2016</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.acic2018.html">crosslearner.datasets.acic2018</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.aircraft.html">crosslearner.datasets.aircraft</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.close_elections.html">crosslearner.datasets.close_elections</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.complex.html">crosslearner.datasets.complex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.cps.html">crosslearner.datasets.cps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.credit_cards.html">crosslearner.datasets.credit_cards</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.ihdp.html">crosslearner.datasets.ihdp</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.jobs.html">crosslearner.datasets.jobs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.lalonde.html">crosslearner.datasets.lalonde</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.masked.html">crosslearner.datasets.masked</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.nhefs.html">crosslearner.datasets.nhefs</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.random_dag.html">crosslearner.datasets.random_dag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.social_insure.html">crosslearner.datasets.social_insure</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.synthetic.html">crosslearner.datasets.synthetic</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.thornton.html">crosslearner.datasets.thornton</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.toy.html">crosslearner.datasets.toy</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.tricks.html">crosslearner.datasets.tricks</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api/generated/api/crosslearner.datasets.twins.html">crosslearner.datasets.twins</a></li>
@@ -435,6 +447,66 @@
 
 
 
+<div class="viewcode-block" id="get_cps_mixtape_dataloader">
+<a class="viewcode-back" href="../../generated/datasets/crosslearner.datasets.get_cps_mixtape_dataloader.html#crosslearner.datasets.get_cps_mixtape_dataloader">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cps_mixtape_dataloader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the CPS Mixtape dataset on demand.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.cps</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_cps_mixtape_dataloader</span> <span class="k">as</span> <span class="n">_loader</span>
+
+    <span class="k">return</span> <span class="n">_loader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_thornton_hiv_dataloader">
+<a class="viewcode-back" href="../../generated/datasets/crosslearner.datasets.get_thornton_hiv_dataloader.html#crosslearner.datasets.get_thornton_hiv_dataloader">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_thornton_hiv_dataloader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the Thornton HIV dataset on demand.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.thornton</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_thornton_hiv_dataloader</span> <span class="k">as</span> <span class="n">_loader</span>
+
+    <span class="k">return</span> <span class="n">_loader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_nhefs_dataloader">
+<a class="viewcode-back" href="../../generated/datasets/crosslearner.datasets.get_nhefs_dataloader.html#crosslearner.datasets.get_nhefs_dataloader">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_nhefs_dataloader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the NHEFS dataset on demand.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.nhefs</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_nhefs_dataloader</span> <span class="k">as</span> <span class="n">_loader</span>
+
+    <span class="k">return</span> <span class="n">_loader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_social_insure_dataloader">
+<a class="viewcode-back" href="../../generated/datasets/crosslearner.datasets.get_social_insure_dataloader.html#crosslearner.datasets.get_social_insure_dataloader">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_social_insure_dataloader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the Social Insure dataset on demand.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.social_insure</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_social_insure_dataloader</span> <span class="k">as</span> <span class="n">_loader</span>
+
+    <span class="k">return</span> <span class="n">_loader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_credit_cards_dataloader">
+<a class="viewcode-back" href="../../generated/datasets/crosslearner.datasets.get_credit_cards_dataloader.html#crosslearner.datasets.get_credit_cards_dataloader">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_credit_cards_dataloader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the credit cards dataset on demand.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.credit_cards</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_credit_cards_dataloader</span> <span class="k">as</span> <span class="n">_loader</span>
+
+    <span class="k">return</span> <span class="n">_loader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_close_elections_dataloader">
+<a class="viewcode-back" href="../../generated/datasets/crosslearner.datasets.get_close_elections_dataloader.html#crosslearner.datasets.get_close_elections_dataloader">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_close_elections_dataloader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the close elections dataset on demand.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.close_elections</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_close_elections_dataloader</span> <span class="k">as</span> <span class="n">_loader</span>
+
+    <span class="k">return</span> <span class="n">_loader</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;get_toy_dataloader&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_complex_dataloader&quot;</span><span class="p">,</span>
@@ -444,6 +516,12 @@
     <span class="s2">&quot;get_acic2018_dataloader&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_twins_dataloader&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_lalonde_dataloader&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_cps_mixtape_dataloader&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_thornton_hiv_dataloader&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_nhefs_dataloader&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_social_insure_dataloader&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_credit_cards_dataloader&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;get_close_elections_dataloader&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_confounding_dataloader&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_aircraft_dataloader&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_tricky_dataloader&quot;</span><span class="p">,</span>

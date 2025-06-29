@@ -1,0 +1,12 @@
+crosslearner.datasets.social\_insure
+====================================
+
+.. automodule:: crosslearner.datasets.social_insure
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_social_insure_dataloader
+   

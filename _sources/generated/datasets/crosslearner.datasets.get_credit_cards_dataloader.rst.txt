@@ -1,0 +1,6 @@
+﻿crosslearner.datasets.get\_credit\_cards\_dataloader
+====================================================
+
+.. currentmodule:: crosslearner.datasets
+
+.. autofunction:: get_credit_cards_dataloader
