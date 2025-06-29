@@ -97,15 +97,20 @@ def _fake_npz(path: str, n: int = 4, p: int = 3, replicate: bool = True) -> None
     np.savez(path, **data)
 
 
-def test_get_acic2016_dataloader(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        acic2016,
-        "download_if_missing",
-        lambda url, path: _fake_npz(path, replicate=True) or path,
-    )
-    loader, (mu0, mu1) = acic2016.get_acic2016_dataloader(
-        batch_size=2, data_dir=tmp_path
-    )
+def test_get_acic2016_dataloader(monkeypatch):
+    from sklearn.utils import Bunch
+    import pandas as pd
+
+    def fake_load(instance=1, raw=False):
+        n, p = 4, 3
+        X = pd.DataFrame(np.zeros((n, p)))
+        a = pd.Series(np.zeros(n))
+        y = pd.Series(np.zeros(n))
+        po = pd.DataFrame({0: np.zeros(n), 1: np.ones(n)})
+        return Bunch(X=X, a=a, y=y, po=po)
+
+    monkeypatch.setattr(acic2016, "load_acic16", fake_load)
+    loader, (mu0, mu1) = acic2016.get_acic2016_dataloader(batch_size=2)
     X, T, Y = next(iter(loader))
     assert X.shape == (2, 3)
     assert T.shape == (2, 1)
@@ -131,13 +136,35 @@ def test_get_acic2018_dataloader(monkeypatch, tmp_path):
     assert mu1.shape == (4, 1)
 
 
-def test_get_twins_dataloader(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        twins,
-        "download_if_missing",
-        lambda url, path: _fake_npz(path, replicate=False) or path,
-    )
-    loader, (mu0, mu1) = twins.get_twins_dataloader(batch_size=2, data_dir=tmp_path)
+def test_get_twins_dataloader(monkeypatch):
+    import pandas as pd
+    import types
+    import sys
+
+    class Dummy:
+        def __init__(self, df):
+            self.data = df
+
+    def fake_load():
+        n, p = 4, 3
+        df = pd.DataFrame(
+            np.concatenate(
+                [
+                    np.zeros((n, p)),
+                    np.zeros((n, 1)),
+                    np.zeros((n, 1)),
+                    np.zeros((n, 1)),
+                    np.ones((n, 1)),
+                ],
+                axis=1,
+            ),
+            columns=[*range(p), "t", "yf", "mu0", "mu1"],
+        )
+        return Dummy(df)
+
+    dummy = types.SimpleNamespace(load_pandas=fake_load)
+    monkeypatch.setitem(sys.modules, "causaldata.twins", dummy)
+    loader, (mu0, mu1) = twins.get_twins_dataloader(batch_size=2)
     X, T, Y = next(iter(loader))
     assert X.shape == (2, 3)
     assert T.shape == (2, 1)

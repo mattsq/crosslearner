@@ -43,10 +43,11 @@ The loaders cover both synthetic benchmarks and popular real-world datasets.
   Jobs training dataset (NSW study) used for off-policy evaluation. The
   covariates and outcome are standardised.
 ``get_acic2016_dataloader`` / ``get_acic2018_dataloader``
-  Load the ACIC challenge benchmarks.  The loaders automatically download the
-  ``.npz`` files if they are not present locally.
+  Load the ACIC challenge benchmarks.  The 2016 dataset is provided by
+  ``causallib`` while the 2018 loader downloads the ``.npz`` file if needed.
 ``get_twins_dataloader``
-  Twins dataset of US twin births with fully observed counterfactuals.
+  Twins dataset of US twin births packaged in ``causaldata`` with fully
+  observed counterfactuals.
 ``get_lalonde_dataloader``
   Original LaLonde dataset with only the ATE available.
 ``get_aircraft_dataloader``
