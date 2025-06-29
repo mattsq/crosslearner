@@ -435,10 +435,11 @@ replications.</p>
 <dt><code class="docutils literal notranslate"><span class="pre">get_jobs_dataloader</span></code></dt><dd><p>Jobs training dataset (NSW study) used for off-policy evaluation. The
 covariates and outcome are standardised.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">get_acic2016_dataloader</span></code> / <code class="docutils literal notranslate"><span class="pre">get_acic2018_dataloader</span></code></dt><dd><p>Load the ACIC challenge benchmarks.  The loaders automatically download the
-<code class="docutils literal notranslate"><span class="pre">.npz</span></code> files if they are not present locally.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">get_acic2016_dataloader</span></code> / <code class="docutils literal notranslate"><span class="pre">get_acic2018_dataloader</span></code></dt><dd><p>Load the ACIC challenge benchmarks.  The 2016 dataset is provided by
+<code class="docutils literal notranslate"><span class="pre">causallib</span></code> while the 2018 loader downloads the <code class="docutils literal notranslate"><span class="pre">.npz</span></code> file if needed.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">get_twins_dataloader</span></code></dt><dd><p>Twins dataset of US twin births with fully observed counterfactuals.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">get_twins_dataloader</span></code></dt><dd><p>Twins dataset of US twin births packaged in <code class="docutils literal notranslate"><span class="pre">causaldata</span></code> with fully
+observed counterfactuals.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">get_lalonde_dataloader</span></code></dt><dd><p>Original LaLonde dataset with only the ATE available.</p>
 </dd>
