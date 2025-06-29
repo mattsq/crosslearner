@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import torch
 from crosslearner.datasets.toy import get_toy_dataloader
@@ -165,6 +166,22 @@ def test_get_twins_dataloader(monkeypatch):
     dummy = types.SimpleNamespace(load_pandas=fake_load)
     monkeypatch.setitem(sys.modules, "causaldata.twins", dummy)
     loader, (mu0, mu1) = twins.get_twins_dataloader(batch_size=2)
+    X, T, Y = next(iter(loader))
+    assert X.shape == (2, 3)
+    assert T.shape == (2, 1)
+    assert Y.shape == (2, 1)
+    assert mu0.shape == (4, 1)
+    assert mu1.shape == (4, 1)
+
+
+def test_get_twins_dataloader_fallback(monkeypatch, tmp_path):
+    monkeypatch.delitem(sys.modules, "causaldata.twins", raising=False)
+    monkeypatch.setattr(
+        twins,
+        "download_if_missing",
+        lambda url, path: _fake_npz(path, replicate=False) or path,
+    )
+    loader, (mu0, mu1) = twins.get_twins_dataloader(batch_size=2, data_dir=tmp_path)
     X, T, Y = next(iter(loader))
     assert X.shape == (2, 3)
     assert T.shape == (2, 1)
