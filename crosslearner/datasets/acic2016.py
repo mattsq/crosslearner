@@ -1,15 +1,11 @@
 """Loader for the ACIC 2016 benchmark dataset."""
 
-import os
 from typing import Tuple
 
-from .utils import download_if_missing
+from causallib.datasets.data_loader import load_acic16
 
-import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-
-URL_2016 = "https://raw.githubusercontent.com/py-why/BenchmarkDatasets/master/acic2016/acic2016.npz"
 
 
 def get_acic2016_dataloader(
@@ -25,22 +21,12 @@ def get_acic2016_dataloader(
     Returns:
         Tuple ``(loader, (mu0, mu1))`` with the dataloader and counterfactuals.
     """
-    data_dir = data_dir or os.path.join(os.path.dirname(__file__), "_data")
-    os.makedirs(data_dir, exist_ok=True)
-    fpath = download_if_missing(URL_2016, os.path.join(data_dir, "acic2016.npz"))
-    data = np.load(fpath)
-    X = data["x"][:, :, seed]
-    T = data["t"][:, seed]
-    Y = data["yf"][:, seed]
-    mu0 = data["mu0"][:, seed]
-    mu1 = data["mu1"][:, seed]
-    dset = TensorDataset(
-        torch.tensor(X, dtype=torch.float32),
-        torch.tensor(T, dtype=torch.float32).unsqueeze(-1),
-        torch.tensor(Y, dtype=torch.float32).unsqueeze(-1),
-    )
+    data = load_acic16(instance=seed + 1)
+    X = torch.tensor(data.X.values, dtype=torch.float32)
+    T = torch.tensor(data.a.values, dtype=torch.float32).unsqueeze(-1)
+    Y = torch.tensor(data.y.values, dtype=torch.float32).unsqueeze(-1)
+    mu0 = torch.tensor(data.po.iloc[:, 0].values, dtype=torch.float32).unsqueeze(-1)
+    mu1 = torch.tensor(data.po.iloc[:, 1].values, dtype=torch.float32).unsqueeze(-1)
+    dset = TensorDataset(X, T, Y)
     loader = DataLoader(dset, batch_size=batch_size, shuffle=True)
-    return loader, (
-        torch.tensor(mu0, dtype=torch.float32).unsqueeze(-1),
-        torch.tensor(mu1, dtype=torch.float32).unsqueeze(-1),
-    )
+    return loader, (mu0, mu1)
