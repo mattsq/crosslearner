@@ -166,6 +166,8 @@ class GNSBatchScheduler:
         """Update the scheduler state after each optimisation step."""
 
         self.step += 1
+        if self.max_B and self.loader.batch_sampler.batch_size >= self.max_B:
+            return
         if self.step % self.check_every == 0:
             self._maybe_grow()
         if val_loss is not None:

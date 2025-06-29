@@ -79,3 +79,30 @@ def test_scheduler_grows_on_plateau(monkeypatch):
 
     assert loader.batch_sampler.batch_size == 4
     assert opt.param_groups[0]["lr"] == pytest.approx(0.2)
+
+
+def test_scheduler_stops_at_max_batch(monkeypatch):
+    x = torch.randn(8, 1)
+    y = torch.randn(8, 1)
+    data = TensorDataset(x, y)
+    sampler = MutableBatchSampler(
+        SequentialSampler(data), batch_size=4, drop_last=False
+    )
+    loader = DataLoader(data, batch_sampler=sampler)
+    model = nn.Linear(1, 1)
+    opt = torch.optim.SGD(model.parameters(), lr=0.1)
+    sched = GNSBatchScheduler(
+        model,
+        _simple_loss,
+        loader,
+        opt,
+        check_every=1,
+        max_global_batch=4,
+    )
+    monkeypatch.setattr(
+        sched,
+        "_grad_noise_scale",
+        lambda a, b: (_ for _ in ()).throw(AssertionError("should not run")),
+    )
+    # Should not raise
+    sched.after_train_step()
