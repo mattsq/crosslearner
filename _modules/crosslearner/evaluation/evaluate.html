@@ -472,9 +472,11 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return doubly-robust tau risk for observational datasets.</span>
 
 <span class="sd">    This estimator compares the model&#39;s CATE predictions against a doubly robust</span>
-<span class="sd">    pseudo-outcome constructed from outcome and propensity models. It reduces to</span>
-<span class="sd">    PEHE when true counterfactual outcomes are available but can be applied when</span>
-<span class="sd">    only observed outcomes are known.</span>
+<span class="sd">    pseudo-outcome constructed from outcome and propensity models. Propensity</span>
+<span class="sd">    scores are clamped away from zero and one and stabilised using the overall</span>
+<span class="sd">    treatment frequency. The estimator reduces to PEHE when true counterfactual</span>
+<span class="sd">    outcomes are available but can be applied when only observed outcomes are</span>
+<span class="sd">    known.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        model: Trained ``ACX`` model.</span>
@@ -493,11 +495,12 @@
 
     <span class="n">mu0_hat</span><span class="p">,</span> <span class="n">mu1_hat</span><span class="p">,</span> <span class="n">tau_hat</span> <span class="o">=</span> <span class="n">_model_outputs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
     <span class="n">mu_hat</span> <span class="o">=</span> <span class="n">T</span> <span class="o">*</span> <span class="n">mu1_hat</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="n">mu0_hat</span>
-    <span class="n">pseudo</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="n">propensity</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">propensity</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">propensity</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">Y</span> <span class="o">-</span> <span class="n">mu_hat</span><span class="p">)</span>
-        <span class="o">+</span> <span class="n">mu1_hat</span>
-        <span class="o">-</span> <span class="n">mu0_hat</span>
-    <span class="p">)</span>
+
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-3</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">propensity</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eps</span><span class="p">)</span>
+    <span class="n">stab_weight</span> <span class="o">=</span> <span class="n">T</span> <span class="o">*</span> <span class="n">T</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">T</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">T</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="n">weight</span> <span class="o">=</span> <span class="n">stab_weight</span> <span class="o">*</span> <span class="p">(</span><span class="n">T</span> <span class="o">-</span> <span class="n">e</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">e</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">e</span><span class="p">))</span>
+    <span class="n">pseudo</span> <span class="o">=</span> <span class="n">weight</span> <span class="o">*</span> <span class="p">(</span><span class="n">Y</span> <span class="o">-</span> <span class="n">mu_hat</span><span class="p">)</span> <span class="o">+</span> <span class="n">mu1_hat</span> <span class="o">-</span> <span class="n">mu0_hat</span>
     <span class="k">return</span> <span class="n">pehe</span><span class="p">(</span><span class="n">tau_hat</span><span class="p">,</span> <span class="n">pseudo</span><span class="p">)</span></div>
 
 </pre></div>
