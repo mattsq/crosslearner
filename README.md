@@ -157,6 +157,7 @@ cross-validated $\sqrt{\mathrm{PEHE}}$ across the built-in synthetic datasets:
   unavailable, download the files manually and place them under
   `crosslearner/datasets/_data`.
   See `docs/datasets.rst` for a description of each loader.
+- `src/data/` – simple loaders with deterministic splits for IHDP, Twins and ACIC 2016/2018.
 - `crosslearner/training/` – training utilities and GAN tricks.
 - `crosslearner/evaluation/` – metrics such as PEHE.
 - `crosslearner/configs/` – YAML configs with hyper‑parameters.
