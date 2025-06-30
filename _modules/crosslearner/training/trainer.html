@@ -735,12 +735,15 @@
 <span class="sd">            t: Treatment tensor.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Packed versions of ``(h, y, t)``.</span>
+<span class="sd">            Packed versions of ``(h, y, t)``. If ``disc_pack`` exceeds the batch</span>
+<span class="sd">            size, the tensors are returned unchanged.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">pack</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_cfg</span><span class="o">.</span><span class="n">disc_pack</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">pack</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">t</span>
         <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">//</span> <span class="n">pack</span><span class="p">)</span> <span class="o">*</span> <span class="n">pack</span>
+        <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">t</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">h</span><span class="p">[:</span><span class="n">b</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">b</span> <span class="o">//</span> <span class="n">pack</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:</span><span class="n">b</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">b</span> <span class="o">//</span> <span class="n">pack</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="p">[:</span><span class="n">b</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">b</span> <span class="o">//</span> <span class="n">pack</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
