@@ -86,9 +86,11 @@ def evaluate_dr(
     """Return doubly-robust tau risk for observational datasets.
 
     This estimator compares the model's CATE predictions against a doubly robust
-    pseudo-outcome constructed from outcome and propensity models. It reduces to
-    PEHE when true counterfactual outcomes are available but can be applied when
-    only observed outcomes are known.
+    pseudo-outcome constructed from outcome and propensity models. Propensity
+    scores are clamped away from zero and one and stabilised using the overall
+    treatment frequency. The estimator reduces to PEHE when true counterfactual
+    outcomes are available but can be applied when only observed outcomes are
+    known.
 
     Args:
         model: Trained ``ACX`` model.
@@ -107,9 +109,10 @@ def evaluate_dr(
 
     mu0_hat, mu1_hat, tau_hat = _model_outputs(model, X)
     mu_hat = T * mu1_hat + (1.0 - T) * mu0_hat
-    pseudo = (
-        (T - propensity) / (propensity * (1.0 - propensity)) * (Y - mu_hat)
-        + mu1_hat
-        - mu0_hat
-    )
+
+    eps = 1e-3
+    e = propensity.clamp(min=eps, max=1 - eps)
+    stab_weight = T * T.mean() + (1.0 - T) * (1.0 - T.mean())
+    weight = stab_weight * (T - e) / (e * (1.0 - e))
+    pseudo = weight * (Y - mu_hat) + mu1_hat - mu0_hat
     return pehe(tau_hat, pseudo)
