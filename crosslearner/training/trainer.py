@@ -355,12 +355,15 @@ class ACXTrainer:
             t: Treatment tensor.
 
         Returns:
-            Packed versions of ``(h, y, t)``.
+            Packed versions of ``(h, y, t)``. If ``disc_pack`` exceeds the batch
+            size, the tensors are returned unchanged.
         """
         pack = max(1, int(self.model_cfg.disc_pack))
         if pack <= 1:
             return h, y, t
         b = (h.size(0) // pack) * pack
+        if b == 0:
+            return h, y, t
         h = h[:b].reshape(b // pack, -1)
         y = y[:b].reshape(b // pack, -1)
         t = t[:b].reshape(b // pack, -1)

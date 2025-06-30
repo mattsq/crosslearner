@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Standardised covariates and outcome in the ``Jobs`` dataloader
 - Twins and ACIC 2016 datasets now load from ``causaldata`` and ``causallib``
   packages for reproducible access
+- Fixed ``ACXTrainer._pack_inputs`` crash when the batch size is smaller than
+  ``disc_pack``
 - Added loaders for several ``causaldata`` tables, including ``cps_mixtape``,
   ``thornton_hiv``, ``nhefs_complete``, ``social_insure``, ``credit_cards`` and
   ``close_elections_lmb``

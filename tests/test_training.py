@@ -170,6 +170,17 @@ def test_train_acx_grl_disc_pack():
     assert isinstance(model, ACX)
 
 
+def test_pack_inputs_handles_small_batch():
+    trainer = ACXTrainer(ModelConfig(p=3, disc_pack=4), TrainingConfig(), device="cpu")
+    h = torch.randn(2, trainer.model.rep_dim)
+    y = torch.randn(2, 1)
+    t = torch.randint(0, 2, (2, 1))
+    h_p, y_p, t_p = trainer._pack_inputs(h, y, t)
+    assert h_p.shape == h.shape
+    assert y_p.shape == y.shape
+    assert t_p.shape == t.shape
+
+
 def test_train_acx_custom_optimizer():
     loader, _ = get_toy_dataloader(batch_size=8, n=32, p=3)
     model_cfg = ModelConfig(p=3)
