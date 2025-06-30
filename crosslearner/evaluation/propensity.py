@@ -8,7 +8,12 @@ from sklearn.model_selection import KFold
 
 
 def estimate_propensity(
-    X: torch.Tensor, T: torch.Tensor, *, folds: int = 5, seed: int = 0
+    X: torch.Tensor,
+    T: torch.Tensor,
+    *,
+    folds: int = 5,
+    seed: int = 0,
+    eps: float = 1e-3,
 ) -> torch.Tensor:
     """Return cross-fitted propensity scores via logistic regression.
 
@@ -31,4 +36,6 @@ def estimate_propensity(
         model.fit(X_np[train_idx], T_np[train_idx])
         pred = model.predict_proba(X_np[test_idx])[:, 1]
         prop[test_idx] = torch.tensor(pred, dtype=torch.float32)
+
+    prop = prop.clamp(min=eps, max=1 - eps)
     return prop.unsqueeze(-1)
