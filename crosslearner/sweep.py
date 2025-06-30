@@ -239,8 +239,11 @@ def main(argv: Iterable[str] | None = None) -> None:
         }
         train_cfg = TrainingConfig(**train_params, verbose=False)
         batch_size = params.get("batch_size", loader.batch_size or 1)
+        drop_last = params.get("normalization") == "batch"
         if mu0 is not None and mu1 is not None:
-            train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+            train_loader = DataLoader(
+                dataset, batch_size=batch_size, shuffle=True, drop_last=drop_last
+            )
             model = train_acx(train_loader, model_cfg, train_cfg, device=device)
             return evaluate(model, X, mu0, mu1)
 
@@ -251,7 +254,10 @@ def main(argv: Iterable[str] | None = None) -> None:
                 X[train_idx], T_all[train_idx], Y_all[train_idx]
             )
             train_loader = DataLoader(
-                train_dataset, batch_size=batch_size, shuffle=True
+                train_dataset,
+                batch_size=batch_size,
+                shuffle=True,
+                drop_last=drop_last,
             )
             model = train_acx(train_loader, model_cfg, train_cfg, device=device)
 
