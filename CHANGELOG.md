@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `crosslearner-sweep` accepts the full set of ``causaldata`` loaders, including
   ``cps_mixtape``, ``thornton_hiv``, ``nhefs_complete``, ``social_insure``,
   ``credit_cards`` and ``close_elections_lmb``
+- ``crosslearner-sweep`` now estimates propensities via cross-validation using
+  ``estimate_propensity`` instead of assuming a constant treatment probability
 - Initial creation of CHANGELOG
 - Added `crosslearner-benchmark` command comparing ACX to baseline models
 - Added GradNorm adaptive loss balancing via ``use_gradnorm`` configuration

@@ -32,6 +32,9 @@ from .datasets import (
 from .training.train_acx import train_acx
 from .training import ModelConfig, TrainingConfig
 from .evaluation.evaluate import evaluate, evaluate_dr
+from .evaluation import estimate_propensity
+from sklearn.model_selection import KFold
+from torch.utils.data import TensorDataset
 from .utils import default_device, set_seed
 
 
@@ -236,12 +239,32 @@ def main(argv: Iterable[str] | None = None) -> None:
         }
         train_cfg = TrainingConfig(**train_params, verbose=False)
         batch_size = params.get("batch_size", loader.batch_size or 1)
-        train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-        model = train_acx(train_loader, model_cfg, train_cfg, device=device)
         if mu0 is not None and mu1 is not None:
+            train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+            model = train_acx(train_loader, model_cfg, train_cfg, device=device)
             return evaluate(model, X, mu0, mu1)
-        propensity = torch.full_like(T_all, T_all.float().mean().item())
-        return evaluate_dr(model, X, T_all, Y_all, propensity)
+
+        kf = KFold(n_splits=5, shuffle=True, random_state=args.seed)
+        scores = []
+        for hold_idx, train_idx in kf.split(X):
+            train_dataset = TensorDataset(
+                X[train_idx], T_all[train_idx], Y_all[train_idx]
+            )
+            train_loader = DataLoader(
+                train_dataset, batch_size=batch_size, shuffle=True
+            )
+            model = train_acx(train_loader, model_cfg, train_cfg, device=device)
+
+            X_hold = X[hold_idx]
+            T_hold = T_all[hold_idx]
+            Y_hold = Y_all[hold_idx]
+            folds = max(2, min(5, len(X_hold)))
+            propensity = estimate_propensity(
+                X_hold, T_hold, folds=folds, seed=args.seed
+            )
+            scores.append(evaluate_dr(model, X_hold, T_hold, Y_hold, propensity))
+
+        return float(sum(scores) / len(scores))
 
     study = optuna.create_study(direction="minimize")
     if args.trials < 1:
