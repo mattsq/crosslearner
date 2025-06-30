@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="crosslearner.training.grl" href="crosslearner.training.grl.html" /><link rel="prev" title="crosslearner.training.baseline" href="crosslearner.training.baseline.html" />
+<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="crosslearner.training.config" href="crosslearner.training.config.html" /><link rel="prev" title="crosslearner.training" href="crosslearner.training.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>crosslearner.training.config - crosslearner 0.1 documentation</title>
+        <title>crosslearner.training.baseline - crosslearner 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
@@ -325,8 +325,8 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="crosslearner.sweep.html">crosslearner.sweep</a></li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="crosslearner.training.html">crosslearner.training</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of crosslearner.training</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="crosslearner.training.baseline.html">crosslearner.training.baseline</a></li>
-<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">crosslearner.training.config</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">crosslearner.training.baseline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.training.config.html">crosslearner.training.config</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.grl.html">crosslearner.training.grl</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.history.html">crosslearner.training.history</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.nuisance.html">crosslearner.training.nuisance</a></li>
@@ -363,7 +363,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../../_sources/api/generated/api/crosslearner.training.config.rst.txt" title="View this page">
+  <a class="muted-link" href="../../../_sources/api/generated/api/crosslearner.training.baseline.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -383,17 +383,27 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-crosslearner.training.config">
-<span id="crosslearner-training-config"></span><h1>crosslearner.training.config<a class="headerlink" href="#module-crosslearner.training.config" title="Link to this heading">¶</a></h1>
+          <section id="module-crosslearner.training.baseline">
+<span id="crosslearner-training-baseline"></span><h1>crosslearner.training.baseline<a class="headerlink" href="#module-crosslearner.training.baseline" title="Link to this heading">¶</a></h1>
+<p class="rubric">Functions</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pseudo_outcome</span></code>(mu0, mu1, T, Y, e_hat, eps)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">train_baseline</span></code>(loader, mu0, mu1, cfg[, device])</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p class="rubric">Classes</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../crosslearner.training.html#crosslearner.training.ModelConfig" title="crosslearner.training.config.ModelConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelConfig</span></code></a>(p[, cat_dims, embed_dim, ...])</p></td>
-<td><p>Configuration for the <code class="xref py py-class docutils literal notranslate"><span class="pre">ACX</span></code> architecture.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../crosslearner.training.html#crosslearner.training.TrainingConfig" title="crosslearner.training.config.TrainingConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TrainingConfig</span></code></a>(epochs, alpha_out, beta_cons, ...)</p></td>
-<td><p>Hyperparameters controlling the training process.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaselineConfig</span></code>(p[, folds, epochs, lr, ...])</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -405,23 +415,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="crosslearner.training.grl.html">
+          <a class="next-page" href="crosslearner.training.config.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">crosslearner.training.grl</div>
+                <div class="title">crosslearner.training.config</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="crosslearner.training.baseline.html">
+          <a class="prev-page" href="crosslearner.training.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">crosslearner.training.baseline</div>
+                <div class="title">crosslearner.training</div>
                 
               </div>
             </a>

@@ -10,6 +10,7 @@ crosslearner.training
    :toctree:
    :recursive:
 
+   baseline
    config
    grl
    history

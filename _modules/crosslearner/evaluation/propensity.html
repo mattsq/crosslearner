@@ -324,6 +324,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/generated/api/crosslearner.sweep.html">crosslearner.sweep</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../api/generated/api/crosslearner.training.html">crosslearner.training</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of crosslearner.training</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.training.baseline.html">crosslearner.training.baseline</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.training.config.html">crosslearner.training.config</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.training.grl.html">crosslearner.training.grl</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api/generated/api/crosslearner.training.history.html">crosslearner.training.history</a></li>
@@ -388,7 +389,12 @@
 <div class="viewcode-block" id="estimate_propensity">
 <a class="viewcode-back" href="../../../api/crosslearner.evaluation.html#crosslearner.evaluation.propensity.estimate_propensity">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">estimate_propensity</span><span class="p">(</span>
-    <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">folds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">T</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">folds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">eps</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return cross-fitted propensity scores via logistic regression.</span>
 
@@ -411,6 +417,8 @@
         <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_np</span><span class="p">[</span><span class="n">train_idx</span><span class="p">],</span> <span class="n">T_np</span><span class="p">[</span><span class="n">train_idx</span><span class="p">])</span>
         <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_np</span><span class="p">[</span><span class="n">test_idx</span><span class="p">])[:,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">prop</span><span class="p">[</span><span class="n">test_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="n">prop</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eps</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">prop</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
 
 </pre></div>

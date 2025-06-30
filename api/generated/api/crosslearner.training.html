@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="crosslearner.training.config" href="crosslearner.training.config.html" /><link rel="prev" title="crosslearner.sweep" href="crosslearner.sweep.html" />
+<link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="crosslearner.training.baseline" href="crosslearner.training.baseline.html" /><link rel="prev" title="crosslearner.sweep" href="crosslearner.sweep.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>crosslearner.training - crosslearner 0.1 documentation</title>
@@ -325,6 +325,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="crosslearner.sweep.html">crosslearner.sweep</a></li>
 <li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">crosslearner.training</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle navigation of crosslearner.training</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="crosslearner.training.baseline.html">crosslearner.training.baseline</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.config.html">crosslearner.training.config</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.grl.html">crosslearner.training.grl</a></li>
 <li class="toctree-l4"><a class="reference internal" href="crosslearner.training.history.html">crosslearner.training.history</a></li>
@@ -389,22 +390,25 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="crosslearner.training.config.html#module-crosslearner.training.config" title="crosslearner.training.config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="crosslearner.training.baseline.html#module-crosslearner.training.baseline" title="crosslearner.training.baseline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">baseline</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="crosslearner.training.grl.html#module-crosslearner.training.grl" title="crosslearner.training.grl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grl</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="crosslearner.training.config.html#module-crosslearner.training.config" title="crosslearner.training.config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="crosslearner.training.grl.html#module-crosslearner.training.grl" title="crosslearner.training.grl"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grl</span></code></a></p></td>
 <td><p>Gradient reversal layer used for adversarial training.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="crosslearner.training.history.html#module-crosslearner.training.history" title="crosslearner.training.history"><code class="xref py py-obj docutils literal notranslate"><span class="pre">history</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="crosslearner.training.history.html#module-crosslearner.training.history" title="crosslearner.training.history"><code class="xref py py-obj docutils literal notranslate"><span class="pre">history</span></code></a></p></td>
 <td><p>Utilities for tracking training statistics.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="crosslearner.training.nuisance.html#module-crosslearner.training.nuisance" title="crosslearner.training.nuisance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nuisance</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="crosslearner.training.nuisance.html#module-crosslearner.training.nuisance" title="crosslearner.training.nuisance"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nuisance</span></code></a></p></td>
 <td><p>Utilities for cross-fitted nuisance estimation.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="crosslearner.training.train_acx.html#crosslearner.training.train_acx" title="crosslearner.training.train_acx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train_acx</span></code></a>(loader, model_config, ...[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="crosslearner.training.train_acx.html#crosslearner.training.train_acx" title="crosslearner.training.train_acx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train_acx</span></code></a>(loader, model_config, ...[, ...])</p></td>
 <td><p>Train an ACX model using configuration objects.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="crosslearner.training.trainer.html#module-crosslearner.training.trainer" title="crosslearner.training.trainer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trainer</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="crosslearner.training.trainer.html#module-crosslearner.training.trainer" title="crosslearner.training.trainer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trainer</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -417,12 +421,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="crosslearner.training.config.html">
+          <a class="next-page" href="crosslearner.training.baseline.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">crosslearner.training.config</div>
+                <div class="title">crosslearner.training.baseline</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

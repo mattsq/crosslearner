@@ -1,0 +1,19 @@
+crosslearner.training.baseline
+==============================
+
+.. automodule:: crosslearner.training.baseline
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      pseudo_outcome
+      train_baseline
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BaselineConfig
+   
